@@ -2,27 +2,32 @@ package io.mindspce.outerfieldsserver.objects.player;
 
 import io.mindspce.outerfieldsserver.area.AreaInstance;
 import io.mindspce.outerfieldsserver.area.ChunkData;
-import io.mindspce.outerfieldsserver.core.NavCalc.GameSettings;
-import io.mindspce.outerfieldsserver.datacontainers.ActiveAreaUpdate;
+import io.mindspce.outerfieldsserver.core.GameSettings;
+import io.mindspce.outerfieldsserver.datacontainers.ActiveChunkUpdate;
 import io.mindspce.outerfieldsserver.enums.Direction;
 import io.mindspce.outerfieldsserver.util.GridUtils;
+import io.mindspice.mindlib.data.geometry.IMutRec2;
 import io.mindspice.mindlib.data.geometry.IMutVector2;
+import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
 
 public class PlayerLocation {
     private AreaInstance currArea;
     private final ChunkData[][] localGrid = new ChunkData[3][3];
-    private IMutVector2 currChunkIndex;
-    private IMutVector2 currTileIndex;
-    private IMutVector2 globalPos = IVector2.ofMutable(0, 0);
-    private IMutVector2 localPos = IVector2.ofMutable(0, 0);
+    private final IMutVector2 currChunkIndex = IVector2.ofMutable(0, 0);
+    private final IMutVector2 currTileIndex = IVector2.ofMutable(0, 0);
+    private final IMutVector2 globalPos = IVector2.ofMutable(0, 0);
+    private final IMutVector2 localPos = IVector2.ofMutable(0, 0);
+    private final IMutRec2 updateArea;
 
     public PlayerLocation(AreaInstance currArea) {
         this.currArea = currArea;
+        IVector2 playerViewBuffer = GameSettings.GET().playerViewWithBuffer();
+        updateArea = IRect2.fromCenterMutable(0, 0, playerViewBuffer.x(), playerViewBuffer.y());
     }
 
-    public synchronized void updatePlayerPos(int x, int y) {
+    public void updatePlayerPos(int x, int y) {
         setGlobalPos(x, y);
         setLocalPos(x, y);
         if (GridUtils.isNewChunk(currChunkIndex, globalPos)) {
@@ -30,7 +35,22 @@ public class PlayerLocation {
             updateLocalGrid();
         }
         setCurrTileIndex();
+    }
 
+    public IRect2 getUpdateArea() {
+        updateArea.reCenter(globalPos);
+        IVector2 chunkSize = GameSettings.GET().chunkSize();
+        int leftChunkX = updateArea.start().x() / chunkSize.x();
+        int leftChunkTopY = (updateArea.start().y() / chunkSize.y();
+        int leftChunkBottomY = (updateArea.start().y() + updateArea.size().y()) / chunkSize.y();
+
+        int rightChunkX = updateArea.end().x() / chunkSize.x();
+        int rightChunkTopX = updateArea.end().y() / chunkSize.y();
+        int rightChunkBottomX = (updateArea.end().y() + updateArea.size().y()) / chunkSize.y();
+
+        if (leftChunkX != currChunkIndex.x()) {
+
+        }
     }
 
     private void setGlobalPos(int x, int y) {
@@ -73,10 +93,10 @@ public class PlayerLocation {
             newY = Direction.NORTH;
         }
 
-        ActiveAreaUpdate areaUpdate = new ActiveAreaUpdate();
-        calcGridRemovals(areaUpdate, newX, newY);
-        calcGridAdditions(areaUpdate, newX, newY);
-        currArea.queueAreaUpdate(areaUpdate);
+        ActiveChunkUpdate activeChunkUpdate = new ActiveChunkUpdate();
+        calcGridRemovals(activeChunkUpdate, newX, newY);
+        calcGridAdditions(activeChunkUpdate, newX, newY);
+        currArea.queueActiveChunk(activeChunkUpdate);
 
 //        int centerX = currChunkIndex.x() - 1;
 //        int centerY = currChunkIndex.y() - 1;
@@ -93,7 +113,7 @@ public class PlayerLocation {
         }
     }
 
-    private void calcGridRemovals(ActiveAreaUpdate areaUpdate, Direction newX, Direction newY) {
+    private void calcGridRemovals(ActiveChunkUpdate areaUpdate, Direction newX, Direction newY) {
         if (newX != null) {
             int x = newX == Direction.EAST ? 0 : 2;
             for (int y = 0; y < 3; ++y) {
@@ -109,7 +129,7 @@ public class PlayerLocation {
         }
     }
 
-    private void calcGridAdditions(ActiveAreaUpdate areaUpdate, Direction newX, Direction newY) {
+    private void calcGridAdditions(ActiveChunkUpdate areaUpdate, Direction newX, Direction newY) {
         int centerX = currChunkIndex.x() - 1;
         int centerY = currChunkIndex.y() - 1;
         if (newX != null) {

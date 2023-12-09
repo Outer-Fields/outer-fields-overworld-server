@@ -1,6 +1,6 @@
 package io.mindspce.outerfieldsserver.area;
 
-import io.mindspce.outerfieldsserver.core.NavCalc.GameSettings;
+import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.objects.item.ItemState;
 import io.mindspce.outerfieldsserver.objects.nonplayer.EnemyState;
 import io.mindspce.outerfieldsserver.objects.nonplayer.NpcState;

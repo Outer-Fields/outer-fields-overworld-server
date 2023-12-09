@@ -2,7 +2,7 @@ package io.mindspce.outerfieldsserver.util;
 
 import io.mindspce.outerfieldsserver.datacontainers.ChunkTileIndex;
 import io.mindspce.outerfieldsserver.area.TileData;
-import io.mindspce.outerfieldsserver.core.NavCalc.GameSettings;
+import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
 
@@ -64,5 +64,7 @@ public class GridUtils {
         int currChunkY = globalPos.y() / GameSettings.GET().chunkSize().y();
         return lastChunk.x() != currChunkX || lastChunk.y() != currChunkY;
     }
+
+    public static boolean
 
 }

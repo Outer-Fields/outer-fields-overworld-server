@@ -5,7 +5,7 @@ import io.mindspce.outerfieldsserver.area.ChunkData;
 import io.mindspce.outerfieldsserver.area.NavData;
 import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.core.calculators.NavigationCalculator;
-import io.mindspce.outerfieldsserver.core.NavCalc.GameSettings;
+import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.enums.NavPath;
 import io.mindspce.outerfieldsserver.datacontainers.ChunkTileIndex;
 import io.mindspce.outerfieldsserver.util.GridUtils;

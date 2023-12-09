@@ -3,7 +3,7 @@ package io.mindspce.outerfieldsserver.core.calculators;
 import io.mindspce.outerfieldsserver.area.AreaInstance;
 import io.mindspce.outerfieldsserver.area.ChunkData;
 import io.mindspce.outerfieldsserver.area.TileData;
-import io.mindspce.outerfieldsserver.core.NavCalc.GameSettings;
+import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.enums.Direction;
 import io.mindspce.outerfieldsserver.datacontainers.ChunkTileIndex;
 import io.mindspce.outerfieldsserver.util.GridUtils;

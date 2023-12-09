@@ -1,8 +1,7 @@
 package io.mindspce.outerfieldsserver.area;
 
-import io.mindspce.outerfieldsserver.core.NavCalc.GameSettings;
-import io.mindspce.outerfieldsserver.datacontainers.ActiveAreaUpdate;
-import io.mindspce.outerfieldsserver.datacontainers.ChunkTileIndex;
+import io.mindspce.outerfieldsserver.core.GameSettings;
+import io.mindspce.outerfieldsserver.datacontainers.ActiveChunkUpdate;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import jakarta.annotation.Nullable;
 
@@ -17,7 +16,7 @@ public class AreaInstance implements Runnable {
     private final ChunkData[][] chunkMap;
     private final IVector2 areaSize;
     private final Map<IVector2, AtomicInteger> activeChunks = new ConcurrentHashMap<>(100);
-    private final ConcurrentLinkedDeque<ActiveAreaUpdate> activeChunkUpdateQueue = new ConcurrentLinkedDeque<>();
+    private final ConcurrentLinkedDeque<ActiveChunkUpdate> activeChunkUpdateQueue = new ConcurrentLinkedDeque<>();
 
     public AreaInstance(String arenaName, ChunkData[][] chunkMap) {
         this.arenaName = arenaName;
@@ -27,7 +26,7 @@ public class AreaInstance implements Runnable {
 
     @Override
     public void run() {
-        ActiveAreaUpdate next;
+        ActiveChunkUpdate next;
         while ((next = activeChunkUpdateQueue.poll()) != null) {
             next.additions.forEach(idx -> activeChunks.compute(idx, (key, value) -> {
                 if (value == null) {
@@ -44,7 +43,7 @@ public class AreaInstance implements Runnable {
         }
     }
 
-    public void queueAreaUpdate(ActiveAreaUpdate areaUpdate) {
+    public void queueActiveChunk(ActiveChunkUpdate areaUpdate) {
         activeChunkUpdateQueue.add(areaUpdate);
     }
 

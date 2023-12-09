@@ -1,4 +1,4 @@
-package io.mindspce.outerfieldsserver.core.NavCalc;
+package io.mindspce.outerfieldsserver.core;
 
 import io.mindspice.mindlib.data.geometry.IVector2;
 
@@ -6,7 +6,7 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 public class GameSettings {
     private static GameSettings INSTANCE = new GameSettings();
     private IVector2 playerViewVec = IVector2.of(960, 540);
-    private IVector2 playerViewBuffer = IVector2.of(256, 256);
+    private IVector2 playerViewBuffer = IVector2.of(384, 384);
     private IVector2 playerViewWithBuffer = playerViewVec.add(playerViewBuffer);
     private IVector2 chunkSize = IVector2.of(3840, 3840);
     private IVector2 tilesPerChunk = IVector2.of(60, 60);
