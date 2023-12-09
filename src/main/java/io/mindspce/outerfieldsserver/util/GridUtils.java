@@ -1,7 +1,8 @@
 package io.mindspce.outerfieldsserver.util;
 
+import io.mindspce.outerfieldsserver.datacontainers.ChunkTileIndex;
 import io.mindspce.outerfieldsserver.area.TileData;
-import io.mindspce.outerfieldsserver.core.configuration.GameSettings;
+import io.mindspce.outerfieldsserver.core.NavCalc.GameSettings;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
 
@@ -27,7 +28,7 @@ public class GridUtils {
     public static void printNavMap(TileData[][] tileData) {
         for (int x = 0; x < tileData[0].length; x++) {
             for (int y = 0; y < tileData.length; y++) {
-                if (tileData[y][x].navData().isNavigable()) {
+                if (tileData[y][x].isNavigable()) {
                     System.out.print("* ");
                 } else {
                     System.out.print("# ");
@@ -56,6 +57,12 @@ public class GridUtils {
         int tileX = tileXPos / GameSettings.GET().tileSize();
         int tileY = tileYPos / GameSettings.GET().tileSize();
         return new ChunkTileIndex(IVector2.of(chunkX, chunky), IVector2.of(tileX, tileY));
+    }
+
+    public static boolean isNewChunk(IVector2 lastChunk, IVector2 globalPos) {
+        int currChunkX = globalPos.x() / GameSettings.GET().chunkSize().x();
+        int currChunkY = globalPos.y() / GameSettings.GET().chunkSize().y();
+        return lastChunk.x() != currChunkX || lastChunk.y() != currChunkY;
     }
 
 }

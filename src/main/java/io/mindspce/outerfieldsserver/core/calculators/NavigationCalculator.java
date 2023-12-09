@@ -3,9 +3,9 @@ package io.mindspce.outerfieldsserver.core.calculators;
 import io.mindspce.outerfieldsserver.area.AreaInstance;
 import io.mindspce.outerfieldsserver.area.ChunkData;
 import io.mindspce.outerfieldsserver.area.TileData;
-import io.mindspce.outerfieldsserver.core.configuration.GameSettings;
+import io.mindspce.outerfieldsserver.core.NavCalc.GameSettings;
 import io.mindspce.outerfieldsserver.enums.Direction;
-import io.mindspce.outerfieldsserver.util.ChunkTileIndex;
+import io.mindspce.outerfieldsserver.datacontainers.ChunkTileIndex;
 import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.IMutVector2;
 import io.mindspice.mindlib.data.geometry.IVector2;
@@ -13,14 +13,33 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 import java.util.*;
 
 
+/**
+ * The NavigationCalculator class provides methods for calculating paths between two points in a given area.
+ */
 public class NavigationCalculator {
     private static final int CHUNK_SIZE = GameSettings.GET().chunkSize().x();
 
+    /**
+     * Retrieves the path from the start ChunkTileIndex to the target ChunkTileIndex by performing A* pathfinding algorithm.
+     *
+     * @param area   The area instance to perform pathfinding in.
+     * @param start  The starting chunk tile index.
+     * @param target The target chunk tile index.
+     * @return The list of global tile indices representing the shortest path from the start to the target.
+     */
     public static List<IVector2> getPathTo(AreaInstance area, ChunkTileIndex start, ChunkTileIndex target) {
-
         return aStarPathfinding(area, start, target);
     }
 
+    /**
+     * Performs A* pathfinding algorithm to find the shortest path between the start and target chunk
+     * tile indices in the given area instance.
+     *
+     * @param area   The area instance to perform pathfinding in.
+     * @param start  The starting chunk tile index.
+     * @param target The target chunk tile index.
+     * @return The list of global tile indices representing the shortest path from the start to the target.
+     */
     private static List<IVector2> aStarPathfinding(AreaInstance area, ChunkTileIndex start, ChunkTileIndex target) {
         Map<ChunkTileIndex, ChunkTileIndex> cameFrom = new HashMap<>();
         Map<ChunkTileIndex, Integer> costSoFar = new HashMap<>();
@@ -51,11 +70,20 @@ public class NavigationCalculator {
         return reconstructPath(cameFrom, start, target);
     }
 
+    /**
+     * Retrieves the neighboring ChunkTileIndex objects for a given ChunkTileIndex within an AreaInstance.
+     * Neighbors are determined based on the 4-point compass directions (NORTH, SOUTH, EAST, WEST).
+     *
+     * @param area    The AreaInstance being analyzed.
+     * @param current The ChunkTileIndex for which neighbors are being retrieved.
+     * @return A List of ChunkTileIndex objects representing the neighboring tiles.
+     */
+    // TODO at 8 point calc?
     private static List<ChunkTileIndex> getNeighbors(AreaInstance area, ChunkTileIndex current) {
         List<ChunkTileIndex> neighbors = new ArrayList<>();
         int tilesPerChunk = GameSettings.GET().tilesPerChunk().x(); // Assuming square chunks
 
-        for (var dir : Direction.get4PointList()) {
+        for (var dir : Direction.get8PointList()) {
             IMutVector2 neighborTileIndex = IVector2.ofMutable(
                     current.tileIndex().x() + dir.asVec2().x(),
                     current.tileIndex().y() + dir.asVec2().y()
@@ -63,32 +91,39 @@ public class NavigationCalculator {
             IMutVector2 neighborChunkIndex = IVector2.ofMutable(current.chunkIndex());
 
             // Adjust chunk index if the neighbor tile index is outside the current chunk
+            boolean crossesBoundary = false;
             if (neighborTileIndex.x() < 0) {
                 neighborChunkIndex.withXDec(); // Move chunk to the left
                 neighborTileIndex.setX(tilesPerChunk - 1);
+                crossesBoundary = true;
             } else if (neighborTileIndex.x() >= tilesPerChunk) {
                 neighborChunkIndex.withXInc(); // Move chunk to the right
                 neighborTileIndex.setX(0);
+                crossesBoundary = true;
             }
 
             if (neighborTileIndex.y() < 0) {
                 neighborChunkIndex.withYDec(); // Move chunk upwards
                 neighborTileIndex.setY(tilesPerChunk - 1);
+                crossesBoundary = true;
             } else if (neighborTileIndex.y() >= tilesPerChunk) {
                 neighborChunkIndex.withYInc(); // Move chunk downwards
                 neighborTileIndex.setY(0);
+                crossesBoundary = true;
             }
 
-            // Check if the calculated neighbor chunk index is within area bounds
-            if (neighborChunkIndex.x() < 0 || neighborChunkIndex.x() >= area.getAreaSize().x() ||
-                    neighborChunkIndex.y() < 0 || neighborChunkIndex.y() >= area.getAreaSize().y()) {
-                continue; // Skip if the neighbor chunk is out of bounds
+            // If the tile index crosses the boundary, ensure the chunk index is still valid
+            if (crossesBoundary) {
+                if (neighborChunkIndex.x() < 0 || neighborChunkIndex.x() >= area.getAreaSize().x() ||
+                        neighborChunkIndex.y() < 0 || neighborChunkIndex.y() >= area.getAreaSize().y()) {
+                    continue; // Skip if the neighbor chunk is out of bounds
+                }
             }
 
             ChunkData neighborChunk = area.getChunkByIndex(neighborChunkIndex);
             TileData neighborTile = neighborChunk.getTileByIndex(neighborTileIndex);
 
-            if (neighborTile.navData().isNavigable()) {
+            if (neighborTile.isNavigable()) {
                 neighbors.add(new ChunkTileIndex(neighborChunkIndex, neighborTileIndex));
             }
         }
@@ -96,6 +131,14 @@ public class NavigationCalculator {
         return neighbors;
     }
 
+
+    /**
+     * Calculates the Manhattan distance between two ChunkTileIndex objects.
+     * Manhattan Distance is the sum of the absolute values of the differences of the Cartesian coordinates.
+     * @param index1 The first ChunkTileIndex object.
+     * @param index2 The second ChunkTileIndex object.
+     * @return The Manhattan distance between the two ChunkTileIndex objects.
+     */
     private static int manhattanDistance(ChunkTileIndex index1, ChunkTileIndex index2) {
         IVector2 globalPos1 = IVector2.of(
                 index1.chunkIndex().x() * GameSettings.GET().chunkSize().x() + index1.tileIndex().x(),
@@ -110,17 +153,28 @@ public class NavigationCalculator {
         return Math.abs(globalPos1.x() - globalPos2.x()) + Math.abs(globalPos1.y() - globalPos2.y());
     }
 
-    private static ArrayList<IVector2> reconstructPath(Map<ChunkTileIndex, ChunkTileIndex> cameFrom,
-            ChunkTileIndex start,
-            ChunkTileIndex goal) {
-
-
+    /**
+     * Reconstructs the path from the start ChunkTileIndex to the goal ChunkTileIndex using the
+     * provided map of cameFrom relationships. Returns coordinates as an array of IVector2.
+     *
+     * @param cameFrom The map of ChunkTileIndex objects indicating the previous ChunkTileIndex for each
+     *                 visited ChunkTileIndex during the pathfinding.
+     * @param start    The starting ChunkTileIndex.
+     * @param goal     The goal ChunkTileIndex.
+     * @return The list of global tile indices representing the shortest path from the start to the goal.
+     */
+    private static List<IVector2> reconstructPath(Map<ChunkTileIndex, ChunkTileIndex> cameFrom,
+            ChunkTileIndex start, ChunkTileIndex goal) {
 
         ArrayList<IVector2> path = new ArrayList<>();
         ChunkTileIndex current = goal;
         while (!current.equals(start)) {
             path.addFirst(GridUtils.tileToGlobal(current));
             current = cameFrom.get(current);
+            if (current == null) {
+                // TODO log this
+                return List.of();
+            }
         }
         path.addFirst(GridUtils.tileToGlobal(start));
         return path;
@@ -131,104 +185,3 @@ public class NavigationCalculator {
             int priority
     ) { }
 }
-
-//    public static List<TileData> getPathTo(AreaInstance area, IVector2 startingChunk,
-//            IVector2 startingTile, IVector2 targetChunk, IVector2 targetTile) {
-//
-//        IVector2 globalStart = GridUtils.tileToGlobal(startingChunk, startingTile);
-//        IVector2 globalTarget = GridUtils.tileToGlobal(targetChunk, targetTile);
-//        return aStarPathfinding(area, globalStart, globalTarget);
-//    }
-//
-//    private static List<IVector2> aStarPathfinding(AreaInstance area, IVector2 start, IVector2 target) {
-//        PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingInt(n -> n.priority));
-//        Map<IVector2, IVector2> cameFrom = new HashMap<>();
-//        Map<IVector2, Integer> costSoFar = new HashMap<>();
-//
-//        openSet.add(new Node(start, 0));
-//        costSoFar.put(start, 0);
-//
-//        while (!openSet.isEmpty()) {
-//            IVector2 current = openSet.poll().position;
-//
-//            if (current.equals(target)) {
-//                break; // Path found
-//            }
-//
-//            for (IVector2 next : getNeighbors(area, current)) {
-//                int newCost = costSoFar.get(current) + getMovementCost(area, current, next);
-//                if (!costSoFar.containsKey(next) || newCost < costSoFar.get(next)) {
-//                    costSoFar.put(next, newCost);
-//                    int priority = newCost + manhattanDistance(next, target);
-//                    openSet.add(new Node(next, priority));
-//                    cameFrom.put(next, current);
-//                }
-//            }
-//        }
-//
-//        return reconstructPath(cameFrom, start, target);
-//    }
-//
-//    private static int getMovementCost(AreaInstance area, IVector2 from, IVector2 to) {
-//        return 1;
-//    }
-//
-//    private static List<IVector2> getNeighbors(AreaInstance area, IVector2 current) {
-//        List<IVector2> neighbors = new ArrayList<>();
-//
-//        // Assuming CHUNK_SIZE is the dimension of each chunk
-//        IVector2 chunk = new IVector2(current.x() / CHUNK_SIZE, current.y() / CHUNK_SIZE);
-//        IVector2 tile = new IVector2(current.x() % CHUNK_SIZE, current.y() % CHUNK_SIZE);
-//
-//        // Directions: up, down, left, right
-//        int[][] directions = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-//        for (int[] dir : directions) {
-//            int nx = tile.x() + dir[0];
-//            int ny = tile.y() + dir[1];
-//            IVector2 nextChunk = chunk;
-//
-//            // Check for chunk boundaries and adjust chunk coordinates
-//            if (nx < 0) {
-//                nextChunk = new IVector2(chunk.x() - 1, chunk.y());
-//                nx = CHUNK_SIZE - 1; // Last tile of the previous chunk
-//            } else if (nx >= CHUNK_SIZE) {
-//                nextChunk = new IVector2(chunk.x() + 1, chunk.y());
-//                nx = 0; // First tile of the next chunk
-//            }
-//            if (ny < 0) {
-//                nextChunk = new IVector2(chunk.x(), chunk.y() - 1);
-//                ny = CHUNK_SIZE - 1; // Last tile of the previous chunk
-//            } else if (ny >= CHUNK_SIZE) {
-//                nextChunk = new IVector2(chunk.x(), chunk.y() + 1);
-//                ny = 0; // First tile of the next chunk
-//            }
-//
-//            // Convert back to global coordinates
-//            IVector2 globalNeighbor = GridUtils.tileToGlobal(nextChunk, new IVector2(nx, ny));
-//            neighbors.add(globalNeighbor);
-//        }
-//
-//        return neighbors;
-//    }
-//
-//    private static int manhattanDistance(IVector2 a, IVector2 b) {
-//        return Math.abs(a.x() - b.x()) + Math.abs(a.y() - b.y());
-//    }
-//
-//    private static List<IVector2> reconstructPath(Map<IVector2, IVector2> cameFrom, IVector2 start, IVector2 target) {
-//        LinkedList<IVector2> path = new LinkedList<>();
-//        IVector2 current = target;
-//
-//        while (!current.equals(start)) {
-//            path.addFirst(current); // Add to the beginning of the list
-//            current = cameFrom.get(current);
-//        }
-//        path.addFirst(start); // Add the start position
-//        return path;
-//    }
-//
-//    private static record Node(
-//            IVector2 position,
-//            int priority
-//    ) { }
-//}

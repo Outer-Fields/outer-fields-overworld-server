@@ -23,7 +23,7 @@ public class NavData {
     }
 
     public void addPath(NavPath path) {
-        if (paths == null){
+        if (paths == null) {
             paths = new HashSet<>();
         }
         paths.add(path);
@@ -34,7 +34,7 @@ public class NavData {
     }
 
     public void addLocation(NavLocation navLocation) {
-        if (locations == null){
+        if (locations == null) {
             locations = new HashSet<>();
         }
         locations.add(navLocation);
@@ -51,10 +51,4 @@ public class NavData {
     public boolean locationOf(NavLocation navLocation) {
         return locations.contains(navLocation);
     }
-
-    public boolean isNavigable() {
-        return paths != null;
-    }
-
-
 }

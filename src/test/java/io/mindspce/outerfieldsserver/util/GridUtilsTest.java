@@ -1,8 +1,7 @@
 package io.mindspce.outerfieldsserver.util;
 
-import io.mindspce.outerfieldsserver.core.configuration.GameSettings;
-import io.mindspce.outerfieldsserver.util.GridUtils;
-import io.mindspce.outerfieldsserver.util.ChunkTileIndex;
+import io.mindspce.outerfieldsserver.datacontainers.ChunkTileIndex;
+import io.mindspce.outerfieldsserver.core.NavCalc.GameSettings;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
 import org.junit.jupiter.api.Test;

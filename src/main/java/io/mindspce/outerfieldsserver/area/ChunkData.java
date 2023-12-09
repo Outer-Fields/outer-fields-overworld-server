@@ -1,10 +1,10 @@
 package io.mindspce.outerfieldsserver.area;
 
-import io.mindspce.outerfieldsserver.core.configuration.GameSettings;
+import io.mindspce.outerfieldsserver.core.NavCalc.GameSettings;
 import io.mindspce.outerfieldsserver.objects.item.ItemState;
 import io.mindspce.outerfieldsserver.objects.nonplayer.EnemyState;
 import io.mindspce.outerfieldsserver.objects.nonplayer.NpcState;
-import io.mindspce.outerfieldsserver.objects.player.PlayerState;
+import io.mindspce.outerfieldsserver.objects.player.PlayerLocation;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
 import java.util.*;
@@ -13,7 +13,7 @@ import java.util.*;
 public class ChunkData {
     private final IVector2 index;
     private final TileData[][] tileMap;
-    private final Set<PlayerState> activePlayers = Collections.synchronizedSet(new HashSet<>());
+    private final Set<PlayerLocation> activePlayers = Collections.synchronizedSet(new HashSet<>());
     private final Set<ItemState> activeItemData = Collections.synchronizedSet(new HashSet<>());
     private final Set<NpcState> activeNpcData = Collections.synchronizedSet(new HashSet<>());
     private final Set<EnemyState> activeEnemies = Collections.synchronizedSet(new HashSet<>());

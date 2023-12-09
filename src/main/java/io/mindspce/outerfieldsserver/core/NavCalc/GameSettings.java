@@ -1,4 +1,4 @@
-package io.mindspce.outerfieldsserver.core.configuration;
+package io.mindspce.outerfieldsserver.core.NavCalc;
 
 import io.mindspice.mindlib.data.geometry.IVector2;
 

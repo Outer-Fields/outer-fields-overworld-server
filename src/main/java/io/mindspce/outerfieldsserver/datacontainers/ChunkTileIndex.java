@@ -1,8 +1,6 @@
-package io.mindspce.outerfieldsserver.util;
+package io.mindspce.outerfieldsserver.datacontainers;
 
 import io.mindspice.mindlib.data.geometry.IVector2;
-
-import java.util.Objects;
 
 
 public record ChunkTileIndex(
@@ -14,10 +12,8 @@ public record ChunkTileIndex(
     public boolean equals(Object o) {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
-
         ChunkTileIndex that = (ChunkTileIndex) o;
         if (!chunkIndex.equals(that.chunkIndex)) { return false; }
-
         return tileIndex.equals(that.tileIndex);
     }
 
@@ -26,5 +22,13 @@ public record ChunkTileIndex(
         int result = chunkIndex != null ? chunkIndex.hashCode() : 0;
         result = 31 * result + (tileIndex != null ? tileIndex.hashCode() : 0);
         return result;
+    }
+
+    public IVector2 getChunkIndex() {
+        return chunkIndex;
+    }
+
+    public IVector2 getTileIndex() {
+        return tileIndex;
     }
 }
