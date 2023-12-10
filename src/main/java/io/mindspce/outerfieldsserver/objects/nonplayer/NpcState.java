@@ -1,4 +1,4 @@
 package io.mindspce.outerfieldsserver.objects.nonplayer;
 
-public class NpcState {
+public class NpcState extends NpcEntity {
 }

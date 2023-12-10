@@ -10,14 +10,10 @@ public class GameSettings {
     private IVector2 playerViewWithBuffer = playerViewVec.add(playerViewBuffer);
     private IVector2 chunkSize = IVector2.of(3840, 3840);
     private IVector2 tilesPerChunk = IVector2.of(60, 60);
-    private IVector2 worldSize = IVector2.of(512,512);
+    private IVector2 worldSize = IVector2.of(512, 512);
     private int tileSize = 64;
+
     public static GameSettings GET() {
-        return INSTANCE;
-    }
-
-
-    public static GameSettings getINSTANCE() {
         return INSTANCE;
     }
 

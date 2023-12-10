@@ -1,4 +1,4 @@
 package io.mindspce.outerfieldsserver.objects.nonplayer;
 
-public class EnemyState {
+public class EnemyState extends EnemyEntity{
 }

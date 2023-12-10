@@ -19,12 +19,12 @@ public class PlayerLocation {
     private final IMutVector2 currTileIndex = IVector2.ofMutable(0, 0);
     private final IMutVector2 globalPos = IVector2.ofMutable(0, 0);
     private final IMutVector2 localPos = IVector2.ofMutable(0, 0);
-    private final IMutRec2 updateArea;
+    private final IMutRec2 updateBounds;
 
     public PlayerLocation(AreaInstance currArea) {
         this.currArea = currArea;
         IVector2 playerViewBuffer = GameSettings.GET().playerViewWithBuffer();
-        updateArea = IRect2.fromCenterMutable(0, 0, playerViewBuffer.x(), playerViewBuffer.y());
+        updateBounds = IRect2.fromCenterMutable(0, 0, playerViewBuffer.x(), playerViewBuffer.y());
     }
 
     public void updatePlayerPos(int x, int y) {
@@ -37,20 +37,33 @@ public class PlayerLocation {
         setCurrTileIndex();
     }
 
-    public IRect2 getUpdateArea() {
-        updateArea.reCenter(globalPos);
-        IVector2 chunkSize = GameSettings.GET().chunkSize();
-        int leftChunkX = updateArea.start().x() / chunkSize.x();
-        int leftChunkTopY = (updateArea.start().y() / chunkSize.y();
-        int leftChunkBottomY = (updateArea.start().y() + updateArea.size().y()) / chunkSize.y();
+    public IRect2 getUpdateBounds() {
+        updateBounds.reCenter(globalPos);
+        return updateBounds;
+    }
 
-        int rightChunkX = updateArea.end().x() / chunkSize.x();
-        int rightChunkTopX = updateArea.end().y() / chunkSize.y();
-        int rightChunkBottomX = (updateArea.end().y() + updateArea.size().y()) / chunkSize.y();
+    public ChunkData[][] getLocalGrid() {
+        return localGrid;
+    }
 
-        if (leftChunkX != currChunkIndex.x()) {
+    public AreaInstance getCurrArea() {
+        return currArea;
+    }
 
-        }
+    public IVector2 getCurrChunkIndex() {
+        return currChunkIndex;
+    }
+
+    public IVector2 getCurrTileIndex() {
+        return currTileIndex;
+    }
+
+    public IVector2 getGlobalPos() {
+        return globalPos;
+    }
+
+    public IVector2 getLocalPos() {
+        return localPos;
     }
 
     private void setGlobalPos(int x, int y) {

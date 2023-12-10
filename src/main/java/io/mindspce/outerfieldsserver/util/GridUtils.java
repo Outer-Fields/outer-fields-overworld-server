@@ -65,6 +65,5 @@ public class GridUtils {
         return lastChunk.x() != currChunkX || lastChunk.y() != currChunkY;
     }
 
-    public static boolean
 
 }
