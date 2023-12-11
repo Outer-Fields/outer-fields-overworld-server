@@ -1,4 +1,4 @@
-package io.mindspce.outerfieldsserver.objects.player;
+package io.mindspce.outerfieldsserver.entities.player;
 
 import io.mindspce.outerfieldsserver.area.AreaInstance;
 import io.mindspce.outerfieldsserver.area.ChunkData;
@@ -8,17 +8,18 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 
 
 public class PlayerCharacter extends PlayerEntity {
-    private final PlayerLocation location;
+    private PlayerSession session;
+    private final PlayerPosition positionData;
     private final EntityUpdateData entityUpdateData = new EntityUpdateData();
 
     public PlayerCharacter(AreaInstance currArea) {
-        this.location = new PlayerLocation(currArea);
+        this.positionData = new PlayerPosition(currArea);
 
     }
 
-    public void sendWorldUpdate(PlayerUpdateLevel updateLevel) {
-        IRect2 updateBounds = location.getUpdateBounds();
-        ChunkData[][] localGrid = location.getLocalGrid();
+    public synchronized void sendWorldUpdate(PlayerUpdateLevel updateLevel) {
+        IRect2 updateBounds = positionData.getUpdateBounds();
+        ChunkData[][] localGrid = positionData.getLocalGrid();
         entityUpdateData.reset(updateLevel);
         for (int x = 0; x < 3; ++x) {
             for (int y = 0; y < 3; ++y) {
@@ -29,13 +30,21 @@ public class PlayerCharacter extends PlayerEntity {
 
         switch (updateLevel) {
             case PLAYERS_ONLY -> {
-
-
+                sendPlayerUpdate();
             }
-            case PLAYERS_AND_NPC -> { }
-            case ALL -> { }
+            case PLAYERS_AND_NPC -> {
+                sendPlayerUpdate();
+                sendNpcEnemyUpdates();
+            }
+            case ALL -> {
+                sendPlayerUpdate();
+                sendNpcEnemyUpdates();
+                sendItemLocationUpdates();
+            }
         }
     }
+
+
 
     private void updateCheck(ChunkData chunk, IRect2 updateBounds, PlayerUpdateLevel updateLevel) {
         if (chunk == null) { return; }
@@ -76,13 +85,33 @@ public class PlayerCharacter extends PlayerEntity {
         }
     }
 
+    private void sendPlayerUpdate() { session.send(entityUpdateData.getPlayerUpdates()); }
+
+    private void sendNpcEnemyUpdates() {
+        session.send(entityUpdateData.getNpcUpdates());
+        session.send(entityUpdateData.getEnemyUpdates());
+    }
+
+    private void sendItemLocationUpdates() {
+        session.send(entityUpdateData.getItemUpdates());
+        session.send(entityUpdateData.getLocationUpdates());
+    }
+
     public IVector2 getLocalPos() {
-        return location.getLocalPos();
+        return positionData.getLocalPos();
+    }
+
+    public PlayerSession getSession() {
+        return session;
+    }
+
+    public PlayerPosition getPositionData() {
+        return positionData;
     }
 
     @Override
     public IVector2 getGlobalPos() {
-        return location.getGlobalPos();
+        return positionData.getGlobalPos();
     }
 
     public void getViewUpdate() {

@@ -1,4 +1,4 @@
-package io.mindspce.outerfieldsserver.objects;
+package io.mindspce.outerfieldsserver.entities;
 
 import io.mindspice.mindlib.data.geometry.IVector2;
 

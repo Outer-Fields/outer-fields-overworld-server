@@ -73,6 +73,9 @@ public class AreaInstance implements Runnable {
         if (index.x() > chunkMap.length || index.y() > chunkMap[0].length) {
             return null;
         }
+        if (index.x() < 0 || index.y() < 0) {
+            return null;
+        }
         return chunkMap[index.x()][index.y()];
     }
 

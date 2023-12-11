@@ -8,15 +8,17 @@ import io.mindspce.outerfieldsserver.enums.Direction;
 import io.mindspce.outerfieldsserver.datacontainers.ChunkTileIndex;
 import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.IMutVector2;
+import io.mindspice.mindlib.data.geometry.IPolygon2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 /**
  * The NavigationCalculator class provides methods for calculating paths between two points in a given area.
  */
-public class NavigationCalculator {
+public class NavCalc {
     private static final int CHUNK_SIZE = GameSettings.GET().chunkSize().x();
 
     /**
@@ -90,6 +92,7 @@ public class NavigationCalculator {
             );
             IMutVector2 neighborChunkIndex = IVector2.ofMutable(current.chunkIndex());
 
+
             // Adjust chunk index if the neighbor tile index is outside the current chunk
             boolean crossesBoundary = false;
             if (neighborTileIndex.x() < 0) {
@@ -121,7 +124,15 @@ public class NavigationCalculator {
             }
 
             ChunkData neighborChunk = area.getChunkByIndex(neighborChunkIndex);
+            if (neighborChunk == null) {
+                // TODO log?
+                continue;
+            }
             TileData neighborTile = neighborChunk.getTileByIndex(neighborTileIndex);
+            if (neighborTile == null) {
+                // TODO log?
+                continue;
+            }
 
             if (neighborTile.isNavigable()) {
                 neighbors.add(new ChunkTileIndex(neighborChunkIndex, neighborTileIndex));
@@ -131,10 +142,10 @@ public class NavigationCalculator {
         return neighbors;
     }
 
-
     /**
      * Calculates the Manhattan distance between two ChunkTileIndex objects.
      * Manhattan Distance is the sum of the absolute values of the differences of the Cartesian coordinates.
+     *
      * @param index1 The first ChunkTileIndex object.
      * @param index2 The second ChunkTileIndex object.
      * @return The Manhattan distance between the two ChunkTileIndex objects.
@@ -169,7 +180,7 @@ public class NavigationCalculator {
         ArrayList<IVector2> path = new ArrayList<>();
         ChunkTileIndex current = goal;
         while (!current.equals(start)) {
-            path.addFirst(GridUtils.tileToGlobal(current));
+            path.addFirst(fuzzTile(current));
             current = cameFrom.get(current);
             if (current == null) {
                 // TODO log this
@@ -180,8 +191,32 @@ public class NavigationCalculator {
         return path;
     }
 
+    /**
+     * Fuzzes a tile by adding random offsets to its position, to make movement more natural
+     *
+     * @param tileChunk The ChunkTileIndex of the tile to fuzz.
+     * @return The fuzzed position of the tile.
+     */
+    private static IVector2 fuzzTile(ChunkTileIndex tileChunk) {
+        IVector2 chunk = tileChunk.chunkIndex();
+        IVector2 tile = tileChunk.tileIndex();
+
+        IMutVector2 pos = IVector2.ofMutable(
+                (chunk.x() * GameSettings.GET().chunkSize().x()) + (tile.x() * GameSettings.GET().tileSize()),
+                (chunk.y() * GameSettings.GET().chunkSize().y()) + (tile.y() * GameSettings.GET().tileSize())
+        );
+
+        pos.add(
+                ThreadLocalRandom.current().nextInt(GameSettings.GET().tileSize()),
+                ThreadLocalRandom.current().nextInt(GameSettings.GET().tileSize())
+        );
+
+        return pos;
+    }
+
     private record Node(
             ChunkTileIndex chunkTile,
             int priority
     ) { }
+
 }

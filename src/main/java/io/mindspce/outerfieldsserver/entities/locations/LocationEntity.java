@@ -1,6 +1,6 @@
-package io.mindspce.outerfieldsserver.objects.locations;
+package io.mindspce.outerfieldsserver.entities.locations;
 
-import io.mindspce.outerfieldsserver.objects.Entity;
+import io.mindspce.outerfieldsserver.entities.Entity;
 
 
 public class LocationEntity extends Entity<LocationEntity> {

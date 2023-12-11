@@ -1,6 +1,6 @@
-package io.mindspce.outerfieldsserver.objects.player;
+package io.mindspce.outerfieldsserver.entities.player;
 
-import io.mindspce.outerfieldsserver.objects.Entity;
+import io.mindspce.outerfieldsserver.entities.Entity;
 
 
 public class PlayerEntity extends Entity<PlayerEntity> {

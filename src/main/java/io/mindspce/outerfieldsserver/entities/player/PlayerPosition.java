@@ -1,27 +1,23 @@
-package io.mindspce.outerfieldsserver.objects.player;
+package io.mindspce.outerfieldsserver.entities.player;
 
 import io.mindspce.outerfieldsserver.area.AreaInstance;
 import io.mindspce.outerfieldsserver.area.ChunkData;
+import io.mindspce.outerfieldsserver.components.Position;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.datacontainers.ActiveChunkUpdate;
 import io.mindspce.outerfieldsserver.enums.Direction;
 import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.IMutRec2;
-import io.mindspice.mindlib.data.geometry.IMutVector2;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
 
-public class PlayerLocation {
+public class PlayerPosition extends Position {
     private AreaInstance currArea;
     private final ChunkData[][] localGrid = new ChunkData[3][3];
-    private final IMutVector2 currChunkIndex = IVector2.ofMutable(0, 0);
-    private final IMutVector2 currTileIndex = IVector2.ofMutable(0, 0);
-    private final IMutVector2 globalPos = IVector2.ofMutable(0, 0);
-    private final IMutVector2 localPos = IVector2.ofMutable(0, 0);
     private final IMutRec2 updateBounds;
 
-    public PlayerLocation(AreaInstance currArea) {
+    public PlayerPosition(AreaInstance currArea) {
         this.currArea = currArea;
         IVector2 playerViewBuffer = GameSettings.GET().playerViewWithBuffer();
         updateBounds = IRect2.fromCenterMutable(0, 0, playerViewBuffer.x(), playerViewBuffer.y());
@@ -29,12 +25,12 @@ public class PlayerLocation {
 
     public void updatePlayerPos(int x, int y) {
         setGlobalPos(x, y);
-        setLocalPos(x, y);
+        setLocalPosFromGlobal(x, y);
         if (GridUtils.isNewChunk(currChunkIndex, globalPos)) {
-            setCurrChunkIndex();
-            updateLocalGrid();
+            setCurrChunkIndexFromGlobalPos(x, y);
         }
-        setCurrTileIndex();
+        updateLocalGrid();
+        setCurrTileIndexFromLocalPos(localPos.x(), localPos.y());
     }
 
     public IRect2 getUpdateBounds() {
@@ -50,47 +46,11 @@ public class PlayerLocation {
         return currArea;
     }
 
-    public IVector2 getCurrChunkIndex() {
-        return currChunkIndex;
-    }
-
-    public IVector2 getCurrTileIndex() {
-        return currTileIndex;
-    }
-
-    public IVector2 getGlobalPos() {
-        return globalPos;
-    }
-
-    public IVector2 getLocalPos() {
-        return localPos;
-    }
-
-    private void setGlobalPos(int x, int y) {
-        globalPos.setXY(x, y);
-    }
-
-    private void setLocalPos(int x, int y) {
-        localPos.setX(x % GameSettings.GET().chunkSize().x());
-        localPos.setY(y % GameSettings.GET().chunkSize().y());
-    }
-
-    private void setCurrChunkIndex() {
-        currChunkIndex.setXY(
-                globalPos.x() / GameSettings.GET().chunkSize().x(),
-                globalPos.y() / GameSettings.GET().chunkSize().y()
-        );
-    }
-
-    private void setCurrTileIndex() {
-        currTileIndex.setXY(
-                localPos.x() / GameSettings.GET().tileSize(),
-                localPos.y() / GameSettings.GET().tileSize()
-        );
+    public void setCurrArea(AreaInstance newArea) {
+        this.currArea = newArea;
     }
 
     private void updateLocalGrid() {
-
         IVector2 lastIndex = localGrid[1][1].getIndex();
         Direction newX = null;
         Direction newY = null;

@@ -1,11 +1,12 @@
 package io.mindspce.outerfieldsserver.area;
 
 import io.mindspce.outerfieldsserver.core.GameSettings;
-import io.mindspce.outerfieldsserver.objects.item.ItemState;
-import io.mindspce.outerfieldsserver.objects.locations.LocationState;
-import io.mindspce.outerfieldsserver.objects.nonplayer.EnemyState;
-import io.mindspce.outerfieldsserver.objects.nonplayer.NpcState;
-import io.mindspce.outerfieldsserver.objects.player.PlayerCharacter;
+import io.mindspce.outerfieldsserver.entities.item.ItemState;
+import io.mindspce.outerfieldsserver.entities.locations.LocationState;
+import io.mindspce.outerfieldsserver.entities.nonplayer.EnemyState;
+import io.mindspce.outerfieldsserver.entities.nonplayer.NpcState;
+import io.mindspce.outerfieldsserver.entities.player.PlayerCharacter;
+import io.mindspice.mindlib.data.geometry.IPolygon2;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
@@ -17,20 +18,23 @@ public class ChunkData {
     private final IVector2 globalPos;
     private final IRect2 boundsRect;
     private final TileData[][] tileMap;
+    private final Map<Integer, IPolygon2> collisions;
     private final Set<PlayerCharacter> activePlayers = Collections.synchronizedSet(new HashSet<>());
     private final Set<NpcState> activeNpcs = Collections.synchronizedSet(new HashSet<>());
     private final Set<EnemyState> activeEnemies = Collections.synchronizedSet(new HashSet<>());
     private final Set<ItemState> activeItems = Collections.synchronizedSet(new HashSet<>());
     private final Set<LocationState> locationStates = Collections.synchronizedSet(new HashSet<>());
 
-    public ChunkData(IVector2 index, TileData[][] tileMap) {
+    public ChunkData(IVector2 index, TileData[][] tileMap,Map<Integer,IPolygon2> collisions ) {
         this.index = index;
         this.tileMap = tileMap;
+        this.collisions = collisions;
         globalPos = IVector2.of(
                 index.x() * GameSettings.GET().chunkSize().x(),
                 index.y() * GameSettings.GET().chunkSize().y()
         );
         boundsRect = IRect2.of(globalPos, GameSettings.GET().chunkSize());
+
     }
 
     public Set<PlayerCharacter> getActivePlayers() {
@@ -59,6 +63,10 @@ public class ChunkData {
 
     public IRect2 getBoundsRect() {
         return boundsRect;
+    }
+
+    public IPolygon2 getCollision(int collisionId) {
+        return collisions.get(collisionId);
     }
 
     public TileData getTileByLocalPos(IVector2 pos) {
