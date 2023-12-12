@@ -62,8 +62,8 @@ public class NavigationTest {
         for (int x = 0; x < tilesPerChunk; ++x) {
             for (int y = 0; y < tilesPerChunk; ++y) {
                 boolean isNavigable = (x % 3 == 0 && y < 5) || (x % 3 == 1 && y >= 5);
-                tiles1[x][y] = new TileData(IVector2.of(x, y), isNavigable ? new NavData(Set.of(NavPath.TEST)) : new NavData());
-                tiles2[x][y] = new TileData(IVector2.of(x, y), isNavigable ? new NavData(Set.of(NavPath.TEST)) : new NavData());
+                tiles1[x][y] = new TileData(IVector2.of(x, y), isNavigable ? new NavData(Set.of(NavPath.TEST)) : null);
+                tiles2[x][y] = new TileData(IVector2.of(x, y), isNavigable ? new NavData(Set.of(NavPath.TEST)) : null);
             }
         }
 
@@ -82,6 +82,7 @@ public class NavigationTest {
             var t = System.nanoTime();
             var path = NavCalc.getPathTo(area, curr, target);
             tArr[i] = (int) (System.nanoTime() - t);
+            System.out.println(path);
         }
         System.out.println((int) Arrays.stream(tArr).average().getAsDouble());
     }

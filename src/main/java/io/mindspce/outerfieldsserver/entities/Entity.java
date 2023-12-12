@@ -1,15 +1,19 @@
 package io.mindspce.outerfieldsserver.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
 
-public abstract class Entity<T extends Entity<T>> {
-    public int id;
-    public IVector2 globalPos;
+public abstract class Entity {
+    @JsonProperty("i") public int id;
+    @JsonProperty("p") public IVector2 globalPos;
 
-    public abstract T asEntity();
 
     public IVector2 getGlobalPos() {
         return globalPos;
+    }
+
+    public int getId() {
+        return id;
     }
 }

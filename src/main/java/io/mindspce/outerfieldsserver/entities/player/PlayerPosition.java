@@ -2,35 +2,93 @@ package io.mindspce.outerfieldsserver.entities.player;
 
 import io.mindspce.outerfieldsserver.area.AreaInstance;
 import io.mindspce.outerfieldsserver.area.ChunkData;
+import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.components.Position;
 import io.mindspce.outerfieldsserver.core.GameSettings;
+import io.mindspce.outerfieldsserver.core.authority.PlayerAuthority;
 import io.mindspce.outerfieldsserver.datacontainers.ActiveChunkUpdate;
+import io.mindspce.outerfieldsserver.datacontainers.DynamicTileRef;
 import io.mindspce.outerfieldsserver.enums.Direction;
 import io.mindspce.outerfieldsserver.util.GridUtils;
-import io.mindspice.mindlib.data.geometry.IMutRec2;
-import io.mindspice.mindlib.data.geometry.IRect2;
-import io.mindspice.mindlib.data.geometry.IVector2;
+import io.mindspice.mindlib.data.geometry.*;
+
+import java.awt.geom.Line2D;
 
 
 public class PlayerPosition extends Position {
     private AreaInstance currArea;
-    private final ChunkData[][] localGrid = new ChunkData[3][3];
+    private final ChunkData[][] localChunkGrid = new ChunkData[3][3];
+    private final DynamicTileRef[][] localTileGrid = new DynamicTileRef[5][5];
     private final IMutRec2 updateBounds;
+    private final IMutLine2 moveVector = ILine2.ofMutable(0, 0, 0, 0);
+    private long lastTimeStamp = -1;
 
-    public PlayerPosition(AreaInstance currArea) {
+    public PlayerPosition(AreaInstance currArea, int startX, int startY) {
         this.currArea = currArea;
         IVector2 playerViewBuffer = GameSettings.GET().playerViewWithBuffer();
         updateBounds = IRect2.fromCenterMutable(0, 0, playerViewBuffer.x(), playerViewBuffer.y());
+        setGlobalPos(startX, startY);
+        setLocalPosFromGlobal(startX, startY);
+        for (int x = 0; x < 5; ++x) {
+            for (int y = 0; y < 5; ++y) {
+                localTileGrid[x][y] = new DynamicTileRef(
+                        currArea,
+                        IVector2.of(GameSettings.GET().tileSize() * (x - 2),
+                                GameSettings.GET().tileSize() * (y - 2)
+                        )
+                );
+            }
+        }
     }
 
-    public void updatePlayerPos(int x, int y) {
-        setGlobalPos(x, y);
-        setLocalPosFromGlobal(x, y);
-        if (GridUtils.isNewChunk(currChunkIndex, globalPos)) {
-            setCurrChunkIndexFromGlobalPos(x, y);
+    public void updatePlayerPos(int posX, int posY, long currTimeStamp) {
+        moveVector.setStart(globalPos.x(), globalPos.y());
+        moveVector.setEnd(posX, posY);
+
+        if (lastTimeStamp != -1) {
+            if (!PlayerAuthority.validateCollision(currArea, localTileGrid, moveVector)) {
+                // TODO log abuse and force sync
+                lastTimeStamp = currTimeStamp;
+                return;
+            }
+
+            ILine2 checkedMVec = PlayerAuthority.validateDistance(moveVector, lastTimeStamp, currTimeStamp);
+            lastTimeStamp = currTimeStamp; // Set this as soon as possible
+            if (checkedMVec.end().x() != posX || checkedMVec.end().y() != posY) {
+                //TODO log
+                setGlobalPos(checkedMVec.end().x(), checkedMVec.end().y());
+            } else {
+                setGlobalPos(posX, posY);
+            }
         }
-        updateLocalGrid();
+        setLocalPosFromGlobal(globalPos.x(), globalPos.y());
+        updateTileGrid(globalPos.x(), globalPos.y());
+
+        if (getCurrTile() == null) { // player not in tilegrid
+            setGlobalPos(moveVector.start().x(), moveVector.start().y());
+        }
+
+        if (GridUtils.isNewChunk(currChunkIndex, globalPos)) {
+            setCurrChunkIndexFromGlobalPos(posX, posY);
+            updateLocalGrid();
+        }
         setCurrTileIndexFromLocalPos(localPos.x(), localPos.y());
+    }
+
+    private void updateTileGrid(int posX, int posY) {
+        for (int x = 0; x < 5; ++x) {
+            for (int y = 0; y < 5; ++y) {
+                localTileGrid[x][y].updatePos(posX, posY);
+            }
+        }
+    }
+
+    public TileData getCurrTile() {
+        return localTileGrid[3][3].getTileRef();
+    }
+
+    public ChunkData getCurrChunk() {
+        return localChunkGrid[1][1];
     }
 
     public IRect2 getUpdateBounds() {
@@ -38,8 +96,8 @@ public class PlayerPosition extends Position {
         return updateBounds;
     }
 
-    public ChunkData[][] getLocalGrid() {
-        return localGrid;
+    public ChunkData[][] getLocalChunkGrid() {
+        return localChunkGrid;
     }
 
     public AreaInstance getCurrArea() {
@@ -51,7 +109,7 @@ public class PlayerPosition extends Position {
     }
 
     private void updateLocalGrid() {
-        IVector2 lastIndex = localGrid[1][1].getIndex();
+        IVector2 lastIndex = localChunkGrid[1][1].getIndex();
         Direction newX = null;
         Direction newY = null;
 
@@ -81,7 +139,7 @@ public class PlayerPosition extends Position {
 //            }
 //        }
 
-        if (localGrid[1][1] == null) {
+        if (localChunkGrid[1][1] == null) {
             // TODO some type authoritative check, as this is an error or abude
         }
     }
@@ -90,14 +148,14 @@ public class PlayerPosition extends Position {
         if (newX != null) {
             int x = newX == Direction.EAST ? 0 : 2;
             for (int y = 0; y < 3; ++y) {
-                areaUpdate.removals.add(localGrid[x][y].getIndex());
+                areaUpdate.removals.add(localChunkGrid[x][y].getIndex());
             }
         }
 
         if (newY != null) {
             int y = newY == Direction.SOUTH ? 0 : 2;
             for (int x = 0; x < 3; ++x) {
-                areaUpdate.removals.add(localGrid[x][y].getIndex());
+                areaUpdate.removals.add(localChunkGrid[x][y].getIndex());
             }
         }
     }
@@ -111,7 +169,7 @@ public class PlayerPosition extends Position {
             for (int row = 0; row < 3; ++row) {
                 int worldX = centerX + (col - 1);
                 int worldY = centerY + (row - 1);
-                localGrid[col][row] = currArea.getChunkByIndex(worldX, worldY);
+                localChunkGrid[col][row] = currArea.getChunkByIndex(worldX, worldY);
                 areaUpdate.additions.add(IVector2.of(worldX, worldY));
             }
         }
@@ -123,7 +181,7 @@ public class PlayerPosition extends Position {
                 if (newX == null || col != (newX == Direction.EAST ? 2 : 0)) {
                     int worldX = centerX + (col - 1);
                     int worldY = centerY + (row - 1);
-                    localGrid[col][row] = currArea.getChunkByIndex(worldX, worldY);
+                    localChunkGrid[col][row] = currArea.getChunkByIndex(worldX, worldY);
                     areaUpdate.additions.add(IVector2.of(worldX, worldY));
                 }
             }
@@ -134,16 +192,16 @@ public class PlayerPosition extends Position {
         if (direction == Direction.EAST) {
             // Shift each row to the left
             for (int y = 0; y < 3; y++) {
-                localGrid[0][y] = localGrid[1][y];
-                localGrid[1][y] = localGrid[2][y];
-                localGrid[2][y] = null; // Make room for the new column on the right
+                localChunkGrid[0][y] = localChunkGrid[1][y];
+                localChunkGrid[1][y] = localChunkGrid[2][y];
+                localChunkGrid[2][y] = null; // Make room for the new column on the right
             }
         } else if (direction == Direction.WEST) {
             // Shift each row to the right
             for (int y = 0; y < 3; y++) {
-                localGrid[2][y] = localGrid[1][y];
-                localGrid[1][y] = localGrid[0][y];
-                localGrid[0][y] = null; // Make room for the new column on the left
+                localChunkGrid[2][y] = localChunkGrid[1][y];
+                localChunkGrid[1][y] = localChunkGrid[0][y];
+                localChunkGrid[0][y] = null; // Make room for the new column on the left
             }
         }
     }
@@ -152,16 +210,16 @@ public class PlayerPosition extends Position {
         if (direction == Direction.SOUTH) {
             // Shift each column down
             for (int x = 0; x < 3; x++) {
-                localGrid[x][0] = localGrid[x][1];
-                localGrid[x][1] = localGrid[x][2];
-                localGrid[x][2] = null; // Make room for the new row at the bottom
+                localChunkGrid[x][0] = localChunkGrid[x][1];
+                localChunkGrid[x][1] = localChunkGrid[x][2];
+                localChunkGrid[x][2] = null; // Make room for the new row at the bottom
             }
         } else if (direction == Direction.NORTH) {
             // Shift each column up
             for (int x = 0; x < 3; x++) {
-                localGrid[x][2] = localGrid[x][1];
-                localGrid[x][1] = localGrid[x][0];
-                localGrid[x][0] = null; // Make room for the new row at the top
+                localChunkGrid[x][2] = localChunkGrid[x][1];
+                localChunkGrid[x][1] = localChunkGrid[x][0];
+                localChunkGrid[x][0] = null; // Make room for the new row at the top
             }
         }
     }

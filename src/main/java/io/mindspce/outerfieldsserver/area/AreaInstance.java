@@ -59,9 +59,18 @@ public class AreaInstance implements Runnable {
         return chunkMap;
     }
 
-    public ChunkData getChunkByPos(IVector2 pos) {
+    public ChunkData getChunkByGlobalPos(IVector2 pos) {
         int x = pos.x() / GameSettings.GET().chunkSize().x();
         int y = pos.y() / GameSettings.GET().chunkSize().y();
+        if (x > chunkMap.length || y > chunkMap[0].length) {
+            throw new IndexOutOfBoundsException("Position out of chunk bounds");
+        }
+        return chunkMap[x][y];
+    }
+
+    public ChunkData getChunkByGlobalPos(int posX, int posY) {
+        int x = posX / GameSettings.GET().chunkSize().x();
+        int y = posY / GameSettings.GET().chunkSize().y();
         if (x > chunkMap.length || y > chunkMap[0].length) {
             throw new IndexOutOfBoundsException("Position out of chunk bounds");
         }
@@ -82,6 +91,9 @@ public class AreaInstance implements Runnable {
     @Nullable
     public ChunkData getChunkByIndex(int x, int y) {
         if (x > chunkMap.length || y > chunkMap[0].length) {
+            return null;
+        }
+        if (x < 0 || y < 0) {
             return null;
         }
         return chunkMap[x][y];

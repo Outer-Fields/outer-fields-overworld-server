@@ -25,7 +25,7 @@ public class ChunkData {
     private final Set<ItemState> activeItems = Collections.synchronizedSet(new HashSet<>());
     private final Set<LocationState> locationStates = Collections.synchronizedSet(new HashSet<>());
 
-    public ChunkData(IVector2 index, TileData[][] tileMap,Map<Integer,IPolygon2> collisions ) {
+    public ChunkData(IVector2 index, TileData[][] tileMap, Map<Integer, IPolygon2> collisions) {
         this.index = index;
         this.tileMap = tileMap;
         this.collisions = collisions;
@@ -57,6 +57,7 @@ public class ChunkData {
         return locationStates;
     }
 
+
     public IVector2 getGlobalPos() {
         return globalPos;
     }
@@ -78,11 +79,48 @@ public class ChunkData {
         return tileMap[x][y];
     }
 
+    public TileData getTileByLocalPos(int posX, int posY) {
+        int x = posX / GameSettings.GET().tileSize();
+        int y = posY / GameSettings.GET().tileSize();
+        if (x > tileMap.length || y > tileMap[0].length) {
+            throw new IndexOutOfBoundsException("Position out of chunk bounds");
+        }
+        return tileMap[x][y];
+    }
+
+    public TileData getTileByGlobalPos(IVector2 pos) {
+        int x = (pos.x() % GameSettings.GET().chunkSize().x()) / GameSettings.GET().tileSize();
+        int y = (pos.y() % GameSettings.GET().chunkSize().y()) / GameSettings.GET().tileSize();
+        if (x > tileMap.length || y > tileMap[0].length) {
+            throw new IndexOutOfBoundsException("Position out of chunk bounds");
+        }
+        return tileMap[x][y];
+    }
+
+    public TileData getTileByGlobalPos(int posX, int posY) {
+        int x = (posX % GameSettings.GET().chunkSize().x()) / GameSettings.GET().tileSize();
+        int y = (posY % GameSettings.GET().chunkSize().y()) / GameSettings.GET().tileSize();
+        if (x > tileMap.length || y > tileMap[0].length) {
+            throw new IndexOutOfBoundsException("Position out of chunk bounds");
+        }
+        return tileMap[x][y];
+    }
+
     public TileData getTileByIndex(IVector2 index) {
         if (index.x() > tileMap.length || index.y() > tileMap[0].length) {
             throw new IndexOutOfBoundsException("Position out of chunk bounds");
         }
         return tileMap[index.x()][index.y()];
+    }
+
+    public TileData getTileByIndex(int x, int y) {
+        if (x > tileMap.length || y > tileMap[0].length) {
+            return null;
+        }
+        if (x < 0 || y < 0) {
+            return null;
+        }
+        return tileMap[x][y];
     }
 
     public TileData[][] getTileMap() {

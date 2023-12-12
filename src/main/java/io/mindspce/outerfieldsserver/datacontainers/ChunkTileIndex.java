@@ -23,12 +23,4 @@ public record ChunkTileIndex(
         result = 31 * result + (tileIndex != null ? tileIndex.hashCode() : 0);
         return result;
     }
-
-    public IVector2 getChunkIndex() {
-        return chunkIndex;
-    }
-
-    public IVector2 getTileIndex() {
-        return tileIndex;
-    }
 }

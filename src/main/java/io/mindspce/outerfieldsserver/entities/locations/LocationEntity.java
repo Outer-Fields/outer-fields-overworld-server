@@ -3,10 +3,6 @@ package io.mindspce.outerfieldsserver.entities.locations;
 import io.mindspce.outerfieldsserver.entities.Entity;
 
 
-public class LocationEntity extends Entity<LocationEntity> {
+public class LocationEntity extends Entity {
 
-    @Override
-    public LocationEntity asEntity() {
-        return null;
-    }
 }
