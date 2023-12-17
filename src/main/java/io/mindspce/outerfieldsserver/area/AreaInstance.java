@@ -1,53 +1,55 @@
 package io.mindspce.outerfieldsserver.area;
 
 import io.mindspce.outerfieldsserver.core.GameSettings;
-import io.mindspce.outerfieldsserver.datacontainers.ActiveChunkUpdate;
+import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.entities.player.PlayerState;
+import io.mindspce.outerfieldsserver.systems.event.EventManager;
+import io.mindspce.outerfieldsserver.data.wrappers.ActiveEntityUpdate;
+import io.mindspce.outerfieldsserver.enums.AreaId;
+import io.mindspce.outerfieldsserver.enums.EventType;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import jakarta.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public class AreaInstance implements Runnable {
-    private final String arenaName;
+public class AreaInstance {
+    private final AreaId arenaName;
     private final ChunkData[][] chunkMap;
     private final IVector2 areaSize;
+    private final List<PlayerState> activePlayers = new ArrayList<>(20);
     private final Map<IVector2, AtomicInteger> activeChunks = new ConcurrentHashMap<>(100);
-    private final ConcurrentLinkedDeque<ActiveChunkUpdate> activeChunkUpdateQueue = new ConcurrentLinkedDeque<>();
 
-    public AreaInstance(String arenaName, ChunkData[][] chunkMap) {
+    private final ConcurrentLinkedDeque<ActiveEntityUpdate> entityUpdateQueue = new ConcurrentLinkedDeque<>();
+
+
+    public AreaInstance(AreaId arenaName, ChunkData[][] chunkMap) {
         this.arenaName = arenaName;
         this.chunkMap = chunkMap;
         areaSize = IVector2.of(chunkMap.length, chunkMap[0].length);
     }
 
-    @Override
-    public void run() {
-        ActiveChunkUpdate next;
-        while ((next = activeChunkUpdateQueue.poll()) != null) {
-            next.additions.forEach(idx -> activeChunks.compute(idx, (key, value) -> {
-                if (value == null) {
-                    return new AtomicInteger(1);
-                } else {
-                    value.incrementAndGet();
-                    return value;
-                }
-            }));
-            next.removals.forEach((idx) -> activeChunks.computeIfPresent(idx, (key, value) -> {
-                value.decrementAndGet();
-                return value;
-            }));
-        }
+    public void submitEntityUpdate(ActiveEntityUpdate entityUpdate) {
+        if (entityUpdate == null) { return; }
+        entityUpdateQueue.add(entityUpdate);
     }
 
-    public void queueActiveChunk(ActiveChunkUpdate areaUpdate) {
-        activeChunkUpdateQueue.add(areaUpdate);
-    }
+//    public void boad() {
+//        int queueSize = entityUpdateQueue.size();
+//        for (int i = 0; i < queueSize; ++i) {
+//            ActiveEntityUpdate entityUpdate = entityUpdateQueue.poll();
+//
+//        }
+//    }
 
-    public String getArenaName() {
+
+
+    public AreaId getId() {
         return arenaName;
     }
 
@@ -109,6 +111,23 @@ public class AreaInstance implements Runnable {
         return vecMap;
     }
 
+    public List<PlayerState> getActivePlayers() {
+        return activePlayers;
+    }
+
+    public void subscribeToChunk(IVector2 chunkIndex, EventType eventType, PlayerState playerState) {
+        ChunkData chunk = getChunkByIndex(chunkIndex);
+        if (chunk != null) {
+            chunk.subscribe(eventType, playerState);
+        }
+    }
+
+    public void unSubscribeToChunk(IVector2 chunkIndex, EventType eventType, PlayerState playerState) {
+        ChunkData chunk = getChunkByIndex(chunkIndex);
+        if (chunk != null) {
+            chunk.unsubscribe(eventType, playerState);
+        }
+    }
 
 }
 

@@ -1,20 +1,24 @@
 package io.mindspce.outerfieldsserver.util;
 
-import io.mindspce.outerfieldsserver.datacontainers.ChunkTileIndex;
+import io.mindspce.outerfieldsserver.data.wrappers.ChunkTileIndex;
 import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspice.mindlib.data.geometry.IVector2;
+import io.mindspice.mindlib.data.tuples.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class GridUtils {
 
-    public static IVector2 calcChunkPos(IVector2 chunkIndex) {
-        return chunkIndex.multiply(GameSettings.GET().chunkSize());
-    }
+//    public static IVector2 calcChunkPos(IVector2 chunkIndex) {
+//        return chunkIndex.multiply(GameSettings.GET().chunkSize());
+//    }
 
-    public static IVector2 calcChunkIndex(IVector2 pos) {
-        return pos.divide(GameSettings.GET().chunkSize());
-    }
+//    public static IVector2 calcChunkIndex(IVector2 pos) {
+//        return pos.divide(GameSettings.GET().chunkSize());
+//    }
 
     public static void printGrid(IVector2[][] grid) {
         for (int x = 0; x < grid[0].length; x++) {
@@ -63,6 +67,29 @@ public class GridUtils {
         int currChunkX = globalPos.x() / GameSettings.GET().chunkSize().x();
         int currChunkY = globalPos.y() / GameSettings.GET().chunkSize().y();
         return lastChunk.x() != currChunkX || lastChunk.y() != currChunkY;
+    }
+
+    public static Pair<List<IVector2>, List<IVector2>> getChunkDeltas(IVector2 oldPos, IVector2 newPos) {
+        List<IVector2> oldChunks = new ArrayList<>(5);
+        List<IVector2> newChunks = new ArrayList<>(5);
+        List<IVector2> currGrid = new ArrayList<>(9);
+        int minX = Math.min(oldPos.x(), newPos.x()) - 1;
+        int maxX = Math.max(oldPos.x(), newPos.x()) + 1;
+        int minY = Math.min(oldPos.y(), newPos.y()) - 1;
+        int maxY = Math.max(oldPos.y(), newPos.y()) + 1;
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                if (x >= newPos.x() - 1 && x <= newPos.x() + 1 && y >= newPos.y() - 1 && y <= newPos.y() + 1) {
+                    if (!(x >= oldPos.x() - 1 && x <= oldPos.x() + 1 && y >= oldPos.y() - 1 && y <= oldPos.y() + 1)) {
+                        newChunks.add(IVector2.of(x, y));
+                    }
+                } else if (x >= oldPos.x() - 1 && x <= oldPos.x() + 1 && y >= oldPos.y() - 1 && y <= oldPos.y() + 1) {
+                    oldChunks.add(IVector2.of(x, y));
+                }
+            }
+        }
+        return Pair.of(oldChunks, newChunks);
     }
 
 

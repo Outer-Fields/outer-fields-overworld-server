@@ -1,8 +1,19 @@
 package io.mindspce.outerfieldsserver.entities.item;
 
 import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.enums.EntityType;
+import io.mindspice.mindlib.data.geometry.IVector2;
 
 
-public class ItemEntity extends Entity{
+public abstract class ItemEntity extends Entity {
+    private final int key;
 
+    public ItemEntity(int key) {
+        super(EntityType.ITEM);
+        this.key = key;
+    }
+
+    public int key() {
+        return key;
+    }
 }

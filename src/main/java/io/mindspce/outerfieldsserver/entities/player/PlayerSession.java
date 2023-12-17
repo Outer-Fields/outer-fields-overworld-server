@@ -1,6 +1,7 @@
 package io.mindspce.outerfieldsserver.entities.player;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import io.mindspce.outerfieldsserver.networking.outgoing.NetMessage;
 import io.mindspice.mindlib.util.JsonUtils;
@@ -13,31 +14,33 @@ import java.io.IOException;
 public class PlayerSession {
     private static final ObjectWriter msgWriter = JsonUtils.getMapper().writerFor(NetMessage.class);
 
-    private final int id;
-    private WebSocketSession connection;
-    private PlayerCharacter character;
+    private WebSocketSession session;
+    private final EntityUpdateContainer entityUpdateContainer;
 
-    public PlayerSession(int playerId) {
-        this.id = playerId;
+    public PlayerSession(WebSocketSession session) {
+        entityUpdateContainer = new EntityUpdateContainer();
+        this.session = session;
+    }
+
+    public EntityUpdateContainer entityUpdateContainer() {
+        return entityUpdateContainer;
     }
 
     public void setConnection(WebSocketSession webSocketSession) {
-        this.connection = webSocketSession;
+        this.session = webSocketSession;
     }
 
-    public void send(NetMessage<?> message) {
-        if (!connection.isOpen()) { return; }
+    public void send(byte[] msgBytes) {
+        if (!session.isOpen()) {
+            // TODO do something
+            return;
+        }
         try {
-            byte[] msg = msgWriter.writeValueAsBytes(message);
-            connection.sendMessage(new BinaryMessage(msg));
-        } catch (JsonProcessingException e) {
-            //TODO log
+            session.sendMessage(new BinaryMessage(msgBytes));
         } catch (IOException e) {
             //TODO log
         }
     }
 
-    public PlayerCharacter getCharacter() {
-        return character;
-    }
+
 }

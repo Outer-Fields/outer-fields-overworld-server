@@ -2,14 +2,12 @@ package io.mindspce.outerfieldsserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.core.ServerConst;
+import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.entities.item.ItemEntity;
 import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
 import io.mindspce.outerfieldsserver.enums.Direction;
-import io.mindspce.outerfieldsserver.enums.EntityType;
-import io.mindspce.outerfieldsserver.enums.NetMsgType;
-import io.mindspce.outerfieldsserver.networking.outgoing.NetEntityUpdate;
 import io.mindspce.outerfieldsserver.networking.outgoing.NetMessage;
 import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.IVector2;
@@ -20,15 +18,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-
 
 
 //@SpringBootTest
 class OuterFieldsServerApplicationTests {
 
+    @Test
+    void typeTest() {
+
+    }
 //    @Test
 //    void gridTest() {
 //        PlayerState muteRect = new PlayerState();
@@ -121,29 +121,28 @@ class OuterFieldsServerApplicationTests {
         List<byte[]> json = new ArrayList<>(1000000);
         for (int i = 0; i < 100000; ++i) {
 
-            PlayerEntity e = new PlayerEntity();
-            e.test = String.valueOf(ThreadLocalRandom.current().nextInt());
-            e.id = ThreadLocalRandom.current().nextInt();
-            e.globalPos = IVector2.of(ThreadLocalRandom.current().nextInt(), ThreadLocalRandom.current().nextInt());
-            NetEntityUpdate<PlayerEntity> neu = new NetEntityUpdate<>(EntityType.PLAYER, List.of(e));
-            NetMessage<?> nm = new NetMessage<>(NetMsgType.EntityUpdate, neu);
-            long t = System.nanoTime();
-            var j = JsonUtils.writeBytes(nm);
-            json.add(j);
+//            PlayerEntity e = new PlayerEntity();
+//            e.test = String.valueOf(ThreadLocalRandom.current().nextInt());
+//            NetEntityUpdate neu = new NetEntityUpdate(List.of(e));
+//            NetMessage<?> nm = new NetMessage<>(NetMsgType.EntityUpdate, neu);
+//            long t = System.nanoTime();
+//            var j = JsonUtils.writePretty((Entity)e);
+//            System.out.println(j);
+            // json.add(j);
         }
         Thread.sleep(10000);
         for (int i = 0; i < 100; ++i) {
-
-            PlayerEntity e = new PlayerEntity();
-            e.test = String.valueOf(ThreadLocalRandom.current().nextInt());
-            e.id = ThreadLocalRandom.current().nextInt();
-            e.globalPos = IVector2.of(ThreadLocalRandom.current().nextInt(), ThreadLocalRandom.current().nextInt());
-            NetEntityUpdate<PlayerEntity> neu = new NetEntityUpdate<>(EntityType.PLAYER, List.of(e));
-            NetMessage<?> nm = new NetMessage<>(NetMsgType.EntityUpdate, neu);
-            long t = System.nanoTime();
-            var j = JsonUtils.writeBytes(nm);
-            times.add(System.nanoTime() - t);
-            json.add(j);
+//
+//            PlayerEntity e = new PlayerEntity();
+//            e.test = String.valueOf(ThreadLocalRandom.current().nextInt());
+//            e.id = ThreadLocalRandom.current().nextInt();
+//            e.globalPos = IVector2.of(ThreadLocalRandom.current().nextInt(), ThreadLocalRandom.current().nextInt());
+//            NetEntityUpdate<PlayerEntity> neu = new NetEntityUpdate<>(EntityType.PLAYER, List.of(e));
+//            NetMessage<?> nm = new NetMessage<>(NetMsgType.EntityUpdate, neu);
+//            long t = System.nanoTime();
+//            var j = JsonUtils.writeBytes(nm);
+//            times.add(System.nanoTime() - t);
+//            json.add(j);
         }
         System.out.println(times.stream().mapToLong(Long::longValue).average());
         System.out.println(json.size());

@@ -1,12 +1,12 @@
 package io.mindspce.outerfieldsserver.enums;
 
 public enum EntityType {
-    PLAYER(0),
-    NON_PLAYER(2),
-    ITEM(3),
-    LOCATION(4);
+    PLAYER((byte)0),
+    NON_PLAYER((byte)2),
+    ITEM((byte)3),
+    LOCATION((byte)4);
 
-    public final int value;
+    public final byte value;
 
-    EntityType(int value) { this.value = value; }
+    EntityType(byte value) { this.value = value; }
 }

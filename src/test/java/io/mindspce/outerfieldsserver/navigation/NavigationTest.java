@@ -6,8 +6,9 @@ import io.mindspce.outerfieldsserver.area.NavData;
 import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.core.calculators.NavCalc;
 import io.mindspce.outerfieldsserver.core.GameSettings;
+import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.NavPath;
-import io.mindspce.outerfieldsserver.datacontainers.ChunkTileIndex;
+import io.mindspce.outerfieldsserver.data.wrappers.ChunkTileIndex;
 import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import org.junit.jupiter.api.Test;
@@ -73,7 +74,7 @@ public class NavigationTest {
         GridUtils.printNavMap(tiles1);
         ChunkData chunkTop = new ChunkData(IVector2.of(0, 0), tiles2, null);
         ChunkData chunkBottom = new ChunkData(IVector2.of(0, 1), tiles1, null);
-        AreaInstance area = new AreaInstance("test", new ChunkData[][]{{chunkTop, chunkBottom}});
+        AreaInstance area = new AreaInstance(AreaId.TEST, new ChunkData[][]{{chunkTop, chunkBottom}});
 
         ChunkTileIndex curr = new ChunkTileIndex(IVector2.of(0, 1), IVector2.of(4, 59)); // Start in chunkBottom
         ChunkTileIndex target = new ChunkTileIndex(IVector2.of(0, 0), IVector2.of(4, 59)); // End in chunkTop

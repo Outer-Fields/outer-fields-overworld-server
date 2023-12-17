@@ -1,62 +1,56 @@
 package io.mindspce.outerfieldsserver.area;
 
 import io.mindspce.outerfieldsserver.core.GameSettings;
-import io.mindspce.outerfieldsserver.entities.item.ItemState;
-import io.mindspce.outerfieldsserver.entities.locations.LocationState;
-import io.mindspce.outerfieldsserver.entities.nonplayer.EnemyState;
-import io.mindspce.outerfieldsserver.entities.nonplayer.NpcState;
-import io.mindspce.outerfieldsserver.entities.player.PlayerCharacter;
-import io.mindspice.mindlib.data.geometry.IPolygon2;
-import io.mindspice.mindlib.data.geometry.IRect2;
-import io.mindspice.mindlib.data.geometry.IVector2;
+import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.systems.event.Subscribable;
+import io.mindspce.outerfieldsserver.entities.player.PlayerState;
+import io.mindspce.outerfieldsserver.enums.EventType;
+import io.mindspice.mindlib.data.geometry.*;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 
-public class ChunkData {
+public class ChunkData implements Subscribable<PlayerState> {
     private final IVector2 index;
     private final IVector2 globalPos;
     private final IRect2 boundsRect;
     private final TileData[][] tileMap;
     private final Map<Integer, IPolygon2> collisions;
-    private final Set<PlayerCharacter> activePlayers = Collections.synchronizedSet(new HashSet<>());
-    private final Set<NpcState> activeNpcs = Collections.synchronizedSet(new HashSet<>());
-    private final Set<EnemyState> activeEnemies = Collections.synchronizedSet(new HashSet<>());
-    private final Set<ItemState> activeItems = Collections.synchronizedSet(new HashSet<>());
-    private final Set<LocationState> locationStates = Collections.synchronizedSet(new HashSet<>());
+    private final IConcurrentVQuadTree<Entity> entityGrid;
 
-    public ChunkData(IVector2 index, TileData[][] tileMap, Map<Integer, IPolygon2> collisions) {
+    private final Map<EventType, Set<PlayerState>> subscriptions = new ConcurrentHashMap<>();
+
+    public ChunkData(IVector2 index, IVector2 globalPos, IVector2 size, TileData[][] tileMap, Map<Integer, IPolygon2> collisions) {
         this.index = index;
         this.tileMap = tileMap;
         this.collisions = collisions;
-        globalPos = IVector2.of(
-                index.x() * GameSettings.GET().chunkSize().x(),
-                index.y() * GameSettings.GET().chunkSize().y()
-        );
+        this.globalPos = globalPos;
+        this.entityGrid = new IConcurrentVQuadTree<>(IRect2.of(globalPos, size), 6);
         boundsRect = IRect2.of(globalPos, GameSettings.GET().chunkSize());
-
     }
 
-    public Set<PlayerCharacter> getActivePlayers() {
-        return activePlayers;
+    public void updateEntityPosition(Entity entity) {
+        // TODO could debug log unfound entities on updates;
+        entityGrid.update(entity.globalPosition(), entity.globalPosition(), entity);
     }
 
-    public Set<NpcState> getActiveNpcs() {
-        return activeNpcs;
+    public void addEntity(Entity entity) {
+        entityGrid.insert(entity.globalPosition(), entity);
     }
 
-    public Set<ItemState> getActiveItems() {
-        return activeItems;
+    public void removeEntity(Entity entity) {
+        entityGrid.remove(entity.globalPosition(), entity);
     }
 
-    public Set<EnemyState> getActiveEnemies() {
-        return activeEnemies;
+    public List<QuadItem<Entity>> queryEntityGrid(IRect2 querySpace) {
+        return entityGrid.query(querySpace);
     }
 
-    public Set<LocationState> getLocationStates() {
-        return locationStates;
+    public List<QuadItem<Entity>> queryEntityGrid(IRect2 querySpace, List<QuadItem<Entity>> updateList) {
+        return entityGrid.query(querySpace, updateList);
     }
-
 
     public IVector2 getGlobalPos() {
         return globalPos;
@@ -139,5 +133,30 @@ public class ChunkData {
 
     public IVector2 getIndex() {
         return index;
+    }
+
+    // Subscribable logic
+    @Override
+    public void subscribe(EventType eventType, PlayerState session) {
+        subscriptions.computeIfAbsent(eventType, k ->
+                Collections.newSetFromMap(new ConcurrentHashMap<>())
+        ).add(session);
+    }
+
+    @Override
+    public void unsubscribe(EventType eventType, PlayerState session) {
+        if (subscriptions.containsKey(eventType)) {
+            subscriptions.get(eventType).remove(session);
+        }
+    }
+
+    @Override
+    public void broadcast(EventType eventType, Consumer<PlayerState> action) {
+        getSubscribers(eventType).forEach(action);
+    }
+
+    @Override
+    public Set<PlayerState> getSubscribers(EventType eventType) {
+        return subscriptions.getOrDefault(eventType, Set.of());
     }
 }

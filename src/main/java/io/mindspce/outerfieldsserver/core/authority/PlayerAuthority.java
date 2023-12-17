@@ -3,28 +3,38 @@ package io.mindspce.outerfieldsserver.core.authority;
 import io.mindspce.outerfieldsserver.area.AreaInstance;
 import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.core.GameSettings;
-import io.mindspce.outerfieldsserver.datacontainers.DynamicTileRef;
+import io.mindspce.outerfieldsserver.data.wrappers.DynamicTileRef;
+import io.mindspce.outerfieldsserver.entities.player.PlayerState;
+import io.mindspice.mindlib.data.collections.other.GridArray;
+import io.mindspice.mindlib.data.geometry.IAtomicLine2;
 import io.mindspice.mindlib.data.geometry.ILine2;
 import io.mindspice.mindlib.data.geometry.IMutLine2;
 import io.mindspice.mindlib.data.geometry.IPolygon2;
 
+import java.util.HashSet;
+import java.util.function.Consumer;
+
 
 public class PlayerAuthority {
 
-    public static boolean validateCollision(AreaInstance area, DynamicTileRef[][] tileRefs, ILine2 mVector) {
-        for (int x = 0; x < tileRefs.length; ++x) {
-            for (int y = 0; y < tileRefs.length; ++y) {
-                TileData tile = tileRefs[x][y].getTileRef();
-                if (tile == null) { continue; }
-                if (!tile.hasCollision()) { continue; }
-                IPolygon2 colShape = tileRefs[x][y].getChunkRef().getCollision(tile.collisionId());
-                if (colShape != null && colShape.intersects(mVector)) { return false; }
+    public static boolean validateCollision(AreaInstance area, GridArray<DynamicTileRef> tileRefs, IAtomicLine2 mVector) {
+        HashSet<Integer> checked = new HashSet<>(9);
+        for (var tile : tileRefs.backingArray()) {
+            if (tile == null) { continue; }
+            if (!tile.getTileRef().hasCollision()) { continue; }
+            int colId = tile.getTileRef().collisionId();
+            if (checked.contains(colId)) { continue; }
+            checked.add(colId);
+            IPolygon2 colShape = tile.getChunkRef().getCollision(colId);
+            if (colShape != null && colShape.intersects(mVector)) {
+                mVector.setEnd(mVector.start());
+                return false;
             }
         }
         return true;
     }
 
-    public static IMutLine2 validateDistance(IMutLine2 mVector, long lastTimestamp, long currentTimestamp) {
+    public static boolean validateDistance(IAtomicLine2 mVector, long lastTimestamp, long currentTimestamp) {
         double timeDiffSec = (currentTimestamp - lastTimestamp) / 1000.0; // Convert milliseconds to seconds
         double maxDist = GameSettings.GET().maxSpeed() * timeDiffSec;
         double travelDist = mVector.distance();
@@ -45,8 +55,11 @@ public class PlayerAuthority {
                 int adjX = mVector.start().x() + moveX;
                 int adjY = mVector.start().y() + moveY;
                 mVector.setEnd(adjX, adjY);
+                return false;
             }
         }
-        return mVector;
+        return true;
     }
+
+
 }

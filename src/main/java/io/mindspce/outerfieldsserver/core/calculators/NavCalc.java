@@ -5,10 +5,9 @@ import io.mindspce.outerfieldsserver.area.ChunkData;
 import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.enums.Direction;
-import io.mindspce.outerfieldsserver.datacontainers.ChunkTileIndex;
+import io.mindspce.outerfieldsserver.data.wrappers.ChunkTileIndex;
 import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.IMutVector2;
-import io.mindspice.mindlib.data.geometry.IPolygon2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
 import java.util.*;

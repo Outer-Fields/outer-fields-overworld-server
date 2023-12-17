@@ -1,9 +1,24 @@
 package io.mindspce.outerfieldsserver.entities.nonplayer;
 
 import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.entities.OutFit;
+import io.mindspce.outerfieldsserver.enums.EntityType;
 
 
-public class NonPlayerEntity extends Entity {
+public abstract class NonPlayerEntity extends Entity {
+    private String name = "";
+    private OutFit outfit = new OutFit();
 
+    public NonPlayerEntity() {
+        super(EntityType.NON_PLAYER);
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public OutFit outfit() {
+        return outfit;
+    }
 
 }

@@ -1,4 +1,4 @@
-package io.mindspce.outerfieldsserver.datacontainers;
+package io.mindspce.outerfieldsserver.data.wrappers;
 
 import io.mindspce.outerfieldsserver.area.AreaInstance;
 import io.mindspce.outerfieldsserver.area.ChunkData;
@@ -17,21 +17,18 @@ public class DynamicTileRef {
         this.offset = offset;
     }
 
-    public void updatePos(IVector2 globalPos) {
-        updatePos(globalPos.x(), globalPos.y());
-    }
 
     public void updateAreaRef(AreaInstance areaRef) {
         this.areaRef = areaRef;
     }
 
-    public void updatePos(int globalX, int globalY) {
-        chunkRef = areaRef.getChunkByGlobalPos(globalX + offset.x(), globalY + offset.y());
+    public void updatePos(IVector2 pos) {
+        chunkRef = areaRef.getChunkByGlobalPos(pos);
         if (chunkRef == null) {
             tileRef = null;
             return;
         }
-        tileRef = chunkRef.getTileByGlobalPos(globalX + offset.x(), globalY + offset.y());
+        tileRef = chunkRef.getTileByGlobalPos(pos);
     }
 
     public TileData getTileRef() {

@@ -1,19 +1,21 @@
 package io.mindspce.outerfieldsserver.networking.outgoing;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.mindspce.outerfieldsserver.enums.EntityType;
-import io.mindspce.outerfieldsserver.enums.NetMsgType;
 import io.mindspce.outerfieldsserver.entities.Entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
-public class NetEntityUpdate<T extends Entity> {
-    @JsonProperty("dt") int dataType;
-    @JsonProperty("d") List<T> entities;
+public class NetEntityUpdate {
+    @JsonProperty("d") public List<Entity> entities;
 
-    public NetEntityUpdate(EntityType entityType, List<T> entities) {
-        this.dataType = entityType.value;
+    public NetEntityUpdate(List<Entity> entities) {
         this.entities = entities;
     }
+
+    public NetEntityUpdate() {
+        entities = new ArrayList<>(50);
+    }
+
 }
