@@ -30,12 +30,18 @@ public class PlayerSession {
         this.session = webSocketSession;
     }
 
+    public boolean isConnected(){
+        return session.isOpen();
+    }
+
     public void send(byte[] msgBytes) {
         if (!session.isOpen()) {
             // TODO do something
+            System.out.println("essions not open");
             return;
         }
         try {
+            System.out.println("sending");
             session.sendMessage(new BinaryMessage(msgBytes));
         } catch (IOException e) {
             //TODO log

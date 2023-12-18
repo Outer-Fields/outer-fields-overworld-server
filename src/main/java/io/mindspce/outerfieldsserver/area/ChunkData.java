@@ -5,10 +5,13 @@ import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.systems.event.Subscribable;
 import io.mindspce.outerfieldsserver.entities.player.PlayerState;
 import io.mindspce.outerfieldsserver.enums.EventType;
+import io.mindspice.mindlib.data.collections.lists.primative.IntList;
 import io.mindspice.mindlib.data.geometry.*;
+import jakarta.annotation.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.StampedLock;
 import java.util.function.Consumer;
 
 
@@ -19,6 +22,8 @@ public class ChunkData implements Subscribable<PlayerState> {
     private final TileData[][] tileMap;
     private final Map<Integer, IPolygon2> collisions;
     private final IConcurrentVQuadTree<Entity> entityGrid;
+    private Set<Entity> activeEntities = new HashSet<>(100);
+    private final StampedLock lock = new StampedLock();
 
     private final Map<EventType, Set<PlayerState>> subscriptions = new ConcurrentHashMap<>();
 
@@ -37,11 +42,22 @@ public class ChunkData implements Subscribable<PlayerState> {
     }
 
     public void addEntity(Entity entity) {
+        if (activeEntities.contains(entity)) { return; }
         entityGrid.insert(entity.globalPosition(), entity);
+        long stamp = lock.writeLock();
+        activeEntities.add(entity);
+        lock.unlockWrite(stamp);
     }
 
     public void removeEntity(Entity entity) {
         entityGrid.remove(entity.globalPosition(), entity);
+        long stamp = lock.writeLock();
+        activeEntities.remove(entity);
+        lock.unlockWrite(stamp);
+    }
+
+    public List<Entity> getActiveEntitiesCopy() {
+        return new ArrayList<>(activeEntities);
     }
 
     public List<QuadItem<Entity>> queryEntityGrid(IRect2 querySpace) {
@@ -64,54 +80,57 @@ public class ChunkData implements Subscribable<PlayerState> {
         return collisions.get(collisionId);
     }
 
+    @Nullable
     public TileData getTileByLocalPos(IVector2 pos) {
         int x = pos.x() / GameSettings.GET().tileSize();
         int y = pos.y() / GameSettings.GET().tileSize();
-        if (x > tileMap.length || y > tileMap[0].length) {
-            throw new IndexOutOfBoundsException("Position out of chunk bounds");
+        if (index.x() < 0 || index.y() < 0 || index.x() > tileMap.length || index.y() > tileMap[0].length) {
+            return null;
         }
         return tileMap[x][y];
     }
 
+    @Nullable
     public TileData getTileByLocalPos(int posX, int posY) {
         int x = posX / GameSettings.GET().tileSize();
         int y = posY / GameSettings.GET().tileSize();
-        if (x > tileMap.length || y > tileMap[0].length) {
-            throw new IndexOutOfBoundsException("Position out of chunk bounds");
+        if (index.x() < 0 || index.y() < 0 || index.x() > tileMap.length || index.y() > tileMap[0].length) {
+            return null;
         }
         return tileMap[x][y];
     }
 
+    @Nullable
     public TileData getTileByGlobalPos(IVector2 pos) {
         int x = (pos.x() % GameSettings.GET().chunkSize().x()) / GameSettings.GET().tileSize();
         int y = (pos.y() % GameSettings.GET().chunkSize().y()) / GameSettings.GET().tileSize();
-        if (x > tileMap.length || y > tileMap[0].length) {
-            throw new IndexOutOfBoundsException("Position out of chunk bounds");
+        if (x < 0 || y < 0 || x > tileMap.length || y > tileMap[0].length) {
+            return null;
         }
         return tileMap[x][y];
     }
 
+    @Nullable
     public TileData getTileByGlobalPos(int posX, int posY) {
         int x = (posX % GameSettings.GET().chunkSize().x()) / GameSettings.GET().tileSize();
         int y = (posY % GameSettings.GET().chunkSize().y()) / GameSettings.GET().tileSize();
-        if (x > tileMap.length || y > tileMap[0].length) {
-            throw new IndexOutOfBoundsException("Position out of chunk bounds");
+        if (x < 0 || y < 0 || x > tileMap.length || y > tileMap[0].length) {
+            return null;
         }
         return tileMap[x][y];
     }
 
+    @Nullable
     public TileData getTileByIndex(IVector2 index) {
-        if (index.x() > tileMap.length || index.y() > tileMap[0].length) {
-            throw new IndexOutOfBoundsException("Position out of chunk bounds");
+        if (index.x() < 0 || index.y() < 0 || index.x() > tileMap.length || index.y() > tileMap[0].length) {
+            return null;
         }
         return tileMap[index.x()][index.y()];
     }
 
+    @Nullable
     public TileData getTileByIndex(int x, int y) {
-        if (x > tileMap.length || y > tileMap[0].length) {
-            return null;
-        }
-        if (x < 0 || y < 0) {
+        if (x < 0 || y < 0 || x > tileMap.length || y > tileMap[0].length) {
             return null;
         }
         return tileMap[x][y];

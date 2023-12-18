@@ -4,6 +4,7 @@ import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.entities.item.ItemEntity;
 import io.mindspce.outerfieldsserver.entities.locations.LocationEntity;
 import io.mindspce.outerfieldsserver.entities.nonplayer.NonPlayerEntity;
+import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.networking.NetMsgOut;
 import io.mindspce.outerfieldsserver.networking.NetSerializer;
 
@@ -66,11 +67,13 @@ public class EntityUpdateContainer {
         }
     }
 
-    public void addNewEntity(Entity entity, boolean isNew) {
+    public void addEntity(Entity entity, boolean isNew) {
+        System.out.println("added:" + entity.entityType());
         switch (entity.entityType()) {
             case PLAYER -> {
                 if (playerEntCount == playerEntLength) {
                     playerEntities = Arrays.copyOf(playerEntities, (int) (playerEntLength * 1.2));
+                    playerEntLength = (int) (playerEntLength * 1.2);
                 }
                 newPlayerBitset.set(playerEntCount, isNew);
                 playerEntities[playerEntCount++] = (PlayerEntity) entity;
@@ -78,6 +81,7 @@ public class EntityUpdateContainer {
             case NON_PLAYER -> {
                 if (nonPlayerEntCount == nonPlayerEntLength) {
                     nonPlayerEntities = Arrays.copyOf(nonPlayerEntities, (int) (nonPlayerEntLength * 1.2));
+                    nonPlayerEntLength = (int) (nonPlayerEntLength * 1.2);
                 }
                 newNonPlayerBitSet.set(nonPlayerEntCount, isNew);
                 nonPlayerEntities[nonPlayerEntCount++] = (NonPlayerEntity) entity;
@@ -85,6 +89,7 @@ public class EntityUpdateContainer {
             case ITEM -> {
                 if (itemEntLength == itemEntCount) {
                     itemEntities = Arrays.copyOf(itemEntities, (int) (itemEntLength * 1.2));
+                    itemEntLength = (int) (itemEntLength * 1.2);
                 }
                 newItemBitset.set(itemEntCount, isNew);
                 itemEntities[itemEntCount++] = (ItemEntity) entity;
@@ -92,6 +97,7 @@ public class EntityUpdateContainer {
             case LOCATION -> {
                 if (locationEntCount == locationEntLength) {
                     locationEntities = Arrays.copyOf(locationEntities, (int) (locationEntLength * 1.2));
+                    locationEntLength = (int) (locationEntLength * 1.2);
                 }
                 newLocationBitSet.set(locationEntCount, isNew);
                 locationEntities[locationEntCount++] = (LocationEntity) entity;
@@ -131,23 +137,40 @@ public class EntityUpdateContainer {
         int payloadSize = playerBytes + nonPlayerBits + itemBytes + locationBytes;
         int msgSize = 1 + 4 + payloadSize;
 
-        ByteBuffer buffer = ByteBuffer.allocate(msgSize);
-        buffer.put(NetMsgOut.EntityUpdate.value);
+        ByteBuffer buffer = NetSerializer.get_buffer(msgSize);
+        buffer.put(NetMsgOut.ENTITY_UPDATE.value);
         buffer.putInt(payloadSize);
 
         for (int i = 0; i < playerEntCount; ++i) {
-            NetSerializer.newPlayerToBuffer(buffer, playerEntities[i]);
+            System.out.println("np bit" + newPlayerBitset.get(i));
+            if (newPlayerBitset.get(i)) {
+                NetSerializer.newPlayerToBuffer(buffer, playerEntities[i]);
+            } else {
+                NetSerializer.entityUpdateToBuffer(buffer, EntityType.PLAYER, playerEntities[i]);
+            }
         }
         for (int i = 0; i < nonPlayerEntCount; ++i) {
-            NetSerializer.newNonPlayerToBuffer(buffer, nonPlayerEntities[i]);
+            if (newNonPlayerBitSet.get(i)) {
+                NetSerializer.newNonPlayerToBuffer(buffer, nonPlayerEntities[i]);
+            } else {
+                NetSerializer.entityUpdateToBuffer(buffer, EntityType.NON_PLAYER, nonPlayerEntities[i]);
+            }
         }
         for (int i = 0; i < itemEntCount; ++i) {
-            NetSerializer.newItemToBuffer(buffer, itemEntities[i]);
+            if (newItemBitset.get(i)) {
+                NetSerializer.newItemToBuffer(buffer, itemEntities[i]);
+            } else {
+                NetSerializer.entityUpdateToBuffer(buffer, EntityType.ITEM, itemEntities[i]);
+            }
         }
         for (int i = 0; i < locationEntCount; ++i) {
-            NetSerializer.newLocationToBuffer(buffer, locationEntities[i]);
+            if (newLocationBitSet.get(i)) {
+                NetSerializer.newLocationToBuffer(buffer, locationEntities[i]);
+            } else {
+                NetSerializer.entityUpdateToBuffer(buffer, EntityType.ITEM, locationEntities[i]);
+            }
         }
-        cleanup();
+        reset();
         return buffer.array();
     }
 }

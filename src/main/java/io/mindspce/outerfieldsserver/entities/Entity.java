@@ -14,7 +14,7 @@ import java.util.concurrent.locks.StampedLock;
 
 public abstract class Entity {
     protected final EntityType entityType;
-    protected LazyFinalValue<Integer> id;
+    protected LazyFinalValue<Integer> id = new LazyFinalValue<>();
     protected volatile State[] states = new State[1];
     protected volatile String name = "";
 

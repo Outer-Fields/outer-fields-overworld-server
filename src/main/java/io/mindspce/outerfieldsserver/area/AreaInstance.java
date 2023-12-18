@@ -10,9 +10,7 @@ import io.mindspce.outerfieldsserver.enums.EventType;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import jakarta.annotation.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,11 +20,10 @@ public class AreaInstance {
     private final AreaId arenaName;
     private final ChunkData[][] chunkMap;
     private final IVector2 areaSize;
-    private final List<PlayerState> activePlayers = new ArrayList<>(20);
+    private final Set<PlayerState> activePlayers = Collections.synchronizedSet(new HashSet<>(20));
     private final Map<IVector2, AtomicInteger> activeChunks = new ConcurrentHashMap<>(100);
 
     private final ConcurrentLinkedDeque<ActiveEntityUpdate> entityUpdateQueue = new ConcurrentLinkedDeque<>();
-
 
     public AreaInstance(AreaId arenaName, ChunkData[][] chunkMap) {
         this.arenaName = arenaName;
@@ -47,11 +44,18 @@ public class AreaInstance {
 //        }
 //    }
 
+    public void addActivePlayer(PlayerState playerState){
+        activePlayers.add(playerState);
+    }
 
+    public void removeActivePlayer(PlayerState playerState) {
+        activePlayers.remove(playerState);
+    }
 
     public AreaId getId() {
         return arenaName;
     }
+
 
     public IVector2 getAreaSize() {
         return areaSize;
@@ -61,30 +65,29 @@ public class AreaInstance {
         return chunkMap;
     }
 
+    @Nullable
     public ChunkData getChunkByGlobalPos(IVector2 pos) {
         int x = pos.x() / GameSettings.GET().chunkSize().x();
         int y = pos.y() / GameSettings.GET().chunkSize().y();
-        if (x > chunkMap.length || y > chunkMap[0].length) {
-            throw new IndexOutOfBoundsException("Position out of chunk bounds");
+        if (x < 0 || y < 0 || x > chunkMap.length || y > chunkMap[0].length) {
+            return null;
         }
         return chunkMap[x][y];
     }
 
+    @Nullable
     public ChunkData getChunkByGlobalPos(int posX, int posY) {
         int x = posX / GameSettings.GET().chunkSize().x();
         int y = posY / GameSettings.GET().chunkSize().y();
-        if (x > chunkMap.length || y > chunkMap[0].length) {
-            throw new IndexOutOfBoundsException("Position out of chunk bounds");
+        if (x < 0 || y < 0 || x > chunkMap.length || y > chunkMap[0].length) {
+            return null; // return null, this is acceptable and should be handled by caller
         }
         return chunkMap[x][y];
     }
 
     @Nullable
     public ChunkData getChunkByIndex(IVector2 index) {
-        if (index.x() > chunkMap.length || index.y() > chunkMap[0].length) {
-            return null;
-        }
-        if (index.x() < 0 || index.y() < 0) {
+        if (index.x() < 0 || index.y() < 0 || index.x() > chunkMap.length || index.y() > chunkMap[0].length) {
             return null;
         }
         return chunkMap[index.x()][index.y()];
@@ -92,10 +95,7 @@ public class AreaInstance {
 
     @Nullable
     public ChunkData getChunkByIndex(int x, int y) {
-        if (x > chunkMap.length || y > chunkMap[0].length) {
-            return null;
-        }
-        if (x < 0 || y < 0) {
+        if ( x < 0 || y < 0 || x > chunkMap.length || y > chunkMap[0].length) {
             return null;
         }
         return chunkMap[x][y];
@@ -111,7 +111,7 @@ public class AreaInstance {
         return vecMap;
     }
 
-    public List<PlayerState> getActivePlayers() {
+    public Set<PlayerState> getActivePlayers() {
         return activePlayers;
     }
 

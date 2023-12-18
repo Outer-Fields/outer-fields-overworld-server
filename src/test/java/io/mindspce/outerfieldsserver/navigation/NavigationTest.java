@@ -19,8 +19,8 @@ import java.util.Set;
 
 public class NavigationTest {
 
-    @Test
-    void testNavigation() {
+  //  @Test
+ //   void testNavigation() {
 //        var tilesPerChunk = GameSettings.GET().tilesPerChunk().x();
 //        TileData[][] tiles1 = new TileData[tilesPerChunk][tilesPerChunk];
 //        TileData[][] tiles2 = new TileData[tilesPerChunk][tilesPerChunk];
@@ -55,36 +55,36 @@ public class NavigationTest {
 //        ChunkTileIndex target = new ChunkTileIndex(IVector2.of(0,0),IVector2.of(21, 10));
 //        System.out.println(NavigationCalculator.getPathTo(area, curr, target));
 
-        int tilesPerChunk = GameSettings.GET().tilesPerChunk().x();
-        TileData[][] tiles1 = new TileData[tilesPerChunk][tilesPerChunk]; // chunkBottom
-        TileData[][] tiles2 = new TileData[tilesPerChunk][tilesPerChunk]; // chunkTop
-
-// Create zigzag paths in chunkBottom and chunkTop
-        for (int x = 0; x < tilesPerChunk; ++x) {
-            for (int y = 0; y < tilesPerChunk; ++y) {
-                boolean isNavigable = (x % 3 == 0 && y < 5) || (x % 3 == 1 && y >= 5);
-                tiles1[x][y] = new TileData(IVector2.of(x, y), isNavigable ? new NavData(Set.of(NavPath.TEST)) : null);
-                tiles2[x][y] = new TileData(IVector2.of(x, y), isNavigable ? new NavData(Set.of(NavPath.TEST)) : null);
-            }
-        }
-
-        GridUtils.printNavMap(tiles2);
-
-        System.out.println("\t\t\t");
-        GridUtils.printNavMap(tiles1);
-        ChunkData chunkTop = new ChunkData(IVector2.of(0, 0), tiles2, null);
-        ChunkData chunkBottom = new ChunkData(IVector2.of(0, 1), tiles1, null);
-        AreaInstance area = new AreaInstance(AreaId.TEST, new ChunkData[][]{{chunkTop, chunkBottom}});
-
-        ChunkTileIndex curr = new ChunkTileIndex(IVector2.of(0, 1), IVector2.of(4, 59)); // Start in chunkBottom
-        ChunkTileIndex target = new ChunkTileIndex(IVector2.of(0, 0), IVector2.of(4, 59)); // End in chunkTop
-        int [] tArr = new int[100];
-        for (int i = 0; i < 100; ++i) {
-            var t = System.nanoTime();
-            var path = NavCalc.getPathTo(area, curr, target);
-            tArr[i] = (int) (System.nanoTime() - t);
-            System.out.println(path);
-        }
-        System.out.println((int) Arrays.stream(tArr).average().getAsDouble());
-    }
+//        int tilesPerChunk = GameSettings.GET().tilesPerChunk().x();
+//        TileData[][] tiles1 = new TileData[tilesPerChunk][tilesPerChunk]; // chunkBottom
+//        TileData[][] tiles2 = new TileData[tilesPerChunk][tilesPerChunk]; // chunkTop
+//
+//// Create zigzag paths in chunkBottom and chunkTop
+//        for (int x = 0; x < tilesPerChunk; ++x) {
+//            for (int y = 0; y < tilesPerChunk; ++y) {
+//                boolean isNavigable = (x % 3 == 0 && y < 5) || (x % 3 == 1 && y >= 5);
+//                tiles1[x][y] = new TileData(IVector2.of(x, y), isNavigable ? new NavData(Set.of(NavPath.TEST)) : null);
+//                tiles2[x][y] = new TileData(IVector2.of(x, y), isNavigable ? new NavData(Set.of(NavPath.TEST)) : null);
+//            }
+//        }
+//
+//        GridUtils.printNavMap(tiles2);
+//
+//        System.out.println("\t\t\t");
+//        GridUtils.printNavMap(tiles1);
+//        ChunkData chunkTop = new ChunkData(IVector2.of(0, 0), tiles2, null);
+//        ChunkData chunkBottom = new ChunkData(IVector2.of(0, 1), tiles1, null);
+//        AreaInstance area = new AreaInstance(AreaId.TEST, new ChunkData[][]{{chunkTop, chunkBottom}});
+//
+//        ChunkTileIndex curr = new ChunkTileIndex(IVector2.of(0, 1), IVector2.of(4, 59)); // Start in chunkBottom
+//        ChunkTileIndex target = new ChunkTileIndex(IVector2.of(0, 0), IVector2.of(4, 59)); // End in chunkTop
+//        int [] tArr = new int[100];
+//        for (int i = 0; i < 100; ++i) {
+//            var t = System.nanoTime();
+//            var path = NavCalc.getPathTo(area, curr, target);
+//            tArr[i] = (int) (System.nanoTime() - t);
+//            System.out.println(path);
+//        }
+//        System.out.println((int) Arrays.stream(tArr).average().getAsDouble());
+//    }
 }

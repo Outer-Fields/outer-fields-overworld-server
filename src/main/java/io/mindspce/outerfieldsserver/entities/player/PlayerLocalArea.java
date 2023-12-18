@@ -12,14 +12,12 @@ import io.mindspce.outerfieldsserver.enums.PosAuthResponse;
 import io.mindspice.mindlib.data.collections.other.GridArray;
 import io.mindspice.mindlib.data.geometry.*;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.List;
+import java.sql.SQLOutput;
+import java.util.*;
 
 
 public class PlayerLocalArea {
-    private AreaInstance currArea;
+    private volatile AreaInstance currArea;
     private final PlayerState playerState;
 
     // Local Chunks
@@ -40,10 +38,10 @@ public class PlayerLocalArea {
             viewRect.topLeft(), viewRect.topRight(),
             viewRect.bottomLeft(), viewRect.bottomRight()
     };
-    private final BitSet[] knownEntities = new BitSet[]{
-            new BitSet(EntityManager.GET().entityCount()), new BitSet(EntityManager.GET().entityCount()),
-            new BitSet(EntityManager.GET().entityCount()), new BitSet(EntityManager.GET().entityCount()),
-    };
+    private final Map<IVector2, BitSet> knownEntities = new HashMap<>(6);
+    private final List<BitSet> freeEntitiesSets = new ArrayList<>(Arrays.asList(
+            new BitSet(), new BitSet(), new BitSet(), new BitSet())
+    );
 
     private final List<QuadItem<Entity>> entitiyUpdateList = new ArrayList<>(100);
 
@@ -57,6 +55,7 @@ public class PlayerLocalArea {
     // Movement Vector position (start = prior, end = current()
     final IAtomicLine2 mVector = ILine2.ofAtomic(0, 0, 0, 0);
 
+    // TODO this needs a starting postion and then update current area needs called;
     public PlayerLocalArea(PlayerState playerState) {
         this.playerState = playerState;
         for (int x = 0; x < 5; ++x) {
@@ -70,20 +69,52 @@ public class PlayerLocalArea {
         }
     }
 
-    public void updateCurrArea(AreaInstance area) {
+    public void updateCurrArea(AreaInstance area, int posX, int posY) {
+        currPosition().setXY(posX, posY);
+        // clear old subscriptions if they exist
+        if (currArea != null) {
+            for (var chunk : chunkList) {
+                currArea.unSubscribeToChunk(chunk.end(), EventType.ENTITY_UPDATE, playerState);
+            }
+        }
+        // remove and clear old enities bitset, to be recalculated
+        for (var key : knownEntities.keySet()) {
+            BitSet knowEntities = knownEntities.get(key);
+            knowEntities.clear();
+            freeEntitiesSets.add(knowEntities);
+        }
+
         this.currArea = area;
+        viewRect.reCenter(currPosition());
+        updateChunks();
+        if (currArea != null) {
+            for (var chunk : chunkList) {
+                currArea.subscribeToChunk(chunk.end(), EventType.ENTITY_UPDATE, playerState);
+            }
+        }
+        ChunkData chunk = currArea.getChunkByIndex(currChunk);
+        if ( chunk != null) {
+            chunk.addEntity(playerState);
+        } else{
+            System.out.println("couldnt add entity, null chunk");
+        }
+        updateTileGridArea();
+        updateTileGrid();
+        calcSubscriptionChanges();
+        swapToOld();
     }
 
     public PosAuthResponse validateUpdate(int posX, int posY, long currTimestamp) {
         mVector.shiftLine(posX, posY); //set end to start, start to new pos
 
-        // validates collision, mutates the line and states end to start if collision is detected
-        if (!PlayerAuthority.validateCollision(currArea, localTileGrid, mVector)) {
-            lastTimestamp = currTimestamp;
-            return PosAuthResponse.INVALID_COLLISION;
-        }
         // validates distance, mutates the line and sets the current position (end) to max allowed distance
         boolean invalidMove = PlayerAuthority.validateDistance(mVector, lastTimestamp, currTimestamp);
+
+        // validates collision, mutates the line and states end to start if collision is detected
+        if (!PlayerAuthority.validateCollision(currArea, localTileGrid, mVector)) {
+            return PosAuthResponse.INVALID_COLLISION;
+        }
+        lastTimestamp = currTimestamp;
         return invalidMove ? PosAuthResponse.INVALID_MOVEMENT : PosAuthResponse.VALID;
     }
 
@@ -92,6 +123,7 @@ public class PlayerLocalArea {
         updateTileGrid();
         updateChunks();
         calcSubscriptionChanges();
+        swapToOld(); // call twice
         swapToOld();
     }
 
@@ -112,7 +144,7 @@ public class PlayerLocalArea {
     }
 
     public boolean isMoving() {
-        return mVector.isPointLine();
+        return !mVector.isPointLine();
     }
 
     public ChunkData currChunk() {
@@ -127,8 +159,8 @@ public class PlayerLocalArea {
         return entitiyUpdateList;
     }
 
-    public BitSet[] knownEntitiesSets() {
-        return knownEntities;
+    public BitSet knownEntitiesSet(IVector2 chunkIndex) {
+        return knownEntities.get(chunkIndex);
     }
 
     void updateTileGrid() {
@@ -137,6 +169,16 @@ public class PlayerLocalArea {
                 localTileGrid.get(x, y).updatePos(currPosition());
             }
         }
+    }
+
+    void updateTileGridArea() {
+        for (int x = 0; x < 5; ++x) {
+            for (int y = 0; y < 5; ++y) {
+                System.out.println(currArea);
+                localTileGrid.get(x, y).updateAreaRef(currArea);
+            }
+        }
+        ;
     }
 
     public void updateChunks() {
@@ -149,33 +191,52 @@ public class PlayerLocalArea {
         int newChunkX = currPosition().x() / chunkSize.x();
         int newChunkY = currPosition().y() / chunkSize.y();
         if (currChunk.x() != newChunkX || currChunk.y() != newChunkY) {
+            ChunkData chunk = currArea.getChunkByIndex(currChunk);
+            if (chunk != null) { chunk.removeEntity(playerState); }
             currChunk.setXY(newChunkX, newChunkY);
+            chunk = currArea.getChunkByIndex(currChunk);
+            if (chunk != null) { chunk.addEntity(playerState); }
         }
     }
 
     public void calcSubscriptionChanges() {
-        for (var outerChunk : chunkList) {
+        for (int i = 0; i < chunkList.length; ++i) {
             boolean isNewChunk = true;
-            boolean isOldChunk = true;
+            boolean isRemovedChunk = true;
 
             for (var innerChunk : chunkList) {
                 // Check if the outerChunk's new position (start) matches any other chunk's old position (end)
-                if (outerChunk.end().equals(innerChunk.start())) {
+                if (chunkList[i].end().equals(innerChunk.start())) {
                     isNewChunk = false;
                 }
                 // Check if the outerChunk's old position (end) matches any other chunk's new position (start)
-                if (outerChunk.start().equals(innerChunk.end())) {
-                    isOldChunk = false;
+                if (chunkList[i].start().equals(innerChunk.end())) {
+                    isRemovedChunk = false;
                 }
             }
             // If isNewChunk is true, it means this chunk's new position is not an old position of any chunk
-            if (isNewChunk) {
-                currArea.subscribeToChunk(outerChunk.end(), EventType.ENTITY_UPDATE, playerState);
-            }
+
             // If isOldChunk is true, it means this chunk's old position is not a new position of any chunk
-            if (isOldChunk) {
-                currArea.unSubscribeToChunk(outerChunk.start(), EventType.ENTITY_UPDATE, playerState);
+            if (isRemovedChunk) {
+                currArea.unSubscribeToChunk(chunkList[i].start(), EventType.ENTITY_UPDATE, playerState);
+                IVector2 vec = IVector2.of(chunkList[i].start());
+                System.out.println("removed bs");
+                BitSet entityBitSet = knownEntities.remove(vec);
+                if (entityBitSet != null) {
+                    entityBitSet.clear();
+                    freeEntitiesSets.add(entityBitSet);
+                }
             }
+
+            if (isNewChunk) {
+                currArea.subscribeToChunk(chunkList[i].end(), EventType.ENTITY_UPDATE, playerState);
+                if (!knownEntities.containsKey(chunkList[i].end())) {
+                    System.out.println("added bs");
+                    BitSet entityBitSet = freeEntitiesSets.removeLast();
+                    knownEntities.put(IVector2.of(chunkList[i].end()), entityBitSet);
+                }
+            }
+
         }
     }
 

@@ -1,7 +1,7 @@
 package io.mindspce.outerfieldsserver.networking;
 
 public enum NetMsgOut {
-    EntityUpdate((byte) 0);
+    ENTITY_UPDATE((byte) 0);
 
     public final byte value;
 

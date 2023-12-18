@@ -19,8 +19,9 @@ public class PlayerAuthority {
 
     public static boolean validateCollision(AreaInstance area, GridArray<DynamicTileRef> tileRefs, IAtomicLine2 mVector) {
         HashSet<Integer> checked = new HashSet<>(9);
-        for (var tile : tileRefs.backingArray()) {
-            if (tile == null) { continue; }
+        for (int i = 0; i < tileRefs.getFlatSize(); ++i) {
+            DynamicTileRef tile = tileRefs.getFlat(i);
+            if (tile == null || tile.getTileRef() == null) { continue; }
             if (!tile.getTileRef().hasCollision()) { continue; }
             int colId = tile.getTileRef().collisionId();
             if (checked.contains(colId)) { continue; }
