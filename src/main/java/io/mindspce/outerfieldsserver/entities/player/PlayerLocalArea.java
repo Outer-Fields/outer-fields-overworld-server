@@ -12,7 +12,6 @@ import io.mindspce.outerfieldsserver.enums.PosAuthResponse;
 import io.mindspice.mindlib.data.collections.other.GridArray;
 import io.mindspice.mindlib.data.geometry.*;
 
-import java.sql.SQLOutput;
 import java.util.*;
 
 
@@ -38,11 +37,7 @@ public class PlayerLocalArea {
             viewRect.topLeft(), viewRect.topRight(),
             viewRect.bottomLeft(), viewRect.bottomRight()
     };
-    private final Map<IVector2, BitSet> knownEntities = new HashMap<>(6);
-    private final List<BitSet> freeEntitiesSets = new ArrayList<>(Arrays.asList(
-            new BitSet(), new BitSet(), new BitSet(), new BitSet())
-    );
-
+    private final BitSet knownEntities = new BitSet(EntityManager.GET().entityCount());
     private final List<QuadItem<Entity>> entitiyUpdateList = new ArrayList<>(100);
 
     // TODO this will need set on area updates, as inner areas have a smaller chunk size
@@ -78,12 +73,8 @@ public class PlayerLocalArea {
             }
         }
         // remove and clear old enities bitset, to be recalculated
-        for (var key : knownEntities.keySet()) {
-            BitSet knowEntities = knownEntities.get(key);
-            knowEntities.clear();
-            freeEntitiesSets.add(knowEntities);
-        }
-
+        System.out.println("cleared known");
+        knownEntities.clear();
         this.currArea = area;
         viewRect.reCenter(currPosition());
         updateChunks();
@@ -93,9 +84,9 @@ public class PlayerLocalArea {
             }
         }
         ChunkData chunk = currArea.getChunkByIndex(currChunk);
-        if ( chunk != null) {
-            chunk.addEntity(playerState);
-        } else{
+        if (chunk != null) {
+            chunk.addActiveEntity(playerState);
+        } else {
             System.out.println("couldnt add entity, null chunk");
         }
         updateTileGridArea();
@@ -104,18 +95,24 @@ public class PlayerLocalArea {
         swapToOld();
     }
 
+    public void resetKnowEntities() {
+        System.out.println("here");
+        knownEntities.clear();
+    }
+
     public PosAuthResponse validateUpdate(int posX, int posY, long currTimestamp) {
         mVector.shiftLine(posX, posY); //set end to start, start to new pos
 
         // validates distance, mutates the line and sets the current position (end) to max allowed distance
-        boolean invalidMove = PlayerAuthority.validateDistance(mVector, lastTimestamp, currTimestamp);
+        // boolean invalidMove = PlayerAuthority.validateDistance(mVector, lastTimestamp, currTimestamp);
 
         // validates collision, mutates the line and states end to start if collision is detected
         if (!PlayerAuthority.validateCollision(currArea, localTileGrid, mVector)) {
             return PosAuthResponse.INVALID_COLLISION;
         }
         lastTimestamp = currTimestamp;
-        return invalidMove ? PosAuthResponse.INVALID_MOVEMENT : PosAuthResponse.VALID;
+        // return invalidMove ? PosAuthResponse.INVALID_MOVEMENT : PosAuthResponse.VALID;
+        return PosAuthResponse.VALID;
     }
 
     public void updateLocalArea() {
@@ -159,8 +156,8 @@ public class PlayerLocalArea {
         return entitiyUpdateList;
     }
 
-    public BitSet knownEntitiesSet(IVector2 chunkIndex) {
-        return knownEntities.get(chunkIndex);
+    public BitSet knownEntities() {
+        return knownEntities;
     }
 
     void updateTileGrid() {
@@ -174,7 +171,6 @@ public class PlayerLocalArea {
     void updateTileGridArea() {
         for (int x = 0; x < 5; ++x) {
             for (int y = 0; y < 5; ++y) {
-                System.out.println(currArea);
                 localTileGrid.get(x, y).updateAreaRef(currArea);
             }
         }
@@ -183,7 +179,7 @@ public class PlayerLocalArea {
 
     public void updateChunks() {
         for (int i = 0; i < 4; ++i) {
-            chunkList[i].end().setXY(
+            chunkList[i].shiftLine(
                     viewRectCorners[i].x() / chunkSize.x(),
                     viewRectCorners[i].y() / chunkSize.y()
             );
@@ -192,53 +188,77 @@ public class PlayerLocalArea {
         int newChunkY = currPosition().y() / chunkSize.y();
         if (currChunk.x() != newChunkX || currChunk.y() != newChunkY) {
             ChunkData chunk = currArea.getChunkByIndex(currChunk);
-            if (chunk != null) { chunk.removeEntity(playerState); }
+            if (chunk != null) { chunk.removeActiveEntity(playerState); }
+
             currChunk.setXY(newChunkX, newChunkY);
             chunk = currArea.getChunkByIndex(currChunk);
-            if (chunk != null) { chunk.addEntity(playerState); }
+            if (chunk != null) { chunk.addActiveEntity(playerState); }
         }
     }
 
     public void calcSubscriptionChanges() {
-        for (int i = 0; i < chunkList.length; ++i) {
-            boolean isNewChunk = true;
-            boolean isRemovedChunk = true;
-
-            for (var innerChunk : chunkList) {
-                // Check if the outerChunk's new position (start) matches any other chunk's old position (end)
-                if (chunkList[i].end().equals(innerChunk.start())) {
-                    isNewChunk = false;
-                }
-                // Check if the outerChunk's old position (end) matches any other chunk's new position (start)
-                if (chunkList[i].start().equals(innerChunk.end())) {
-                    isRemovedChunk = false;
-                }
-            }
-            // If isNewChunk is true, it means this chunk's new position is not an old position of any chunk
-
-            // If isOldChunk is true, it means this chunk's old position is not a new position of any chunk
-            if (isRemovedChunk) {
-                currArea.unSubscribeToChunk(chunkList[i].start(), EventType.ENTITY_UPDATE, playerState);
-                IVector2 vec = IVector2.of(chunkList[i].start());
-                System.out.println("removed bs");
-                BitSet entityBitSet = knownEntities.remove(vec);
-                if (entityBitSet != null) {
-                    entityBitSet.clear();
-                    freeEntitiesSets.add(entityBitSet);
+        for (ILine2 oCorner : chunkList) {
+            if (!oCorner.start().equals(oCorner.end())) {
+                for (ILine2 iCorner : chunkList) {
+                    if (!oCorner.end().equals(iCorner.start())) {
+                        ChunkData chunk = currArea.getChunkByIndex(oCorner.end());
+                        if (chunk == null) { continue; }
+                        chunk.unsubscribe(EventType.ENTITY_UPDATE, playerState);
+                        chunk.getActiveEntitiesCopy().forEach(e -> knownEntities.set(e.id(), false));
+                    }
+                    if (!oCorner.start().equals(iCorner.end())) {
+                        ChunkData chunk = currArea.getChunkByIndex(oCorner.end());
+                        if (chunk == null) { continue; }
+                        chunk.subscribe(EventType.ENTITY_UPDATE, playerState);
+                    }
                 }
             }
-
-            if (isNewChunk) {
-                currArea.subscribeToChunk(chunkList[i].end(), EventType.ENTITY_UPDATE, playerState);
-                if (!knownEntities.containsKey(chunkList[i].end())) {
-                    System.out.println("added bs");
-                    BitSet entityBitSet = freeEntitiesSets.removeLast();
-                    knownEntities.put(IVector2.of(chunkList[i].end()), entityBitSet);
-                }
-            }
-
         }
     }
+
+    public void removeOldKnownEntities(ChunkData chunk) {
+
+    }
+
+//    public void calcSubscriptionChanges() {
+//        System.out.println(Arrays.toString(chunkList));
+//        for (int i = 0; i < chunkList.length; ++i) {
+//            boolean isNewChunk = true;
+//            boolean isRemovedChunk = true;
+//
+//            for (var innerChunk : chunkList) {
+//                // Check if the outerChunk's new position (start) matches any other chunk's old position (end)
+//                if (chunkList[i].end().equals(innerChunk.start())) {
+//                    isNewChunk = false;
+//                }
+//                // Check if the outerChunk's old position (end) matches any other chunk's new position (start)
+//                if (chunkList[i].start().equals(innerChunk.end())) {
+//                    isRemovedChunk = false;
+//                }
+//            }
+//            // If isNewChunk is true, it means this chunk's new position is not an old position of any chunk
+//
+//            // If isOldChunk is true, it means this chunk's old position is not a new position of any chunk
+//            if (isRemovedChunk) {
+//                currArea.unSubscribeToChunk(chunkList[i].start(), EventType.ENTITY_UPDATE, playerState);
+//                IVector2 vec = IVector2.of(chunkList[i].start());
+//                BitSet entityBitSet = knownEntities.remove(vec);
+//                if (entityBitSet != null) {
+//                    entityBitSet.clear();
+//                    freeEntitiesSets.add(entityBitSet);
+//                }
+//            }
+//
+//            if (isNewChunk) {
+//                currArea.subscribeToChunk(chunkList[i].end(), EventType.ENTITY_UPDATE, playerState);
+//                if (!knownEntities.containsKey(chunkList[i].end())) {
+//                    BitSet entityBitSet = freeEntitiesSets.removeLast();
+//                    knownEntities.put(IVector2.of(chunkList[i].end()), entityBitSet);
+//                }
+//            }
+//        }
+//        System.out.println(Arrays.toString(chunkList));
+//    }
 
     public void swapToOld() {
         for (int i = 0; i < 4; ++i) {

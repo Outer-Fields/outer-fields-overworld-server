@@ -2,11 +2,14 @@ package io.mindspce.outerfieldsserver.entities.player;
 
 import io.mindspce.outerfieldsserver.area.AreaInstance;
 import io.mindspce.outerfieldsserver.area.ChunkData;
+import io.mindspce.outerfieldsserver.core.WorldState;
 import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.PosAuthResponse;
 import io.mindspice.mindlib.data.geometry.ILine2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.geometry.QuadItem;
+import io.mindspice.mindlib.util.Utils;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.BitSet;
@@ -23,19 +26,25 @@ public class PlayerState extends PlayerEntity {
         localArea = new PlayerLocalArea(this);
     }
 
-    public void setPlayerSession(WebSocketSession session) {
-        playerSession = new PlayerSession(session);
+    public void setPlayerSession(PlayerSession session) {
+        localArea.resetKnowEntities();
+        playerSession = session;
     }
 
-    public void init(AreaInstance currArea, int startX, int startY) {
-        localArea.updateCurrArea(currArea, startX, startY);
+    public void init(PlayerSession playerSession, AreaId id, int startX, int startY) {
+        this.playerSession = playerSession;
+        AreaInstance areaInstance = WorldState.GET().getAreaTable().get(id);
+        localArea.updateCurrArea(areaInstance, startX, startY);
+        areaInstance.addActivePlayer(this);
+        areaInstance.addEntityToGrid(IVector2.of(startX, startY), this);
         isInit = true;
     }
 
     public void onPositionUpdate(int posX, int posY, long timestamp) {
 //        if (!isInit) { return; }
         try {
-//            System.out.println("Position: " + posX + ", " + posY);
+
+           // System.out.println("ID:" + id() + " Position: " + posX + ", " + posY);
 
             PosAuthResponse valid = localArea.validateUpdate(posX, posY, timestamp);
             if (valid != PosAuthResponse.VALID) {
@@ -50,54 +59,80 @@ public class PlayerState extends PlayerEntity {
                 if (localArea.currChunk() == null) {
                     // TODO log this this should only happen in testing
                 }
-                localArea.currChunk().updateEntityPosition(this);
+                localArea.currArea().updateGridEntity(localArea.mVector, this);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void onTick(long _tickTime) {
+    public void onTick(long _tickTime) { ;
         if (playerSession == null || !playerSession.isConnected()) { return; }
-
+        var t = System.nanoTime();
         List<QuadItem<Entity>> eUpdateList = localArea.entityUpdateList();
-        ILine2[] localChunks = localArea.localChunksList();
-        int lSize = 0;
+        BitSet knownEntities = localArea.knownEntities();
+        localArea.currArea().queryEntityGrid(localArea.viewRect(), eUpdateList);
 
-        outerLoop:
-        for (int i = 0; i < 4; ++i) {
-            IVector2 chunkVec = localArea.localChunksList()[i].end();
-            for (int j = 0; j < i; ++j) {
-                // Skip if already calculated, as these can be redundant, depending on view atm
-                if (chunkVec.equals(localChunks[j].end())) { continue outerLoop; }
-            }
+        for (var quadItem : eUpdateList) {
+            if (quadItem.item().id() == id.get()) { continue; }
+            System.out.println("sending data for id:" + id() +"data_id:" + quadItem.item().id());
 
-            ChunkData chunk = localArea.currArea().getChunkByIndex(chunkVec);
-            if (chunk == null) { continue; }
+            if (knownEntities.get(quadItem.item().id())) {
+                //  System.out.println("sent know entity");
+                System.out.println("sending known data for id:" + id() +"  data_id:" + quadItem.item().id());
 
-            // This appends to the list internally when doing the grid check
-            localArea.currChunk().queryEntityGrid(localArea.viewRect(), eUpdateList);
 
-            BitSet knownEntities = localArea.knownEntitiesSet(chunkVec);
-            for (int j = lSize; j < eUpdateList.size(); ++j) {
-                Entity entity = eUpdateList.get(j).item();
-                if (knownEntities.get(entity.id())) {
-                    System.out.println("sent know entity");
-                    playerSession.entityUpdateContainer().addEntity(entity, false);
-                } else {
-                    System.out.println("sent new entity");
-                    knownEntities.set(entity.id());
-                    playerSession.entityUpdateContainer().addEntity(entity, true);
-                }
-                lSize++;
+                playerSession.entityUpdateContainer().addEntity(quadItem.item(), false);
+            } else {
+                System.out.println("sending new data for id:" + id() +" data_id:" + quadItem.item().id());
+
+                Utils.printThreadMethod();
+                System.out.println(knownEntities);
+                System.out.println(quadItem.item().id());
+                knownEntities.set(quadItem.item().id());
+                playerSession.entityUpdateContainer().addEntity(quadItem.item(), true);
             }
         }
-        if (eUpdateList.isEmpty()) {
-            System.out.println("empty");
-            return;
-        }
-        playerSession.send(playerSession.entityUpdateContainer().getAsEntityPayLoad());
+        playerSession.submitMsg(playerSession.entityUpdateContainer().getAsEntityPayLoad());
         eUpdateList.clear();
+
+//        outerLoop:
+//        for (int i = 0; i < 4; ++i) {
+//            IVector2 chunkVec = localArea.localChunksList()[i].end();
+//            for (int j = 0; j < i; ++j) {
+//                // Skip if already calculated, as these can be redundant, depending on view atm
+//                if (chunkVec.equals(localChunks[j].end())) { continue outerLoop; }
+//            }
+//
+//            ChunkData chunk = localArea.currArea().getChunkByIndex(chunkVec);
+//            if (chunk == null) { continue; }
+//
+//            // This appends to the list internally when doing the grid check
+//            localArea.currChunk().queryEntityGrid(localArea.viewRect(), eUpdateList);
+//
+//            BitSet knownEntities = localArea.knownEntitiesSet(chunkVec);
+//            for (int j = lSize; j < eUpdateList.size(); ++j) {
+//                Entity entity = eUpdateList.get(j).item();
+//                if (knownEntities.get(entity.id())) {
+//                    //  System.out.println("sent know entity");
+//                    playerSession.entityUpdateContainer().addEntity(entity, false);
+//                } else {
+//                    //  System.out.println("sent new entity");
+//                    knownEntities.set(entity.id());
+//                    playerSession.entityUpdateContainer().addEntity(entity, true);
+//                }
+//                lSize++;
+//            }
+//        }
+//
+//        if (eUpdateList.isEmpty()) {
+//            System.out.println("empty");
+//            return;
+//        }
+//        playerSession.submitMsg(playerSession.entityUpdateContainer().getAsEntityPayLoad());
+//        ;
+//        eUpdateList.clear();
+
     }
 
     @Override

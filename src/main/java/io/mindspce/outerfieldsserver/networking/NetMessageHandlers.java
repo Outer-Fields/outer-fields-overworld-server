@@ -1,15 +1,20 @@
 package io.mindspce.outerfieldsserver.networking;
 
+import io.mindspce.outerfieldsserver.entities.player.PlayerSession;
 import io.mindspce.outerfieldsserver.entities.player.PlayerState;
 import io.mindspce.outerfieldsserver.networking.incoming.NetMessageIn;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.function.Consumer;
 
 
-public interface NetMessageInHandler {
+public interface NetMessageHandlers {
 
+
+    @FunctionalInterface
+    interface MessageOutHandler {
+        void handleMsgOut(byte[] msg, PlayerSession playerSession);
+    }
 
     default void handleClientPosition(NetMessageIn msg, PlayerState player) {
         ByteBuffer buffer = msg.data();

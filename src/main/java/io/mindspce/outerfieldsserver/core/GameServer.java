@@ -3,8 +3,7 @@ package io.mindspce.outerfieldsserver.core;
 import io.mindspce.outerfieldsserver.area.AreaInstance;
 import io.mindspce.outerfieldsserver.area.ChunkData;
 import io.mindspce.outerfieldsserver.area.TileData;
-import io.mindspce.outerfieldsserver.core.networking.SocketInQueue;
-import io.mindspce.outerfieldsserver.entities.player.PlayerSession;
+import io.mindspce.outerfieldsserver.core.networking.SocketQueue;
 import io.mindspce.outerfieldsserver.entities.player.PlayerState;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspice.mindlib.data.geometry.IVector2;
@@ -18,20 +17,20 @@ import java.util.concurrent.TimeUnit;
 
 
 public class GameServer {
-    public final WorldState worldState;
     private final NonBlockingHashMapLong<PlayerState> playerTable;
     private volatile long lastTickTime;
-    @Autowired private SocketInQueue socketInQueue;
+    @Autowired private SocketQueue socketQueue;
     private final ScheduledExecutorService tickExecutor = Executors.newSingleThreadScheduledExecutor();
 
-    public GameServer(WorldState worldState, NonBlockingHashMapLong<PlayerState> playerTable) {
-        this.worldState = worldState;
+    public GameServer(NonBlockingHashMapLong<PlayerState> playerTable) {
         this.playerTable = playerTable;
         tickExecutor.scheduleAtFixedRate(
                 playerUpdateTick(),
                 0,
+                //2,
                 ServerConst.NANOS_IN_SEC / GameSettings.GET().tickRate(),
                 TimeUnit.NANOSECONDS
+                // TimeUnit.SECONDS
         );
         tickExecutor.execute(initPlayer1());
     }
@@ -44,7 +43,7 @@ public class GameServer {
         return () -> {
             try {
                 lastTickTime = System.currentTimeMillis();
-                worldState.getAreaList()
+                WorldState.GET().getAreaList()
                         .forEach(a -> a.getActivePlayers()
                                 .forEach(p -> p.onTick(lastTickTime)));
             } catch (Exception e) {
@@ -55,13 +54,9 @@ public class GameServer {
 
     // FIXME this is for testing
 
-    public Runnable initPlayer1(){
+    public Runnable initPlayer1() {
         return (() -> {
             try {
-                PlayerState playerState = new PlayerState(1);
-                PlayerState playerState2 = new PlayerState(2);
-                playerTable.put(1, playerState);
-                playerTable.put(2, playerState);
                 ChunkData[][] cdArr = new ChunkData[4][4];
 
                 for (int i = 0; i < 4; ++i) {
@@ -83,14 +78,8 @@ public class GameServer {
                     }
                 }
                 AreaInstance ai = new AreaInstance(AreaId.TEST, cdArr);
-                ai.addActivePlayer(playerState);
-                ai.addActivePlayer(playerState2);
-                playerState.init(ai, 0, 0);
-                playerState.setId(1);
-                playerState2.setId(2);
-                playerState2.init(ai, 0, 0);
-                worldState.addArea(AreaId.TEST, ai);
-                System.out.println("inited player");
+                WorldState.GET().init(Map.of(AreaId.TEST, ai));
+                System.out.println("inited woolrd");
             } catch (Exception e) {
                 e.printStackTrace();
             }

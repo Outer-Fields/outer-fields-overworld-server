@@ -68,7 +68,8 @@ public class EntityUpdateContainer {
     }
 
     public void addEntity(Entity entity, boolean isNew) {
-        System.out.println("added:" + entity.entityType());
+        System.out.println("added entity: " + entity);
+        System.out.println("isnew: " + isNew);
         switch (entity.entityType()) {
             case PLAYER -> {
                 if (playerEntCount == playerEntLength) {
@@ -106,43 +107,69 @@ public class EntityUpdateContainer {
     }
 
     public byte[] getAsEntityPayLoad() {
-        int playerBytes = IntStream.range(0, playerEntCount)
-                .map(i -> newPlayerBitset.get(i)
-                        ? NetSerializer.NEW_CHARACTER_BYTES
-                        : NetSerializer.ENTITY_UPDATE_BYTES
-                        + playerEntities[i].states().length)
-                .sum();
+        int maxMessage = Math.max(Math.max(playerEntCount, nonPlayerEntCount), Math.max(itemEntCount, locationEntCount));
+        int messageBytes = 0;
+        for (int i = 0; i < maxMessage; ++ i) {
+            if (playerEntCount > i) {
+                messageBytes += newPlayerBitset.get(i)
+                        ? NetSerializer.NEW_CHARACTER_BYTES : NetSerializer.ENTITY_UPDATE_BYTES;
+                messageBytes +=  playerEntities[i].states().length;
+            }
+            if (nonPlayerEntCount > i) {
+                messageBytes += newNonPlayerBitSet.get(i)
+                        ? NetSerializer.NEW_CHARACTER_BYTES : NetSerializer.ENTITY_UPDATE_BYTES;
+                messageBytes +=  nonPlayerEntities[i].states().length;
+            }
+            if (itemEntCount > i) {
+                messageBytes += newItemBitset.get(i)
+                        ? NetSerializer.NEW_ITEM_BYTES : NetSerializer.ENTITY_UPDATE_BYTES;
+                messageBytes +=  itemEntities[i].states().length;
+            }
+            if (locationEntCount > i) {
+                messageBytes += newLocationBitSet.get(i)
+                        ? NetSerializer.NEW_LOCATION_BYTES : NetSerializer.ENTITY_UPDATE_BYTES;
+                messageBytes +=  itemEntities[i].states().length;
+            }
 
-        int nonPlayerBits = IntStream.range(0, nonPlayerEntCount)
-                .map(i -> newNonPlayerBitSet.get(i)
-                        ? NetSerializer.NEW_CHARACTER_BYTES
-                        : NetSerializer.ENTITY_UPDATE_BYTES
-                        + nonPlayerEntities[i].states().length)
-                .sum();
+        }
+//        int playerBytes = IntStream.range(0, playerEntCount)
+//                .map(i -> newPlayerBitset.get(i)
+//                        ? NetSerializer.NEW_CHARACTER_BYTES
+//                        : NetSerializer.ENTITY_UPDATE_BYTES
+//                        + playerEntities[i].states().length)
+//                .sum();
+//
+//        int nonPlayerBits = IntStream.range(0, nonPlayerEntCount)
+//                .map(i -> newNonPlayerBitSet.get(i)
+//                        ? NetSerializer.NEW_CHARACTER_BYTES
+//                        : NetSerializer.ENTITY_UPDATE_BYTES
+//                        + nonPlayerEntities[i].states().length)
+//                .sum();
+//
+//        int itemBytes = IntStream.range(0, itemEntCount)
+//                .map(i -> newItemBitset.get(i)
+//                        ? NetSerializer.NEW_ITEM_BYTES
+//                        : NetSerializer.ENTITY_UPDATE_BYTES
+//                        + itemEntities[i].states().length)
+//                .sum();
+//
+//        int locationBytes = IntStream.range(0, locationEntCount)
+//                .map(i -> newLocationBitSet.get(i)
+//                        ? NetSerializer.NEW_LOCATION_BYTES
+//                        : NetSerializer.ENTITY_UPDATE_BYTES
+//                        + locationEntities[i].states().length)
+//                .sum();
 
-        int itemBytes = IntStream.range(0, itemEntCount)
-                .map(i -> newItemBitset.get(i)
-                        ? NetSerializer.NEW_ITEM_BYTES
-                        : NetSerializer.ENTITY_UPDATE_BYTES
-                        + itemEntities[i].states().length)
-                .sum();
-
-        int locationBytes = IntStream.range(0, locationEntCount)
-                .map(i -> newLocationBitSet.get(i)
-                        ? NetSerializer.NEW_LOCATION_BYTES
-                        : NetSerializer.ENTITY_UPDATE_BYTES
-                        + locationEntities[i].states().length)
-                .sum();
-
-        int payloadSize = playerBytes + nonPlayerBits + itemBytes + locationBytes;
-        int msgSize = 1 + 4 + payloadSize;
+       // int payloadSize = playerBytes + nonPlayerBits + itemBytes + locationBytes;
+        int msgSize = 1  + messageBytes;
 
         ByteBuffer buffer = NetSerializer.get_buffer(msgSize);
+
+
         buffer.put(NetMsgOut.ENTITY_UPDATE.value);
-        buffer.putInt(payloadSize);
+       // buffer.putInt(payloadSize);
 
         for (int i = 0; i < playerEntCount; ++i) {
-            System.out.println("np bit" + newPlayerBitset.get(i));
             if (newPlayerBitset.get(i)) {
                 NetSerializer.newPlayerToBuffer(buffer, playerEntities[i]);
             } else {
@@ -171,6 +198,16 @@ public class EntityUpdateContainer {
             }
         }
         reset();
+//        ByteBuffer buffer2 = ByteBuffer.wrap(buffer.array());
+//        StringBuilder sb = new StringBuilder();
+//        while (buffer2.hasRemaining()) {
+//            byte b = buffer2.get();
+//            sb.append(String.format("%02X", b)); // Convert byte to Hex String
+//        }
+
+ //       System.out.println(sb.toString());
+
+
         return buffer.array();
     }
 }

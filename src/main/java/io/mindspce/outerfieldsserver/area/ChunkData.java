@@ -5,7 +5,6 @@ import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.systems.event.Subscribable;
 import io.mindspce.outerfieldsserver.entities.player.PlayerState;
 import io.mindspce.outerfieldsserver.enums.EventType;
-import io.mindspice.mindlib.data.collections.lists.primative.IntList;
 import io.mindspice.mindlib.data.geometry.*;
 import jakarta.annotation.Nullable;
 
@@ -21,7 +20,6 @@ public class ChunkData implements Subscribable<PlayerState> {
     private final IRect2 boundsRect;
     private final TileData[][] tileMap;
     private final Map<Integer, IPolygon2> collisions;
-    private final IConcurrentVQuadTree<Entity> entityGrid;
     private Set<Entity> activeEntities = new HashSet<>(100);
     private final StampedLock lock = new StampedLock();
 
@@ -32,40 +30,40 @@ public class ChunkData implements Subscribable<PlayerState> {
         this.tileMap = tileMap;
         this.collisions = collisions;
         this.globalPos = globalPos;
-        this.entityGrid = new IConcurrentVQuadTree<>(IRect2.of(globalPos, size), 6);
         boundsRect = IRect2.of(globalPos, GameSettings.GET().chunkSize());
     }
 
-    public void updateEntityPosition(Entity entity) {
-        // TODO could debug log unfound entities on updates;
-        entityGrid.update(entity.globalPosition(), entity.globalPosition(), entity);
-    }
+    public void addActiveEntity(Entity entity) {
+        System.out.println("Added:" + " Chunk: " + index);
 
-    public void addEntity(Entity entity) {
         if (activeEntities.contains(entity)) { return; }
-        entityGrid.insert(entity.globalPosition(), entity);
         long stamp = lock.writeLock();
-        activeEntities.add(entity);
-        lock.unlockWrite(stamp);
+        try {
+            activeEntities.add(entity);
+        } finally {
+            lock.unlockWrite(stamp);
+
+        }
     }
 
-    public void removeEntity(Entity entity) {
-        entityGrid.remove(entity.globalPosition(), entity);
+    public void removeActiveEntity(Entity entity) {
+        System.out.println("Removed:" + " Chunk: " + index);
         long stamp = lock.writeLock();
-        activeEntities.remove(entity);
-        lock.unlockWrite(stamp);
+        try {
+            activeEntities.remove(entity);
+        } finally {
+            lock.unlockWrite(stamp);
+        }
     }
 
     public List<Entity> getActiveEntitiesCopy() {
-        return new ArrayList<>(activeEntities);
-    }
-
-    public List<QuadItem<Entity>> queryEntityGrid(IRect2 querySpace) {
-        return entityGrid.query(querySpace);
-    }
-
-    public List<QuadItem<Entity>> queryEntityGrid(IRect2 querySpace, List<QuadItem<Entity>> updateList) {
-        return entityGrid.query(querySpace, updateList);
+        long stamp = -1;
+        List<Entity> activeEntitiesList = null;
+        do {
+            stamp = lock.tryOptimisticRead();
+            activeEntitiesList = List.copyOf(activeEntities);
+        } while (!lock.validate(stamp));
+        return activeEntitiesList;
     }
 
     public IVector2 getGlobalPos() {
@@ -84,7 +82,7 @@ public class ChunkData implements Subscribable<PlayerState> {
     public TileData getTileByLocalPos(IVector2 pos) {
         int x = pos.x() / GameSettings.GET().tileSize();
         int y = pos.y() / GameSettings.GET().tileSize();
-        if (index.x() < 0 || index.y() < 0 || index.x() > tileMap.length || index.y() > tileMap[0].length) {
+        if (index.x() < 0 || index.y() < 0 || index.x() >= tileMap.length || index.y() >= tileMap[0].length) {
             return null;
         }
         return tileMap[x][y];
@@ -94,7 +92,7 @@ public class ChunkData implements Subscribable<PlayerState> {
     public TileData getTileByLocalPos(int posX, int posY) {
         int x = posX / GameSettings.GET().tileSize();
         int y = posY / GameSettings.GET().tileSize();
-        if (index.x() < 0 || index.y() < 0 || index.x() > tileMap.length || index.y() > tileMap[0].length) {
+        if (index.x() < 0 || index.y() < 0 || index.x() >= tileMap.length || index.y() >= tileMap[0].length) {
             return null;
         }
         return tileMap[x][y];
@@ -104,7 +102,7 @@ public class ChunkData implements Subscribable<PlayerState> {
     public TileData getTileByGlobalPos(IVector2 pos) {
         int x = (pos.x() % GameSettings.GET().chunkSize().x()) / GameSettings.GET().tileSize();
         int y = (pos.y() % GameSettings.GET().chunkSize().y()) / GameSettings.GET().tileSize();
-        if (x < 0 || y < 0 || x > tileMap.length || y > tileMap[0].length) {
+        if (x < 0 || y < 0 || x >= tileMap.length || y >= tileMap[0].length) {
             return null;
         }
         return tileMap[x][y];
@@ -114,7 +112,7 @@ public class ChunkData implements Subscribable<PlayerState> {
     public TileData getTileByGlobalPos(int posX, int posY) {
         int x = (posX % GameSettings.GET().chunkSize().x()) / GameSettings.GET().tileSize();
         int y = (posY % GameSettings.GET().chunkSize().y()) / GameSettings.GET().tileSize();
-        if (x < 0 || y < 0 || x > tileMap.length || y > tileMap[0].length) {
+        if (x < 0 || y < 0 || x >= tileMap.length || y >= tileMap[0].length) {
             return null;
         }
         return tileMap[x][y];
@@ -122,7 +120,7 @@ public class ChunkData implements Subscribable<PlayerState> {
 
     @Nullable
     public TileData getTileByIndex(IVector2 index) {
-        if (index.x() < 0 || index.y() < 0 || index.x() > tileMap.length || index.y() > tileMap[0].length) {
+        if (index.x() < 0 || index.y() < 0 || index.x() >= tileMap.length || index.y() >= tileMap[0].length) {
             return null;
         }
         return tileMap[index.x()][index.y()];
@@ -130,7 +128,7 @@ public class ChunkData implements Subscribable<PlayerState> {
 
     @Nullable
     public TileData getTileByIndex(int x, int y) {
-        if (x < 0 || y < 0 || x > tileMap.length || y > tileMap[0].length) {
+        if (x < 0 || y < 0 || x >= tileMap.length || y >= tileMap[0].length) {
             return null;
         }
         return tileMap[x][y];

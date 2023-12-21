@@ -1,53 +1,60 @@
 package io.mindspce.outerfieldsserver.core.networking;
 
-import io.mindspce.outerfieldsserver.area.AreaInstance;
-import io.mindspce.outerfieldsserver.area.ChunkData;
-import io.mindspce.outerfieldsserver.area.TileData;
-import io.mindspce.outerfieldsserver.core.GameServer;
-import io.mindspce.outerfieldsserver.core.WorldState;
+import io.mindspce.outerfieldsserver.entities.player.PlayerSession;
 import io.mindspce.outerfieldsserver.entities.player.PlayerState;
-import io.mindspce.outerfieldsserver.enums.AreaId;
-import io.mindspce.outerfieldsserver.networking.NetMessageInHandler;
+import io.mindspce.outerfieldsserver.networking.NetMessageHandlers;
 import io.mindspce.outerfieldsserver.networking.incoming.NetMessageIn;
-import io.mindspice.mindlib.data.geometry.IVector2;
 import org.jctools.maps.NonBlockingHashMapLong;
 import org.jctools.queues.MpscArrayQueue;
+import org.springframework.web.socket.BinaryMessage;
 
-import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import java.util.function.Consumer;
 
 
-public class SocketInQueue implements NetMessageInHandler {
-    private final MpscArrayQueue<NetMessageIn> queue = new MpscArrayQueue<>(10000);
-    private final ScheduledExecutorService networkInExecutor = Executors.newSingleThreadScheduledExecutor();
+public class SocketQueue implements NetMessageHandlers {
+    private final MpscArrayQueue<NetMessageIn> networkInQueue = new MpscArrayQueue<>(10000);
+    private final MpscArrayQueue<NetMessageIn> networkOutQueue = new MpscArrayQueue<>(10000);
+    private final ExecutorService networkInExec = Executors.newSingleThreadExecutor();
+    private final ExecutorService networkOutExec = Executors.newVirtualThreadPerTaskExecutor();
+    private volatile boolean running = true;
     NonBlockingHashMapLong<PlayerState> playerTable;
 
-    public SocketInQueue(NonBlockingHashMapLong<PlayerState> playerTable) {
-        System.out.println("started socket queue");
+    public SocketQueue(NonBlockingHashMapLong<PlayerState> playerTable) {
         this.playerTable = playerTable;
-        networkInExecutor.scheduleAtFixedRate(networkInProcessor(), 0, 2, TimeUnit.MILLISECONDS);
+        networkInExec.submit(networkInProcessor());
     }
 
-
-
-    public void handOffMessage(NetMessageIn msg) {
-        boolean success = queue.offer(msg);
+    public void handOffMessageIn(NetMessageIn msg) {
+        boolean success = networkOutQueue.offer(msg);
         while (!success) {
             LockSupport.parkNanos(100);
-            success = queue.offer(msg);
+            success = networkOutQueue.offer(msg);
         }
     }
 
-
-    public Runnable networkInProcessor() {
-        return () ->  queue.drain(this::handleMessage);
+    public Consumer<BinaryMessage> networkOutHandler(PlayerSession playerSession) {
+        return msg -> networkOutExec.submit(() -> playerSession.send(msg));
     }
 
+    public Runnable networkInProcessor() {
+        return () -> {
+            System.out.println("ran");
+            while (running) {
+                networkOutQueue.drain(this::handleMsgIn);
+                Thread.onSpinWait();
+                LockSupport.parkNanos(10000);
 
-    private void handleMessage(NetMessageIn msg) {
+
+            }
+        };
+    }
+
+    private void handleMsgIn(NetMessageIn msg) {
         switch (msg.type()) {
             case CLIENT_POSITION -> {
                 PlayerState player = playerTable.get(msg.pid());
@@ -58,4 +65,6 @@ public class SocketInQueue implements NetMessageInHandler {
             }
         }
     }
+
+
 }

@@ -7,7 +7,7 @@ import io.mindspce.outerfieldsserver.systems.event.EventManager;
 import io.mindspce.outerfieldsserver.data.wrappers.ActiveEntityUpdate;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EventType;
-import io.mindspice.mindlib.data.geometry.IVector2;
+import io.mindspice.mindlib.data.geometry.*;
 import jakarta.annotation.Nullable;
 
 import java.util.*;
@@ -22,6 +22,7 @@ public class AreaInstance {
     private final IVector2 areaSize;
     private final Set<PlayerState> activePlayers = Collections.synchronizedSet(new HashSet<>(20));
     private final Map<IVector2, AtomicInteger> activeChunks = new ConcurrentHashMap<>(100);
+    private final IConcurrentVQuadTree<Entity> entityGrid;
 
     private final ConcurrentLinkedDeque<ActiveEntityUpdate> entityUpdateQueue = new ConcurrentLinkedDeque<>();
 
@@ -29,11 +30,40 @@ public class AreaInstance {
         this.arenaName = arenaName;
         this.chunkMap = chunkMap;
         areaSize = IVector2.of(chunkMap.length, chunkMap[0].length);
+        entityGrid = new IConcurrentVQuadTree<>(
+                IRect2.of(0, 0, chunkMap.length * GameSettings.GET().chunkSize().x(),
+                        chunkMap[0].length * GameSettings.GET().chunkSize().y()),
+                5
+        );
     }
 
     public void submitEntityUpdate(ActiveEntityUpdate entityUpdate) {
         if (entityUpdate == null) { return; }
         entityUpdateQueue.add(entityUpdate);
+    }
+
+    public List<QuadItem<Entity>> queryEntityGrid(IRect2 querySpace) {
+        return entityGrid.query(querySpace);
+    }
+
+    public List<QuadItem<Entity>> queryEntityGrid(IRect2 querySpace, List<QuadItem<Entity>> updateList) {
+        return entityGrid.query(querySpace, updateList);
+    }
+
+    public void updateGridEntity(IVector2 oldPos, IVector2 newPos, Entity entity) {
+        entityGrid.update(oldPos, newPos, entity);
+    }
+
+    public void updateGridEntity(ILine2 mVec, Entity entity) {
+        entityGrid.update(mVec.start(), mVec.end(), entity);
+    }
+
+    public void addEntityToGrid(IVector2 pos, Entity entity) {
+        entityGrid.insert(pos, entity);
+    }
+
+    public void removeEntityFromGrid(IVector2 pos, Entity entity) {
+        entityGrid.remove(pos, entity);
     }
 
 //    public void boad() {
@@ -44,7 +74,7 @@ public class AreaInstance {
 //        }
 //    }
 
-    public void addActivePlayer(PlayerState playerState){
+    public void addActivePlayer(PlayerState playerState) {
         activePlayers.add(playerState);
     }
 
@@ -55,7 +85,6 @@ public class AreaInstance {
     public AreaId getId() {
         return arenaName;
     }
-
 
     public IVector2 getAreaSize() {
         return areaSize;
@@ -69,7 +98,7 @@ public class AreaInstance {
     public ChunkData getChunkByGlobalPos(IVector2 pos) {
         int x = pos.x() / GameSettings.GET().chunkSize().x();
         int y = pos.y() / GameSettings.GET().chunkSize().y();
-        if (x < 0 || y < 0 || x > chunkMap.length || y > chunkMap[0].length) {
+        if (x < 0 || y < 0 || x >= chunkMap.length || y >= chunkMap[0].length) {
             return null;
         }
         return chunkMap[x][y];
@@ -79,7 +108,7 @@ public class AreaInstance {
     public ChunkData getChunkByGlobalPos(int posX, int posY) {
         int x = posX / GameSettings.GET().chunkSize().x();
         int y = posY / GameSettings.GET().chunkSize().y();
-        if (x < 0 || y < 0 || x > chunkMap.length || y > chunkMap[0].length) {
+        if (x < 0 || y < 0 || x >= chunkMap.length || y >= chunkMap[0].length) {
             return null; // return null, this is acceptable and should be handled by caller
         }
         return chunkMap[x][y];
@@ -87,7 +116,7 @@ public class AreaInstance {
 
     @Nullable
     public ChunkData getChunkByIndex(IVector2 index) {
-        if (index.x() < 0 || index.y() < 0 || index.x() > chunkMap.length || index.y() > chunkMap[0].length) {
+        if (index.x() < 0 || index.y() < 0 || index.x() >= chunkMap.length || index.y() >= chunkMap[0].length) {
             return null;
         }
         return chunkMap[index.x()][index.y()];
@@ -95,7 +124,7 @@ public class AreaInstance {
 
     @Nullable
     public ChunkData getChunkByIndex(int x, int y) {
-        if ( x < 0 || y < 0 || x > chunkMap.length || y > chunkMap[0].length) {
+        if (x < 0 || y < 0 || x >= chunkMap.length || y >= chunkMap[0].length) {
             return null;
         }
         return chunkMap[x][y];
@@ -118,6 +147,7 @@ public class AreaInstance {
     public void subscribeToChunk(IVector2 chunkIndex, EventType eventType, PlayerState playerState) {
         ChunkData chunk = getChunkByIndex(chunkIndex);
         if (chunk != null) {
+            System.out.println("subscribed: " + chunkIndex);
             chunk.subscribe(eventType, playerState);
         }
     }
@@ -125,6 +155,8 @@ public class AreaInstance {
     public void unSubscribeToChunk(IVector2 chunkIndex, EventType eventType, PlayerState playerState) {
         ChunkData chunk = getChunkByIndex(chunkIndex);
         if (chunk != null) {
+            System.out.println("unsubscribed: " + chunkIndex);
+
             chunk.unsubscribe(eventType, playerState);
         }
     }

@@ -12,11 +12,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 public class WorldState {
-
-    private final Map<AreaId, AreaInstance> areaTable;
+    private static final WorldState INSTANCE = new WorldState();
+    private Map<AreaId, AreaInstance> areaTable;
     private volatile Collection<AreaInstance> areaList;
 
-    public WorldState(Map<AreaId, AreaInstance> areaTable) {
+    public WorldState() {
+
+    }
+
+    public void init(Map<AreaId, AreaInstance> areaTable) {
         this.areaTable = areaTable;
         areaList = areaTable.values();
     }
@@ -34,5 +38,7 @@ public class WorldState {
         return areaList;
     }
 
-
+    public static WorldState GET() {
+        return INSTANCE;
+    }
 }

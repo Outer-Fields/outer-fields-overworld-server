@@ -1,7 +1,7 @@
 package io.mindspce.outerfieldsserver.core.statemanagers;
 
 import io.mindspce.outerfieldsserver.core.WorldState;
-import io.mindspce.outerfieldsserver.core.networking.SocketInQueue;
+import io.mindspce.outerfieldsserver.core.networking.SocketQueue;
 import io.mindspce.outerfieldsserver.entities.player.*;
 
 import java.util.Collection;
@@ -12,12 +12,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PlayerStateManager implements Runnable {
     private volatile Collection<PlayerSession> activePlayers;
     private final WorldState worldState;
-    private final SocketInQueue socketInQueue;
+    private final SocketQueue socketQueue;
     AtomicInteger tickCount = new AtomicInteger(0);
 
-    public PlayerStateManager(WorldState worldState, SocketInQueue socketInQueue) {
+    public PlayerStateManager(WorldState worldState, SocketQueue socketQueue) {
         this.worldState = worldState;
-        this.socketInQueue = socketInQueue;
+        this.socketQueue = socketQueue;
     }
 
     @Override

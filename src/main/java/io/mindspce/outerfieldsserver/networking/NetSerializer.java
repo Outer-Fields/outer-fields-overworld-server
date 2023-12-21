@@ -7,6 +7,7 @@ import io.mindspce.outerfieldsserver.entities.nonplayer.NonPlayerEntity;
 import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
 import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.enums.State;
+import io.mindspice.mindlib.data.geometry.IVector2;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -199,6 +200,11 @@ public class NetSerializer {
         }
         return nameBytes;
     }
+
+
+
+
+
 
 
 }

@@ -5,17 +5,14 @@ import io.mindspce.outerfieldsserver.enums.State;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.wrappers.LazyFinalValue;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
 
 public abstract class Entity {
     protected final EntityType entityType;
     protected LazyFinalValue<Integer> id = new LazyFinalValue<>();
-    protected volatile State[] states = new State[1];
+    protected volatile State[] states = new State[0];
     protected volatile String name = "";
 
     public Entity(EntityType entityType) {
@@ -42,4 +39,14 @@ public abstract class Entity {
 
     public abstract IVector2 priorPosition();
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Entity: ");
+        sb.append("\n  entityType: ").append(entityType);
+        sb.append(",\n  id: ").append(id.get());
+        sb.append(",\n  states: ").append(Arrays.toString(states));
+        sb.append(",\n  name: \"").append(name).append('\"');
+        sb.append("\n");
+        return sb.toString();
+    }
 }
