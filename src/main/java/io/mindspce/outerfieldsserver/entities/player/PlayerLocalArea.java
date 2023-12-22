@@ -46,9 +46,12 @@ public class PlayerLocalArea {
     // Currents
     private long lastTimestamp = -1;
     private final IMutVector2 currChunk = IVector2.ofMutable(0, 0);
+    private final HashSet<IVector2> unSubTable = new HashSet<>(2);
+    private final HashSet<IVector2> newSubTable = new HashSet<>(2);
 
     // Movement Vector position (start = prior, end = current()
     final IAtomicLine2 mVector = ILine2.ofAtomic(0, 0, 0, 0);
+    private int ignoreCount = 0; // Used to drop packets when player sends invalid movement
 
     // TODO this needs a starting postion and then update current area needs called;
     public PlayerLocalArea(PlayerState playerState) {
@@ -100,19 +103,26 @@ public class PlayerLocalArea {
         knownEntities.clear();
     }
 
-    public PosAuthResponse validateUpdate(int posX, int posY, long currTimestamp) {
+    public boolean validateUpdate(int posX, int posY, long currTimestamp) {
+        if (ignoreCount > 0) {
+            ignoreCount--;
+            lastTimestamp = currTimestamp;
+            return false;
+        }
         mVector.shiftLine(posX, posY); //set end to start, start to new pos
 
-        // validates distance, mutates the line and sets the current position (end) to max allowed distance
-        // boolean invalidMove = PlayerAuthority.validateDistance(mVector, lastTimestamp, currTimestamp);
 
-        // validates collision, mutates the line and states end to start if collision is detected
-        if (!PlayerAuthority.validateCollision(currArea, localTileGrid, mVector)) {
-            return PosAuthResponse.INVALID_COLLISION;
+        boolean validMove = PlayerAuthority.validateDistance(mVector, lastTimestamp, currTimestamp);
+        boolean validCollision = PlayerAuthority.validateCollision(currArea, localTileGrid, viewRect, mVector);
+
+        if (!(validCollision && validMove)) {
+            ignoreCount = 30;
         }
+        //validates distance, mutates the line and sets the current position (end) to max allowed distance
+
         lastTimestamp = currTimestamp;
         // return invalidMove ? PosAuthResponse.INVALID_MOVEMENT : PosAuthResponse.VALID;
-        return PosAuthResponse.VALID;
+         return validCollision && validMove;
     }
 
     public void updateLocalArea() {
@@ -197,23 +207,36 @@ public class PlayerLocalArea {
     }
 
     public void calcSubscriptionChanges() {
+        boolean didSub = false;
+        boolean didUnSub = false;
         for (ILine2 oCorner : chunkList) {
+            boolean newSub = true;
+            boolean unsub = true;
             if (!oCorner.start().equals(oCorner.end())) {
                 for (ILine2 iCorner : chunkList) {
-                    if (!oCorner.end().equals(iCorner.start())) {
-                        ChunkData chunk = currArea.getChunkByIndex(oCorner.end());
-                        if (chunk == null) { continue; }
-                        chunk.unsubscribe(EventType.ENTITY_UPDATE, playerState);
-                        chunk.getActiveEntitiesCopy().forEach(e -> knownEntities.set(e.id(), false));
-                    }
-                    if (!oCorner.start().equals(iCorner.end())) {
-                        ChunkData chunk = currArea.getChunkByIndex(oCorner.end());
-                        if (chunk == null) { continue; }
-                        chunk.subscribe(EventType.ENTITY_UPDATE, playerState);
-                    }
+                    if (oCorner.end().equals(iCorner.start())) { newSub = false; }
+                    if (oCorner.start().equals(iCorner.end())) { unsub = false; }
+                }
+
+                if (unsub && !unSubTable.contains(oCorner.end())) {
+                    unSubTable.add(oCorner.end());
+                    didUnSub = true;
+                    ChunkData chunk = currArea.getChunkByIndex(oCorner.end());
+                    if (chunk == null) { continue; }
+                    chunk.unsubscribe(EventType.ENTITY_UPDATE, playerState);
+                    chunk.getActiveEntitiesCopy().forEach(e -> knownEntities.set(e.id(), false));
+                }
+                if (newSub && !newSubTable.contains(oCorner.end())) {
+                    didSub = true;
+                    newSubTable.add(oCorner.end());
+                    ChunkData chunk = currArea.getChunkByIndex(oCorner.end());
+                    if (chunk == null) { continue; }
+                    chunk.subscribe(EventType.ENTITY_UPDATE, playerState);
                 }
             }
         }
+        if (didSub) { newSubTable.clear(); }
+        if (didUnSub) { unSubTable.clear(); }
     }
 
     public void removeOldKnownEntities(ChunkData chunk) {

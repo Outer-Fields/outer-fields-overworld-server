@@ -11,9 +11,9 @@ public class GameSettings {
     private IVector2 chunkSize = IVector2.of(1920, 1920);
     private IVector2 tilesPerChunk = IVector2.of(60, 60);
     private IVector2 worldSize = IVector2.of(512, 512);
-    private int tileSize = 64;
+    private int tileSize = 32;
     private int maxSpeed = 300;
-    private int tickRate = 1;
+    private int tickRate = 20;
     private int npcTickInterval = 2;
     private int itemTickInterval = 30;
     private int locationTickInterval = 90;

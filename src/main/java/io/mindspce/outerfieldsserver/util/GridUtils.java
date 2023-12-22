@@ -1,11 +1,15 @@
 package io.mindspce.outerfieldsserver.util;
 
+import io.mindspce.outerfieldsserver.area.ChunkJson;
 import io.mindspce.outerfieldsserver.data.wrappers.ChunkTileIndex;
 import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
+import io.mindspice.mindlib.util.JsonUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +57,19 @@ public class GridUtils {
         );
     }
 
+    public static IVector2 globalToLocalTile(IVector2 chunkIndex, IVector2 globalPos) {
+        return IVector2.of(
+                (globalPos.x() - chunkIndex.x() * GameSettings.GET().chunkSize().x()) / GameSettings.GET().tileSize(),
+                (globalPos.y() - chunkIndex.y() * GameSettings.GET().chunkSize().y()) / GameSettings.GET().tileSize()
+        );
+    }
+
+    public static IVector2 globalToChunk(IVector2 globalPos) {
+        int chunkX = globalPos.x() / GameSettings.GET().chunkSize().x();
+        int chunky = globalPos.y() / GameSettings.GET().chunkSize().y();
+        return IVector2.of(chunkX, chunky);
+    }
+
     public static ChunkTileIndex globalToChunkTile(IVector2 globalPos) {
         int chunkX = globalPos.x() / GameSettings.GET().chunkSize().x();
         int chunky = globalPos.y() / GameSettings.GET().chunkSize().y();
@@ -90,6 +107,14 @@ public class GridUtils {
             }
         }
         return Pair.of(oldChunks, newChunks);
+    }
+
+    public static ChunkJson parseChunkJson(File file) throws IOException {
+        return JsonUtils.getMapper().readValue(file, ChunkJson.class);
+    }
+
+    public static IVector2 chunkIndexToGlobal(IVector2 chunkIndex) {
+        return IVector2.of(chunkIndex).multiply(GameSettings.GET().chunkSize());
     }
 
 

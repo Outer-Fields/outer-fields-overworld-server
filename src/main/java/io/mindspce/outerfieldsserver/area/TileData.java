@@ -6,26 +6,33 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 public record TileData(
         IVector2 index,
         NavData navData,
-        int collisionId
+        boolean isCollision,
+        boolean isLocation
 ) {
-
-    public TileData(IVector2 index) {
-        this(index, null, -1);
-    }
-
-    public TileData(IVector2 index, NavData navData) {
-        this(index, navData, -1);
-    }
-
-    public TileData(IVector2 index, int collisionId) {
-        this(index, null, collisionId);
-    }
 
     public boolean isNavigable() {
         return navData != null;
     }
 
     public boolean hasCollision() {
-        return collisionId != -1;
+        return isCollision;
     }
+
+    public boolean isLocation() {
+        return isCollision;
+    }
+
+    public TileData withCollisionChange(boolean collision) {
+        return new TileData(index, navData, collision, isLocation);
+    }
+
+    public TileData withNavChange(NavData data) {
+        return new TileData(index, data, isCollision, isLocation);
+    }
+
+    public TileData withLocationChange(boolean location) {
+        return new TileData(index, navData, isCollision, location);
+    }
+
+
 }

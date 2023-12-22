@@ -2,6 +2,7 @@ package io.mindspce.outerfieldsserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.mindspce.outerfieldsserver.area.ChunkJson;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.core.ServerConst;
 import io.mindspce.outerfieldsserver.entities.Entity;
@@ -14,6 +15,9 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.util.JsonUtils;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -25,6 +29,17 @@ import java.util.concurrent.atomic.AtomicLong;
 //@SpringBootTest
 class OuterFieldsServerApplicationTests {
 
+
+
+    @Test
+    void parseTest() throws IOException {
+
+        ChunkJson chunkJson = JsonUtils.getMapper()
+                .readValue(new File("/home/mindspice/code/Java/Okra/outer-fields-overworld-server/src/main/resources/chunkdata/chunk_0_0.json"), ChunkJson.class);
+
+        System.out.println(chunkJson);
+
+    }
     @Test
     void typeTest() {
 

@@ -5,6 +5,7 @@ import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.systems.event.Subscribable;
 import io.mindspce.outerfieldsserver.entities.player.PlayerState;
 import io.mindspce.outerfieldsserver.enums.EventType;
+import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.*;
 import jakarta.annotation.Nullable;
 
@@ -18,18 +19,17 @@ public class ChunkData implements Subscribable<PlayerState> {
     private final IVector2 index;
     private final IVector2 globalPos;
     private final IRect2 boundsRect;
-    private final TileData[][] tileMap;
-    private final Map<Integer, IPolygon2> collisions;
+    private final HashMap<IVector2, TileData> activeTiles;
     private Set<Entity> activeEntities = new HashSet<>(100);
     private final StampedLock lock = new StampedLock();
 
     private final Map<EventType, Set<PlayerState>> subscriptions = new ConcurrentHashMap<>();
 
-    public ChunkData(IVector2 index, IVector2 globalPos, IVector2 size, TileData[][] tileMap, Map<Integer, IPolygon2> collisions) {
+    public ChunkData(IVector2 index, HashMap<IVector2, TileData> activeTiles) {
         this.index = index;
-        this.tileMap = tileMap;
-        this.collisions = collisions;
-        this.globalPos = globalPos;
+        this.activeTiles = activeTiles;
+
+        this.globalPos = GridUtils.chunkIndexToGlobal(index);
         boundsRect = IRect2.of(globalPos, GameSettings.GET().chunkSize());
     }
 
@@ -70,87 +70,85 @@ public class ChunkData implements Subscribable<PlayerState> {
         return globalPos;
     }
 
+    public IVector2 index() {
+        return index;
+    }
+
     public IRect2 getBoundsRect() {
         return boundsRect;
     }
 
-    public IPolygon2 getCollision(int collisionId) {
-        return collisions.get(collisionId);
-    }
 
-    @Nullable
-    public TileData getTileByLocalPos(IVector2 pos) {
-        int x = pos.x() / GameSettings.GET().tileSize();
-        int y = pos.y() / GameSettings.GET().tileSize();
-        if (index.x() < 0 || index.y() < 0 || index.x() >= tileMap.length || index.y() >= tileMap[0].length) {
-            return null;
-        }
-        return tileMap[x][y];
-    }
-
-    @Nullable
-    public TileData getTileByLocalPos(int posX, int posY) {
-        int x = posX / GameSettings.GET().tileSize();
-        int y = posY / GameSettings.GET().tileSize();
-        if (index.x() < 0 || index.y() < 0 || index.x() >= tileMap.length || index.y() >= tileMap[0].length) {
-            return null;
-        }
-        return tileMap[x][y];
-    }
+//    @Nullable
+//    public TileData getTileByLocalPos(IVector2 pos) {
+//        int x = pos.x() / GameSettings.GET().tileSize();
+//        int y = pos.y() / GameSettings.GET().tileSize();
+//        if (index.x() < 0 || index.y() < 0 || index.x() >= tileMap.length || index.y() >= tileMap[0].length) {
+//            return null;
+//        }
+//        return tileMap[x][y];
+//    }
+//
+//    @Nullable
+//    public TileData getTileByLocalPos(int posX, int posY) {
+//        int x = posX / GameSettings.GET().tileSize();
+//        int y = posY / GameSettings.GET().tileSize();
+//        if (index.x() < 0 || index.y() < 0 || index.x() >= tileMap.length || index.y() >= tileMap[0].length) {
+//            return null;
+//        }
+//        return tileMap[x][y];
+//    }
 
     @Nullable
     public TileData getTileByGlobalPos(IVector2 pos) {
-        int x = (pos.x() % GameSettings.GET().chunkSize().x()) / GameSettings.GET().tileSize();
-        int y = (pos.y() % GameSettings.GET().chunkSize().y()) / GameSettings.GET().tileSize();
-        if (x < 0 || y < 0 || x >= tileMap.length || y >= tileMap[0].length) {
-            return null;
-        }
-        return tileMap[x][y];
+        return activeTiles.get(GridUtils.globalToLocalTile(index, pos));
+//        int x = (pos.x() % GameSettings.GET().chunkSize().x()) / GameSettings.GET().tileSize();
+//        int y = (pos.y() % GameSettings.GET().chunkSize().y()) / GameSettings.GET().tileSize();
+//        if (x < 0 || y < 0 || x >= tileMap.length || y >= tileMap[0].length) {
+//            return null;
+//        }
+//        return tileMap[x][y];
     }
 
-    @Nullable
-    public TileData getTileByGlobalPos(int posX, int posY) {
-        int x = (posX % GameSettings.GET().chunkSize().x()) / GameSettings.GET().tileSize();
-        int y = (posY % GameSettings.GET().chunkSize().y()) / GameSettings.GET().tileSize();
-        if (x < 0 || y < 0 || x >= tileMap.length || y >= tileMap[0].length) {
-            return null;
-        }
-        return tileMap[x][y];
-    }
+//    @Nullable
+//    public TileData getTileByGlobalPos(int posX, int posY) {
+//        int x = (posX % GameSettings.GET().chunkSize().x()) / GameSettings.GET().tileSize();
+//        int y = (posY % GameSettings.GET().chunkSize().y()) / GameSettings.GET().tileSize();
+//        if (x < 0 || y < 0 || x >= tileMap.length || y >= tileMap[0].length) {
+//            return null;
+//        }
+//        return tileMap[x][y];
+//    }
 
     @Nullable
     public TileData getTileByIndex(IVector2 index) {
-        if (index.x() < 0 || index.y() < 0 || index.x() >= tileMap.length || index.y() >= tileMap[0].length) {
-            return null;
-        }
-        return tileMap[index.x()][index.y()];
+        return activeTiles.get(index);
     }
-
-    @Nullable
-    public TileData getTileByIndex(int x, int y) {
-        if (x < 0 || y < 0 || x >= tileMap.length || y >= tileMap[0].length) {
-            return null;
-        }
-        return tileMap[x][y];
-    }
-
-    public TileData[][] getTileMap() {
-        return tileMap;
-    }
-
-    public IVector2[][] getVectorMap() {
-        IVector2[][] vecMap = new IVector2[tileMap.length][tileMap[0].length];
-        for (int i = 0; i < tileMap.length; ++i) {
-            for (int j = 0; j < tileMap[0].length; ++j) {
-                vecMap[i][j] = tileMap[i][j].index();
-            }
-        }
-        return vecMap;
-    }
-
-    public IVector2 getIndex() {
-        return index;
-    }
+//    @Nullable
+//    public TileData getTileByIndex(int x, int y) {
+//        if (x < 0 || y < 0 || x >= tileMap.length || y >= tileMap[0].length) {
+//            return null;
+//        }
+//        return tileMap[x][y];
+//    }
+//
+//    public TileData[][] getTileMap() {
+//        return tileMap;
+//    }
+//
+//    public IVector2[][] getVectorMap() {
+//        IVector2[][] vecMap = new IVector2[tileMap.length][tileMap[0].length];
+//        for (int i = 0; i < tileMap.length; ++i) {
+//            for (int j = 0; j < tileMap[0].length; ++j) {
+//                vecMap[i][j] = tileMap[i][j].index();
+//            }
+//        }
+//        return vecMap;
+//    }
+//
+//    public IVector2 getIndex() {
+//        return index;
+//    }
 
     // Subscribable logic
     @Override
@@ -175,5 +173,27 @@ public class ChunkData implements Subscribable<PlayerState> {
     @Override
     public Set<PlayerState> getSubscribers(EventType eventType) {
         return subscriptions.getOrDefault(eventType, Set.of());
+    }
+
+    static public ChunkData loadFromJson(ChunkJson json) {
+        HashMap<IVector2, TileData> tileData = new HashMap<>(50);
+
+        for (var collision : json.collisionMask()) {
+            tileData.put(collision, new TileData(collision, null, true, false));
+        }
+        for (var area : json.areaMask()) {
+            if (tileData.containsKey(area)) {
+                tileData.get(area).withLocationChange(true);
+            }
+            tileData.put(area, new TileData(area, null, false, true));
+        }
+
+        for (var navigation : json.navMask()) {
+            if (tileData.containsKey(navigation)) {
+                tileData.get(navigation).withNavChange(new NavData());
+            }
+            tileData.put(navigation, new TileData(navigation, new NavData(), false, false));
+        }
+        return new ChunkData(json.index(), tileData);
     }
 }

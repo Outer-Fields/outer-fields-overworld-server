@@ -1,13 +1,17 @@
 package io.mindspce.outerfieldsserver.area;
 
 import io.mindspce.outerfieldsserver.core.GameSettings;
+
 import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.entities.locations.LocationEntity;
 import io.mindspce.outerfieldsserver.entities.player.PlayerState;
-import io.mindspce.outerfieldsserver.systems.event.EventManager;
 import io.mindspce.outerfieldsserver.data.wrappers.ActiveEntityUpdate;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EventType;
+import io.mindspice.mindlib.data.geometry.QuadItem;
 import io.mindspice.mindlib.data.geometry.*;
+
+import io.mindspice.mindlib.data.tuples.Pair;
 import jakarta.annotation.Nullable;
 
 import java.util.*;
@@ -23,6 +27,8 @@ public class AreaInstance {
     private final Set<PlayerState> activePlayers = Collections.synchronizedSet(new HashSet<>(20));
     private final Map<IVector2, AtomicInteger> activeChunks = new ConcurrentHashMap<>(100);
     private final IConcurrentVQuadTree<Entity> entityGrid;
+    private final IConcurrentPQuadTree<LocationEntity> locationGrid;
+    private final IConcurrentPQuadTree<IPolygon2> collisionGrid;
 
     private final ConcurrentLinkedDeque<ActiveEntityUpdate> entityUpdateQueue = new ConcurrentLinkedDeque<>();
 
@@ -31,6 +37,16 @@ public class AreaInstance {
         this.chunkMap = chunkMap;
         areaSize = IVector2.of(chunkMap.length, chunkMap[0].length);
         entityGrid = new IConcurrentVQuadTree<>(
+                IRect2.of(0, 0, chunkMap.length * GameSettings.GET().chunkSize().x(),
+                        chunkMap[0].length * GameSettings.GET().chunkSize().y()),
+                5
+        );
+        locationGrid = new IConcurrentPQuadTree<>(
+                IRect2.of(0, 0, chunkMap.length * GameSettings.GET().chunkSize().x(),
+                        chunkMap[0].length * GameSettings.GET().chunkSize().y()),
+                5
+        );
+        collisionGrid = new IConcurrentPQuadTree<>(
                 IRect2.of(0, 0, chunkMap.length * GameSettings.GET().chunkSize().x(),
                         chunkMap[0].length * GameSettings.GET().chunkSize().y()),
                 5
@@ -64,6 +80,38 @@ public class AreaInstance {
 
     public void removeEntityFromGrid(IVector2 pos, Entity entity) {
         entityGrid.remove(pos, entity);
+    }
+
+    public void addLocationToGrid(List<Pair<IPolygon2, LocationEntity>> locations) {
+        locations.forEach(l -> addLocationToGrid(l.first(), l.second()));
+    }
+
+    public void addLocationToGrid(IPolygon2 locationBounds, LocationEntity location) {
+        locationGrid.insert(locationBounds, location);
+    }
+
+    public void removeLocationFromGrid(IPolygon2 locationBounds, LocationEntity location) {
+        locationGrid.remove(locationBounds, location);
+    }
+
+    public void updateLocationInGrid(IPolygon2 oldBounds, IPolygon2 newBounds, LocationEntity location) {
+        locationGrid.update(oldBounds, newBounds, location);
+    }
+
+    public void addCollisionToGrid(List<IPolygon2> collisionPolys) {
+        collisionPolys.forEach(this::addCollisionToGrid);
+    }
+
+    public void addCollisionToGrid(IPolygon2 collisionPoly) {
+        collisionGrid.insert(collisionPoly, collisionPoly);
+    }
+
+    public void removeCollisionFromGrid(IPolygon2 collisionPoly) {
+        collisionGrid.remove(collisionPoly, collisionPoly);
+    }
+
+    public List<QuadItem<IPolygon2>> queryCollisionGrid(IRect2 areaRect) {
+        return collisionGrid.query(areaRect);
     }
 
 //    public void boad() {
@@ -130,15 +178,7 @@ public class AreaInstance {
         return chunkMap[x][y];
     }
 
-    public IVector2[][] getVectorMap() {
-        IVector2[][] vecMap = new IVector2[chunkMap.length][chunkMap[0].length];
-        for (int i = 0; i < chunkMap.length; ++i) {
-            for (int j = 0; j < chunkMap[0].length; ++j) {
-                vecMap[i][j] = chunkMap[i][j].getIndex();
-            }
-        }
-        return vecMap;
-    }
+//
 
     public Set<PlayerState> getActivePlayers() {
         return activePlayers;

@@ -26,12 +26,11 @@ public class DynamicTileRef {
     }
 
     public void updatePos(IVector2 pos) {
-        chunkRef = areaRef.getChunkByGlobalPos(
-                pos.x() + (offset.x() * GameSettings.GET().tileSize()),
-                pos.y() + (offset.y() * GameSettings.GET().tileSize())
-        );
+        chunkRef = areaRef.getChunkByGlobalPos(pos);
         if (chunkRef == null) {
             tileRef = null;
+            if (tileRef != null) {
+            }
             return;
         }
         tileRef = chunkRef.getTileByGlobalPos(pos);
@@ -49,4 +48,14 @@ public class DynamicTileRef {
         return areaRef;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("DynamicTileRef: ");
+        sb.append("\n  areaRef: ").append(areaRef);
+        sb.append(",\n  offset: ").append(offset);
+        sb.append(",\n  chunkRef: ").append(chunkRef);
+        sb.append(",\n  tileRef: ").append(tileRef);
+        sb.append("\n");
+        return sb.toString();
+    }
 }

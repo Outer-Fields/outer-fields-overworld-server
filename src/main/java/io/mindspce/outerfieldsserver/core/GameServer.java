@@ -32,7 +32,7 @@ public class GameServer {
                 TimeUnit.NANOSECONDS
                 // TimeUnit.SECONDS
         );
-        tickExecutor.execute(initPlayer1());
+        //tickExecutor.execute(initPlayer1());
     }
 
     public PlayerState getPlayer(int id) {
@@ -54,37 +54,37 @@ public class GameServer {
 
     // FIXME this is for testing
 
-    public Runnable initPlayer1() {
-        return (() -> {
-            try {
-                ChunkData[][] cdArr = new ChunkData[4][4];
-
-                for (int i = 0; i < 4; ++i) {
-                    for (int j = 0; j < 4; ++j) {
-                        TileData[][] tdArr = new TileData[4096][4096];
-                        for (int x = 0; x < 4096; ++x) {
-                            for (int y = 0; y < 4096; ++y) {
-                                TileData td = new TileData(IVector2.of(i * 32, j * 32));
-                                tdArr[x][y] = td;
-                            }
-                        }
-                        ChunkData cd = new ChunkData(
-                                IVector2.of(i, j),
-                                IVector2.of(i * 4096, j * 4096),
-                                IVector2.of(4096, 4096),
-                                tdArr,
-                                Map.of());
-                        cdArr[i][j] = cd;
-                    }
-                }
-                AreaInstance ai = new AreaInstance(AreaId.TEST, cdArr);
-                WorldState.GET().init(Map.of(AreaId.TEST, ai));
-                System.out.println("inited woolrd");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
+//    public Runnable initPlayer1() {
+//        return (() -> {
+//            try {
+//                ChunkData[][] cdArr = new ChunkData[4][4];
+//
+//                for (int i = 0; i < 4; ++i) {
+//                    for (int j = 0; j < 4; ++j) {
+//                        TileData[][] tdArr = new TileData[4096][4096];
+//                        for (int x = 0; x < 4096; ++x) {
+//                            for (int y = 0; y < 4096; ++y) {
+//                                TileData td = new TileData(IVector2.of(i * 32, j * 32));
+//                                tdArr[x][y] = td;
+//                            }
+//                        }
+//                        ChunkData cd = new ChunkData(
+//                                IVector2.of(i, j),
+//                                IVector2.of(i * 4096, j * 4096),
+//                                IVector2.of(4096, 4096),
+//                                tdArr,
+//                                Map.of());
+//                        cdArr[i][j] = cd;
+//                    }
+//                }
+//                AreaInstance ai = new AreaInstance(AreaId.TEST, cdArr);
+//                WorldState.GET().init(Map.of(AreaId.TEST, ai));
+//                System.out.println("inited woolrd");
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        });
+//    }
 
 
 }

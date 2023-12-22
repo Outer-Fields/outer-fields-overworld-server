@@ -171,6 +171,14 @@ public class NetSerializer {
         return buffer;
     }
 
+    public static byte[] getPosAuthCorrection(IVector2 pos) {
+        ByteBuffer buffer = get_buffer(9);
+        buffer.put(NetMsgOut.POS_AUTH_CORRECTION.value);
+        buffer.putInt(pos.x());
+        buffer.putInt(pos.y());
+        return buffer.array();
+    }
+
     public static ByteBuffer newNonPlayerToBuffer(NonPlayerEntity entity) {
         return newNonPlayerToBuffer(
                 get_buffer(NEW_CHARACTER_BYTES + entity.states().length), entity);

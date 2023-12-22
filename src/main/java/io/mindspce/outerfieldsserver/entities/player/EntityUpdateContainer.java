@@ -68,8 +68,6 @@ public class EntityUpdateContainer {
     }
 
     public void addEntity(Entity entity, boolean isNew) {
-        System.out.println("added entity: " + entity);
-        System.out.println("isnew: " + isNew);
         switch (entity.entityType()) {
             case PLAYER -> {
                 if (playerEntCount == playerEntLength) {

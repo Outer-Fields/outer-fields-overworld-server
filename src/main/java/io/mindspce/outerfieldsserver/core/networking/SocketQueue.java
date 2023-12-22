@@ -43,7 +43,6 @@ public class SocketQueue implements NetMessageHandlers {
 
     public Runnable networkInProcessor() {
         return () -> {
-            System.out.println("ran");
             while (running) {
                 networkOutQueue.drain(this::handleMsgIn);
                 Thread.onSpinWait();

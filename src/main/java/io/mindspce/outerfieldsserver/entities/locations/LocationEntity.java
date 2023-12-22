@@ -7,10 +7,12 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 
 public abstract class LocationEntity extends Entity {
     protected final int key;
+    protected final String locationName;
 
-    public LocationEntity(int key) {
+    public LocationEntity(int locationKey, String locationName) {
         super(EntityType.LOCATION);
-        this.key = key;
+        this.key = locationKey;
+        this.locationName = locationName;
     }
 
     public int key() {

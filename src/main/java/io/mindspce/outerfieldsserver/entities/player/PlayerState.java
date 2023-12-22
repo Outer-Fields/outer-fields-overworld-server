@@ -1,16 +1,14 @@
 package io.mindspce.outerfieldsserver.entities.player;
 
 import io.mindspce.outerfieldsserver.area.AreaInstance;
-import io.mindspce.outerfieldsserver.area.ChunkData;
 import io.mindspce.outerfieldsserver.core.WorldState;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.PosAuthResponse;
-import io.mindspice.mindlib.data.geometry.ILine2;
+import io.mindspce.outerfieldsserver.networking.NetSerializer;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.geometry.QuadItem;
 import io.mindspice.mindlib.util.Utils;
-import org.springframework.web.socket.WebSocketSession;
 
 import java.util.BitSet;
 import java.util.List;
@@ -42,18 +40,17 @@ public class PlayerState extends PlayerEntity {
 
     public void onPositionUpdate(int posX, int posY, long timestamp) {
 //        if (!isInit) { return; }
+
+
         try {
 
-           // System.out.println("ID:" + id() + " Position: " + posX + ", " + posY);
+            //      System.out.println("ID:" + id() + " Position: " + posX + ", " + posY);
 
-            PosAuthResponse valid = localArea.validateUpdate(posX, posY, timestamp);
-            if (valid != PosAuthResponse.VALID) {
-                // TODO log
-                // TODO send correction to player
-                if (valid == PosAuthResponse.INVALID_COLLISION) {
-                    return;
-                }
+            boolean valid = localArea.validateUpdate(posX, posY, timestamp);
+            if (!valid) {
+                playerSession.submitMsg(NetSerializer.getPosAuthCorrection(localArea.currPosition()));
             }
+
             localArea.updateLocalArea();
             if (localArea.isMoving()) {
                 if (localArea.currChunk() == null) {
@@ -66,7 +63,8 @@ public class PlayerState extends PlayerEntity {
         }
     }
 
-    public void onTick(long _tickTime) { ;
+    public void onTick(long _tickTime) {
+        ;
         if (playerSession == null || !playerSession.isConnected()) { return; }
         var t = System.nanoTime();
         List<QuadItem<Entity>> eUpdateList = localArea.entityUpdateList();
@@ -75,16 +73,15 @@ public class PlayerState extends PlayerEntity {
 
         for (var quadItem : eUpdateList) {
             if (quadItem.item().id() == id.get()) { continue; }
-            System.out.println("sending data for id:" + id() +"data_id:" + quadItem.item().id());
+            System.out.println("sending data for id:" + id() + "data_id:" + quadItem.item().id());
 
             if (knownEntities.get(quadItem.item().id())) {
                 //  System.out.println("sent know entity");
-                System.out.println("sending known data for id:" + id() +"  data_id:" + quadItem.item().id());
-
+                System.out.println("sending known data for id:" + id() + "  data_id:" + quadItem.item().id());
 
                 playerSession.entityUpdateContainer().addEntity(quadItem.item(), false);
             } else {
-                System.out.println("sending new data for id:" + id() +" data_id:" + quadItem.item().id());
+                System.out.println("sending new data for id:" + id() + " data_id:" + quadItem.item().id());
 
                 Utils.printThreadMethod();
                 System.out.println(knownEntities);
