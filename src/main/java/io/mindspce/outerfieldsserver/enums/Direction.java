@@ -19,24 +19,21 @@ public enum Direction {
     CENTER(IVector2.of(0, 0));
 
     private final IVector2 vector2;
+    private static final Direction[][] directions;
 
+    static {
+        directions = new Direction[][]{
+                {NORTH_WEST, NORTH, NORTH_EAST},
+                {WEST, CENTER, EAST},
+                {SOUTH_WEST, SOUTH, SOUTH_EAST}
+        };
+    }
+
+    ;
     private static final List<Direction> fourPointList = List.of(NORTH, SOUTH, EAST, WEST);
     private static final List<Direction> eightPointList = List.of(
             NORTH, NORTH_EAST, EAST, SOUTH_EAST, SOUTH, SOUTH_WEST, WEST, NORTH_WEST
     );
-    private static final Map<IVector2, Direction> directionMap = Map.of(
-            NORTH.vector2, NORTH,
-            SOUTH.vector2, SOUTH,
-            EAST.vector2, EAST,
-            WEST.vector2, WEST,
-            NORTH_EAST.vector2, NORTH_EAST,
-            NORTH_WEST.vector2, NORTH_WEST,
-            SOUTH_EAST.vector2, SOUTH_EAST,
-            SOUTH_WEST.vector2, SOUTH_WEST,
-            CENTER.vector2, CENTER
-
-    );
-    private static final IMutVector2 cacheVector = IVector2.ofMutable(0, 0);
 
     Direction(IVector2 vector2) { this.vector2 = vector2; }
 
@@ -52,17 +49,18 @@ public enum Direction {
         return eightPointList;
     }
 
-    public static Map<IVector2, Direction> getDirectionMap() {
-        return directionMap;
-    }
+    public static Direction getDirectionOf(int currX, int currY, int targetX, int targetY) {
+        int deltaX = currX - targetX;
+        int deltaY = currY - targetY;
 
-    public static Direction getDirectionOf(int targetX, int targetY, int currentX, int currentY) {
-        int deltaX = Integer.compare(targetX - currentX, 0);
-        int deltaY = Integer.compare(targetY - currentY, 0);
+        // Adjust deltaX and deltaY to be -1, 0, or 1
+        deltaX = Integer.compare(deltaX, 0);
+        deltaY = Integer.compare(deltaY, 0);
+
+        // Access the directions array with adjusted indices
         System.out.println(deltaX + " | " + deltaY);
-        return directionMap.get(IVector2.of(deltaX,deltaY));
+        return directions[deltaY + 1][deltaX + 1];
     }
-
     public static Direction getDirectionOf(IVector2 target, IVector2 current) {
         return getDirectionOf(target.x(), target.y(), current.x(), current.y());
     }

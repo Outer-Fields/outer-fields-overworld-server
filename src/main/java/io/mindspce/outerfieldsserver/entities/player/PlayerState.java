@@ -41,9 +41,8 @@ public class PlayerState extends PlayerEntity {
     public void onPositionUpdate(int posX, int posY, long timestamp) {
 //        if (!isInit) { return; }
 
-
+        long t = System.nanoTime();
         try {
-
             //      System.out.println("ID:" + id() + " Position: " + posX + ", " + posY);
 
             boolean valid = localArea.validateUpdate(posX, posY, timestamp);
@@ -61,12 +60,12 @@ public class PlayerState extends PlayerEntity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("Input Time: " + (System.nanoTime() - t));
     }
 
     public void onTick(long _tickTime) {
-        ;
-        if (playerSession == null || !playerSession.isConnected()) { return; }
-        var t = System.nanoTime();
+        long t = System.nanoTime();
+        if (playerSession == null || !playerSession.isConnected()) { return; };
         List<QuadItem<Entity>> eUpdateList = localArea.entityUpdateList();
         BitSet knownEntities = localArea.knownEntities();
         localArea.currArea().queryEntityGrid(localArea.viewRect(), eUpdateList);
@@ -92,6 +91,8 @@ public class PlayerState extends PlayerEntity {
         }
         playerSession.submitMsg(playerSession.entityUpdateContainer().getAsEntityPayLoad());
         eUpdateList.clear();
+        System.out.println("Output Time: " + (System.nanoTime() - t));
+
 
 //        outerLoop:
 //        for (int i = 0; i < 4; ++i) {
