@@ -39,7 +39,7 @@ public class PlayerAuthority {
                     return false;
                 }
             }
-            }
+        }
 ////                    // Normalize the direction vector
 ////                    IVector2 normalizedDirection = direction.normalize();
 ////                    // Scale the normalized direction by -16 pixels to move in the opposite direction
