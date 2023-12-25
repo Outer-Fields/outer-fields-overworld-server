@@ -1,16 +1,10 @@
 package io.mindspce.outerfieldsserver.core;
 
-import io.mindspce.outerfieldsserver.area.AreaInstance;
-import io.mindspce.outerfieldsserver.area.ChunkData;
-import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.core.networking.SocketQueue;
 import io.mindspce.outerfieldsserver.entities.player.PlayerState;
-import io.mindspce.outerfieldsserver.enums.AreaId;
-import io.mindspice.mindlib.data.geometry.IVector2;
 import org.jctools.maps.NonBlockingHashMapLong;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -42,10 +36,13 @@ public class GameServer {
     public Runnable playerUpdateTick() {
         return () -> {
             try {
-                lastTickTime = System.currentTimeMillis();
+                long now = System.currentTimeMillis();
+                double deltaTime = (System.currentTimeMillis() -lastTickTime) / 1000.0);
+                        lastTickTime = System.currentTimeMillis();
+
                 WorldState.GET().getAreaList()
                         .forEach(a -> a.getActivePlayers()
-                                .forEach(p -> p.onTick(lastTickTime)));
+                                .forEach(p -> p.onTick(lastTickTime, deltaTime)));
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -1,7 +1,5 @@
 package io.mindspce.outerfieldsserver.systems.event;
 
-import io.mindspce.outerfieldsserver.enums.EventType;
-
 import java.util.Set;
 import java.util.function.Consumer;
 

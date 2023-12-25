@@ -4,7 +4,7 @@ import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.systems.event.Subscribable;
 import io.mindspce.outerfieldsserver.entities.player.PlayerState;
-import io.mindspce.outerfieldsserver.enums.EventType;
+import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.*;
 import jakarta.annotation.Nullable;

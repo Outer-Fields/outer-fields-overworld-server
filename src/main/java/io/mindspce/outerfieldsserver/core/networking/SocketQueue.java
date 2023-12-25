@@ -10,15 +10,12 @@ import org.springframework.web.socket.BinaryMessage;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 
 
 public class SocketQueue implements NetMessageHandlers {
     private final MpscArrayQueue<NetMessageIn> networkInQueue = new MpscArrayQueue<>(10000);
-    private final MpscArrayQueue<NetMessageIn> networkOutQueue = new MpscArrayQueue<>(10000);
     private final ExecutorService networkInExec = Executors.newSingleThreadExecutor();
     private final ExecutorService networkOutExec = Executors.newVirtualThreadPerTaskExecutor();
     private volatile boolean running = true;
@@ -30,10 +27,10 @@ public class SocketQueue implements NetMessageHandlers {
     }
 
     public void handOffMessageIn(NetMessageIn msg) {
-        boolean success = networkOutQueue.offer(msg);
+        boolean success = networkInQueue.offer(msg);
         while (!success) {
             LockSupport.parkNanos(100);
-            success = networkOutQueue.offer(msg);
+            success = networkInQueue.offer(msg);
         }
     }
 
@@ -44,7 +41,7 @@ public class SocketQueue implements NetMessageHandlers {
     public Runnable networkInProcessor() {
         return () -> {
             while (running) {
-                networkOutQueue.drain(this::handleMsgIn);
+                networkInQueue.drain(this::handleMsgIn);
                 Thread.onSpinWait();
                 LockSupport.parkNanos(10000);
 

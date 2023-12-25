@@ -1,9 +1,12 @@
 package io.mindspce.outerfieldsserver.components;
 
-import io.mindspce.outerfieldsserver.enums.ComponentType;
+import io.mindspce.outerfieldsserver.systems.event.*;
 
 
-public record Component<T>(
-        ComponentType type,
-        T componentData
-) { }
+public abstract class Component implements TickListener {
+    private final int ownerId;
+
+    protected Component(int ownerId) {
+        this.ownerId = ownerId;
+    }
+}

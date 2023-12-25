@@ -1,14 +1,13 @@
 package io.mindspce.outerfieldsserver.entities.player;
 
-import io.mindspce.outerfieldsserver.area.AreaInstance;
+import io.mindspce.outerfieldsserver.area.AreaState;
 import io.mindspce.outerfieldsserver.area.ChunkData;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.core.authority.PlayerAuthority;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.data.wrappers.DynamicTileRef;
 import io.mindspce.outerfieldsserver.entities.Entity;
-import io.mindspce.outerfieldsserver.enums.EventType;
-import io.mindspce.outerfieldsserver.enums.PosAuthResponse;
+import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.collections.other.GridArray;
 import io.mindspice.mindlib.data.geometry.*;
 
@@ -16,7 +15,7 @@ import java.util.*;
 
 
 public class PlayerLocalArea {
-    private volatile AreaInstance currArea;
+    private volatile AreaState currArea;
     private final PlayerState playerState;
 
     // Local Chunks
@@ -45,7 +44,7 @@ public class PlayerLocalArea {
 
     // Currents
     private long lastTimestamp = -1;
-    private final IMutVector2 currChunk = IVector2.ofMutable(0, 0);
+    private volatile IVector2 currChunk = IVector2.of(0, 0);
     private final HashSet<IVector2> unSubTable = new HashSet<>(2);
     private final HashSet<IVector2> newSubTable = new HashSet<>(2);
 
@@ -67,7 +66,7 @@ public class PlayerLocalArea {
         }
     }
 
-    public void updateCurrArea(AreaInstance area, int posX, int posY) {
+    public void updateCurrArea(AreaState area, int posX, int posY) {
         currPosition().setXY(posX, posY);
         // clear old subscriptions if they exist
         if (currArea != null) {
@@ -111,7 +110,6 @@ public class PlayerLocalArea {
         }
         mVector.shiftLine(posX, posY); //set end to start, start to new pos
 
-
         boolean validMove = PlayerAuthority.validateDistance(mVector, lastTimestamp, currTimestamp);
         boolean validCollision = PlayerAuthority.validateCollision(currArea, localTileGrid, viewRect, mVector);
 
@@ -122,7 +120,7 @@ public class PlayerLocalArea {
 
         lastTimestamp = currTimestamp;
         // return invalidMove ? PosAuthResponse.INVALID_MOVEMENT : PosAuthResponse.VALID;
-         return validCollision && validMove;
+        return validCollision && validMove;
     }
 
     public void updateLocalArea() {
@@ -142,7 +140,7 @@ public class PlayerLocalArea {
         return mVector.start();
     }
 
-    public AreaInstance currArea() {
+    public AreaState currArea() {
         return currArea;
     }
 
@@ -156,6 +154,10 @@ public class PlayerLocalArea {
 
     public ChunkData currChunk() {
         return currArea.getChunkByIndex(currChunk);
+    }
+
+    public IVector2 currChunkIndex() {
+        return currChunk;
     }
 
     public IMutLine2[] localChunksList() {
@@ -200,7 +202,7 @@ public class PlayerLocalArea {
             ChunkData chunk = currArea.getChunkByIndex(currChunk);
             if (chunk != null) { chunk.removeActiveEntity(playerState); }
 
-            currChunk.setXY(newChunkX, newChunkY);
+            currChunk = currChunk.setXY(newChunkX, newChunkY);
             chunk = currArea.getChunkByIndex(currChunk);
             if (chunk != null) { chunk.addActiveEntity(playerState); }
         }

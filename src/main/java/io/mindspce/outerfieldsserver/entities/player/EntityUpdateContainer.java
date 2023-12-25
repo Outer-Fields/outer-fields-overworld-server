@@ -111,22 +111,22 @@ public class EntityUpdateContainer {
             if (playerEntCount > i) {
                 messageBytes += newPlayerBitset.get(i)
                         ? NetSerializer.NEW_CHARACTER_BYTES : NetSerializer.ENTITY_UPDATE_BYTES;
-                messageBytes +=  playerEntities[i].states().length;
+                messageBytes +=  playerEntities[i].states().size();
             }
             if (nonPlayerEntCount > i) {
                 messageBytes += newNonPlayerBitSet.get(i)
                         ? NetSerializer.NEW_CHARACTER_BYTES : NetSerializer.ENTITY_UPDATE_BYTES;
-                messageBytes +=  nonPlayerEntities[i].states().length;
+                messageBytes +=  nonPlayerEntities[i].states().size();
             }
             if (itemEntCount > i) {
                 messageBytes += newItemBitset.get(i)
                         ? NetSerializer.NEW_ITEM_BYTES : NetSerializer.ENTITY_UPDATE_BYTES;
-                messageBytes +=  itemEntities[i].states().length;
+                messageBytes +=  itemEntities[i].states().size();
             }
             if (locationEntCount > i) {
                 messageBytes += newLocationBitSet.get(i)
                         ? NetSerializer.NEW_LOCATION_BYTES : NetSerializer.ENTITY_UPDATE_BYTES;
-                messageBytes +=  itemEntities[i].states().length;
+                messageBytes +=  itemEntities[i].states().size();
             }
 
         }

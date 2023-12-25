@@ -2,12 +2,15 @@ package io.mindspce.outerfieldsserver.area;
 
 import io.mindspce.outerfieldsserver.core.GameSettings;
 
+import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.entities.locations.LocationEntity;
 import io.mindspce.outerfieldsserver.entities.player.PlayerState;
 import io.mindspce.outerfieldsserver.data.wrappers.ActiveEntityUpdate;
 import io.mindspce.outerfieldsserver.enums.AreaId;
-import io.mindspce.outerfieldsserver.enums.EventType;
+import io.mindspce.outerfieldsserver.enums.EntityEventType;
+import io.mindspce.outerfieldsserver.systems.event.EventType;
+import io.mindspce.outerfieldsserver.systems.event.EntityEvent;
 import io.mindspice.mindlib.data.geometry.QuadItem;
 import io.mindspice.mindlib.data.geometry.*;
 
@@ -20,7 +23,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public class AreaInstance {
+public class AreaState {
     private final AreaId arenaName;
     private final ChunkData[][] chunkMap;
     private final IVector2 areaSize;
@@ -32,7 +35,7 @@ public class AreaInstance {
 
     private final ConcurrentLinkedDeque<ActiveEntityUpdate> entityUpdateQueue = new ConcurrentLinkedDeque<>();
 
-    public AreaInstance(AreaId arenaName, ChunkData[][] chunkMap) {
+    public AreaState(AreaId arenaName, ChunkData[][] chunkMap) {
         this.arenaName = arenaName;
         this.chunkMap = chunkMap;
         areaSize = IVector2.of(chunkMap.length, chunkMap[0].length);
@@ -72,6 +75,7 @@ public class AreaInstance {
 
     public void updateGridEntity(ILine2 mVec, Entity entity) {
         entityGrid.update(mVec.start(), mVec.end(), entity);
+        EntityManager.GET().emitEntityEvent(new EntityEvent(arenaName, EntityEventType.NEW_POSITION));
     }
 
     public void addEntityToGrid(IVector2 pos, Entity entity) {

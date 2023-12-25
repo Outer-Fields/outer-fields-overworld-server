@@ -1,22 +1,5 @@
 package io.mindspce.outerfieldsserver.navigation;
 
-import io.mindspce.outerfieldsserver.area.AreaInstance;
-import io.mindspce.outerfieldsserver.area.ChunkData;
-import io.mindspce.outerfieldsserver.area.NavData;
-import io.mindspce.outerfieldsserver.area.TileData;
-import io.mindspce.outerfieldsserver.core.calculators.NavCalc;
-import io.mindspce.outerfieldsserver.core.GameSettings;
-import io.mindspce.outerfieldsserver.enums.AreaId;
-import io.mindspce.outerfieldsserver.enums.NavPath;
-import io.mindspce.outerfieldsserver.data.wrappers.ChunkTileIndex;
-import io.mindspce.outerfieldsserver.util.GridUtils;
-import io.mindspice.mindlib.data.geometry.IVector2;
-import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.Set;
-
-
 public class NavigationTest {
 
   //  @Test

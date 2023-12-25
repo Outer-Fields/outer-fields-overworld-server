@@ -1,25 +1,18 @@
 package io.mindspce.outerfieldsserver.core.authority;
 
-import io.mindspce.outerfieldsserver.area.AreaInstance;
-import io.mindspce.outerfieldsserver.area.ChunkData;
-import io.mindspce.outerfieldsserver.area.TileData;
+import io.mindspce.outerfieldsserver.area.AreaState;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.data.wrappers.DynamicTileRef;
-import io.mindspce.outerfieldsserver.entities.player.PlayerState;
 import io.mindspce.outerfieldsserver.enums.Direction;
-import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.collections.other.GridArray;
 import io.mindspice.mindlib.data.geometry.*;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.function.Consumer;
 
 
 public class PlayerAuthority {
 
-    public static boolean validateCollision(AreaInstance area, GridArray<DynamicTileRef> tileRefs, IRect2 viewRect,
+    public static boolean validateCollision(AreaState area, GridArray<DynamicTileRef> tileRefs, IRect2 viewRect,
             IAtomicLine2 mVector) {
         for (int i = 0; i < tileRefs.getFlatSize(); ++i) {
             DynamicTileRef tile = tileRefs.getFlat(i);

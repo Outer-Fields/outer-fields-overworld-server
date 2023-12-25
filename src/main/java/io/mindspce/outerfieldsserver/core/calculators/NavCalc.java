@@ -1,6 +1,6 @@
 package io.mindspce.outerfieldsserver.core.calculators;
 
-import io.mindspce.outerfieldsserver.area.AreaInstance;
+import io.mindspce.outerfieldsserver.area.AreaState;
 import io.mindspce.outerfieldsserver.area.ChunkData;
 import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.core.GameSettings;
@@ -28,7 +28,7 @@ public class NavCalc {
      * @param target The target chunk tile index.
      * @return The list of global tile indices representing the shortest path from the start to the target.
      */
-    public static List<IVector2> getPathTo(AreaInstance area, ChunkTileIndex start, ChunkTileIndex target) {
+    public static List<IVector2> getPathTo(AreaState area, ChunkTileIndex start, ChunkTileIndex target) {
         return aStarPathfinding(area, start, target);
     }
 
@@ -41,7 +41,7 @@ public class NavCalc {
      * @param target The target chunk tile index.
      * @return The list of global tile indices representing the shortest path from the start to the target.
      */
-    private static List<IVector2> aStarPathfinding(AreaInstance area, ChunkTileIndex start, ChunkTileIndex target) {
+    private static List<IVector2> aStarPathfinding(AreaState area, ChunkTileIndex start, ChunkTileIndex target) {
         Map<ChunkTileIndex, ChunkTileIndex> cameFrom = new HashMap<>();
         Map<ChunkTileIndex, Integer> costSoFar = new HashMap<>();
         PriorityQueue<Node> frontier = new PriorityQueue<>(Comparator.comparingInt(Node::priority));
@@ -80,7 +80,7 @@ public class NavCalc {
      * @return A List of ChunkTileIndex objects representing the neighboring tiles.
      */
     // TODO at 8 point calc?
-    private static List<ChunkTileIndex> getNeighbors(AreaInstance area, ChunkTileIndex current) {
+    private static List<ChunkTileIndex> getNeighbors(AreaState area, ChunkTileIndex current) {
         List<ChunkTileIndex> neighbors = new ArrayList<>();
         int tilesPerChunk = GameSettings.GET().tilesPerChunk().x(); // Assuming square chunks
 

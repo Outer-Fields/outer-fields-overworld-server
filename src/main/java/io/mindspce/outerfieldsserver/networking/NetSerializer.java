@@ -91,7 +91,7 @@ public class NetSerializer {
 
     public static ByteBuffer entityUpdateToBuffer(EntityType entityType, Entity entity) {
         return entityUpdateToBuffer(
-                get_buffer(ENTITY_UPDATE_BYTES + entity.states().length), entityType, entity
+                get_buffer(ENTITY_UPDATE_BYTES + entity.states().size()), entityType, entity
         );
     }
 
@@ -100,7 +100,7 @@ public class NetSerializer {
         buffer.put(DataType.ENTITY_UPDATE.value);
         buffer.put(entityType.value);
         buffer.putInt(entity.id());
-        buffer.put((byte) entity.states().length);
+        buffer.put((byte) entity.states().size());
         for (State state : entity.states()) {
             if (state == null) { continue;}
             buffer.put(state.value);
@@ -111,14 +111,14 @@ public class NetSerializer {
     }
 
     public static ByteBuffer newItemToBuffer(ItemEntity entity) {
-        return newItemToBuffer(get_buffer(NEW_ITEM_BYTES + entity.states().length), entity);
+        return newItemToBuffer(get_buffer(NEW_ITEM_BYTES + entity.states().size()), entity);
     }
 
     public static ByteBuffer newItemToBuffer(ByteBuffer buffer, ItemEntity entity) {
         buffer.put(DataType.NEW_ITEM.value);
         buffer.put(EntityType.ITEM.value);
         buffer.putInt(entity.id());
-        buffer.put((byte) entity.states().length);
+        buffer.put((byte) entity.states().size());
         for (State state : entity.states()) {
             if (state == null) { continue;}
             buffer.put(state.value);
@@ -131,14 +131,14 @@ public class NetSerializer {
     }
 
     public static ByteBuffer newLocationToBuffer(LocationEntity entity) {
-        return newLocationToBuffer(get_buffer(NEW_ITEM_BYTES + entity.states().length), entity);
+        return newLocationToBuffer(get_buffer(NEW_ITEM_BYTES + entity.states().size()), entity);
     }
 
     public static ByteBuffer newLocationToBuffer(ByteBuffer buffer, LocationEntity entity) {
         buffer.put(DataType.NEW_LOCATION.value);
         buffer.put(EntityType.LOCATION.value);
         buffer.putInt(entity.id());
-        buffer.put((byte) entity.states().length);
+        buffer.put((byte) entity.states().size());
         for (State state : entity.states()) {
             if (state == null) { continue;}
             buffer.put(state.value);
@@ -152,14 +152,14 @@ public class NetSerializer {
 
     public static ByteBuffer newPlayerToBuffer(PlayerEntity entity) {
         return newPlayerToBuffer(
-                get_buffer(NEW_CHARACTER_BYTES + entity.states().length), entity);
+                get_buffer(NEW_CHARACTER_BYTES + entity.states().size()), entity);
     }
 
     public static ByteBuffer newPlayerToBuffer(ByteBuffer buffer, PlayerEntity entity) {
         buffer.put(DataType.NEW_CHARACTER.value);
         buffer.put(EntityType.PLAYER.value);
         buffer.putInt(entity.id());
-        buffer.put((byte) entity.states().length);
+        buffer.put((byte) entity.states().size());
         for (State state : entity.states()) {
             if (state == null) { continue;}
             buffer.put(state.value);
@@ -181,14 +181,14 @@ public class NetSerializer {
 
     public static ByteBuffer newNonPlayerToBuffer(NonPlayerEntity entity) {
         return newNonPlayerToBuffer(
-                get_buffer(NEW_CHARACTER_BYTES + entity.states().length), entity);
+                get_buffer(NEW_CHARACTER_BYTES + entity.states().size()), entity);
     }
 
     public static ByteBuffer newNonPlayerToBuffer(ByteBuffer buffer, NonPlayerEntity entity) {
         buffer.put(DataType.NEW_CHARACTER.value);
         buffer.put(EntityType.NON_PLAYER.value);
         buffer.putInt(entity.id());
-        buffer.put((byte) entity.states().length);
+        buffer.put((byte) entity.states().size());
         for (State state : entity.states()) {
             if (state == null) { continue;}
             buffer.put(state.value);

@@ -1,10 +1,11 @@
 package io.mindspce.outerfieldsserver.entities.player;
 
-import io.mindspce.outerfieldsserver.area.AreaInstance;
+import io.mindspce.outerfieldsserver.area.AreaState;
 import io.mindspce.outerfieldsserver.core.WorldState;
+import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
-import io.mindspce.outerfieldsserver.enums.PosAuthResponse;
+import io.mindspce.outerfieldsserver.systems.event.*;
 import io.mindspce.outerfieldsserver.networking.NetSerializer;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.geometry.QuadItem;
@@ -12,11 +13,13 @@ import io.mindspice.mindlib.util.Utils;
 
 import java.util.BitSet;
 import java.util.List;
+import java.util.function.Consumer;
 
 
-public class PlayerState extends PlayerEntity {
+public class PlayerState extends PlayerEntity implements EventListener<PlayerState> {
     private PlayerSession playerSession;
     private final PlayerLocalArea localArea;
+    private final ListenerCache<PlayerState> listeners = new ListenerCache<>();
     private volatile boolean isInit = false;
 
     public PlayerState(int playerId) {
@@ -31,10 +34,10 @@ public class PlayerState extends PlayerEntity {
 
     public void init(PlayerSession playerSession, AreaId id, int startX, int startY) {
         this.playerSession = playerSession;
-        AreaInstance areaInstance = WorldState.GET().getAreaTable().get(id);
-        localArea.updateCurrArea(areaInstance, startX, startY);
-        areaInstance.addActivePlayer(this);
-        areaInstance.addEntityToGrid(IVector2.of(startX, startY), this);
+        AreaState areaState = WorldState.GET().getAreaTable().get(id);
+        localArea.updateCurrArea(areaState, startX, startY);
+        areaState.addActivePlayer(this);
+        areaState.addEntityToGrid(IVector2.of(startX, startY), this);
         isInit = true;
     }
 
@@ -55,6 +58,8 @@ public class PlayerState extends PlayerEntity {
                 if (localArea.currChunk() == null) {
                     // TODO log this this should only happen in testing
                 }
+
+                EntityManager.GET().emitEvent(Event.of(entityId, EventType.PLAYER_POSITION, entityType));
                 localArea.currArea().updateGridEntity(localArea.mVector, this);
             }
         } catch (Exception e) {
@@ -63,15 +68,27 @@ public class PlayerState extends PlayerEntity {
         System.out.println("Input Time: " + (System.nanoTime() - t));
     }
 
-    public void onTick(long _tickTime) {
+    double fullQueryDelta = 0.0;
+
+    public void onTick(long _tickTime, double deltaTime) {
+
         long t = System.nanoTime();
-        if (playerSession == null || !playerSession.isConnected()) { return; };
+        fullQueryDelta += deltaTime;
+        if (playerSession == null || !playerSession.isConnected()) { return; }
+        if (deltaTime < 1.5) {
+
+            return;
+
+        }
+
+        deltaTime = 0.0;
+
         List<QuadItem<Entity>> eUpdateList = localArea.entityUpdateList();
         BitSet knownEntities = localArea.knownEntities();
         localArea.currArea().queryEntityGrid(localArea.viewRect(), eUpdateList);
 
         for (var quadItem : eUpdateList) {
-            if (quadItem.item().id() == id.get()) { continue; }
+            if (quadItem.item().id() == entityId) { continue; }
             System.out.println("sending data for id:" + id() + "data_id:" + quadItem.item().id());
 
             if (knownEntities.get(quadItem.item().id())) {
@@ -92,7 +109,6 @@ public class PlayerState extends PlayerEntity {
         playerSession.submitMsg(playerSession.entityUpdateContainer().getAsEntityPayLoad());
         eUpdateList.clear();
         System.out.println("Output Time: " + (System.nanoTime() - t));
-
 
 //        outerLoop:
 //        for (int i = 0; i < 4; ++i) {
@@ -144,7 +160,37 @@ public class PlayerState extends PlayerEntity {
     }
 
     @Override
+    public AreaId currentArea() {
+        return localArea.currArea().getId();
+    }
+
+    @Override
+    public IVector2 chunkIndex() {
+        return localArea.currChunkIndex();
+    }
+
+    @Override
     public int hashCode() {
         return playerId();
+    }
+
+    @Override
+    public void onEvent(Event event) {
+        listeners.handleEvent(this, event);
+    }
+
+    @Override
+    public void onDirect(Event event) {
+
+    }
+
+    @Override
+    public void onCallBack(Callback<PlayerState> consumer) {
+
+    }
+
+    @Override
+    public boolean isListenerFor(EventType eventType) {
+        return false;
     }
 }
