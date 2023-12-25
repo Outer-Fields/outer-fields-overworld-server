@@ -4,11 +4,12 @@ import io.mindspce.outerfieldsserver.components.subcomponents.AreaMonitor;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.systems.event.EventDomain;
+import io.mindspce.outerfieldsserver.systems.event.EventListener;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspice.mindlib.data.geometry.IRect2;
 
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -17,17 +18,22 @@ import java.util.concurrent.ScheduledExecutorService;
 public class NpcStateManager {
     private static final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
     private final Set<EventType> entityEventSubscriptions = new CopyOnWriteArraySet<>();
+    private final List<EventListener<?>> eventListeners = new ArrayList<>();
+    private final Map<Class<?>, EventListener<?>> registeredListeners = new HashMap<>();
 
     public NpcStateManager() {
+
         EntityManager.GET().registerEventListener(EventDomain.CHARACTER, this::entityEventHandler);
         // entityEventSubscriptions.addAll(List.of(EntityEventType.NEW_POSITION));
     }
 
     public void entityEventHandler(Event event) {
-        if (entityEventSubscriptions.contains(event.type())) {
-            //loop over lists of EventListeners check if they monitor for that message and issue;
-        }
-    }
+        exec.submit(() -> {
+            if (entityEventSubscriptions.contains(event.type())) {
+                eventListeners.forEach(l -> l.onEvent(event));
+            }
+        });
+
 
     public void onTick(Event event) {
 

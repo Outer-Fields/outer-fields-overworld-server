@@ -22,8 +22,8 @@ public class PlayerState extends PlayerEntity implements EventListener<PlayerSta
     private final ListenerCache<PlayerState> listeners = new ListenerCache<>();
     private volatile boolean isInit = false;
 
-    public PlayerState(int playerId) {
-        super(playerId);
+    public PlayerState(int entityId, int playerId) {
+        super(entityId, playerId);
         localArea = new PlayerLocalArea(this);
     }
 
@@ -60,6 +60,10 @@ public class PlayerState extends PlayerEntity implements EventListener<PlayerSta
                 }
 
                 EntityManager.GET().emitEvent(Event.of(entityId, EventType.PLAYER_POSITION, entityType));
+                EntityManager.GET().emitCallback(new Callback<>(10, PlayerState.class, ((playerState) -> {
+                    playerState.localArea.currChunkIndex() == 10
+
+                }));
                 localArea.currArea().updateGridEntity(localArea.mVector, this);
             }
         } catch (Exception e) {
@@ -180,12 +184,7 @@ public class PlayerState extends PlayerEntity implements EventListener<PlayerSta
     }
 
     @Override
-    public void onDirect(Event event) {
-
-    }
-
-    @Override
-    public void onCallBack(Callback<PlayerState> consumer) {
+    public void onCallBack(Consumer<PlayerState> consumer) {
 
     }
 

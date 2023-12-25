@@ -9,8 +9,8 @@ public abstract class PlayerEntity extends Entity {
     private final int playerId;
     private volatile OutFit outfit = new OutFit();
 
-    public PlayerEntity(int playerId) {
-        super(EntityType.PLAYER);
+    public PlayerEntity(int entityId, int playerId) {
+        super(entityId, EntityType.PLAYER);
         this.playerId = playerId;
     }
 

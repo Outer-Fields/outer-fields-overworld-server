@@ -4,7 +4,7 @@ import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EntityEventType;
 
 
-public class EntityEvent {
+public class EntityEvent extends Event<EntityEvent> {
     AreaId areaId;
     int entityId;
     EntityEventType entityEventType;

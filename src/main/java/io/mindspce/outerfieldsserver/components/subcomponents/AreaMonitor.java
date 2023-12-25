@@ -1,45 +1,54 @@
 package io.mindspce.outerfieldsserver.components.subcomponents;
 
 import io.mindspce.outerfieldsserver.components.Component;
-import io.mindspce.outerfieldsserver.systems.event.Event;
-import io.mindspce.outerfieldsserver.systems.event.EventListener;
-import io.mindspce.outerfieldsserver.systems.event.EventType;
-import io.mindspce.outerfieldsserver.systems.event.ListenerCache;
+import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
+import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.enums.EntityType;
+import io.mindspce.outerfieldsserver.systems.event.*;
 import io.mindspice.mindlib.data.geometry.IRect2;
+import io.mindspice.mindlib.data.geometry.IVector2;
 
-import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 
-public class AreaMonitor extends Component implements EventListener {
-    private final ListenerCache<AreaMonitor> listenerCache = new ListenerCache<>();
+public class AreaMonitor extends Component<AreaMonitor> implements EventListener<AreaMonitor> {
     private final IRect2 monitoredArea;
-    private final BiConsumer<AreaMonitor, Event> onEvent;
 
-    public AreaMonitor(int ownerId, IRect2 monitoredArea, BiConsumer<AreaMonitor, Event> onEvent) {
-        super(ownerId);
-
+    public AreaMonitor(Entity parent, IRect2 monitoredArea, BiConsumer<AreaMonitor, Event<?>> onEvent) {
+        super(parent);
         this.monitoredArea = monitoredArea;
-        this.onEvent = onEvent;
+        listenerCache.addListener(EventType.PLAYER_POSITION, AreaMonitor::enteredAreaCheck);
     }
 
-    @Override
-    public void onTick(long tickTime, double delta) {
-
-    }
-
-    @Override
-    public void onEvent(Event event) {
-        listenerCache.handleEvent(this, event);
-    }
-
-    @Override
-    public void onDirect(Event event) {
-
-    }
-
-    @Override
-    public boolean isListenerFor(EventType eventType) {
-        return false;
+    private void enteredAreaCheck(Event<IVector2> event) {
+        if (monitoredArea.contains(event.entity().globalPosition())) {
+            event.data();
+        }
+        EntityManager.GET().emitEvent(Event.of(parentEntity.id(), EventType.AREA_ENTERED, EntityType.LOCATION));
     }
 }
+
+@Override
+public void onTick(long tickTime, double delta) {
+
+}
+
+@Override
+public void onEvent(Event<?> event) {
+    listenerCache.handleEvent(this, event);
+}
+
+@Override
+public void onCallBack(Consumer<AreaMonitor> consumer) {
+    consumer.accept(this);
+}
+
+@Override
+public boolean isListenerFor(EventType eventType) {
+    return false;
+}
+
+private record AreaMonitorData(
+
+)

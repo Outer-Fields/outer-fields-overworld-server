@@ -1,29 +1,39 @@
 package io.mindspce.outerfieldsserver.systems.event;
 
+import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EntityType;
+import io.mindspice.mindlib.data.geometry.IVector2;
 
 
-public class Event {
-    int issuerId = -1;
-    int recipientId = -1;
-    EventDomain domain;
-    EventType type;
-    EntityType entityType;
+public class Event<T> {
+    private final AreaId areaId;
+    private final IVector2 chunkId;
+    private final int issuerId;
+    private final int recipientId;
+    private final EventType eventType;
+    private final EntityType entityType;
+    private final Entity entity;
+    private final T data;
 
-    private Event(EventDomain domain, EventType type, EntityType entityType, int issuerId, int recipientId) {
-        this.domain = domain;
-        this.type = type;
+    public Event(EventType eventType, EntityType entityType, Entity entity, T eventData) {
+        areaId = entity.currentArea();
+        chunkId = IVector2.of(entity.chunkIndex());
+        issuerId = entity.id();
+        recipientId = -1;
+        this.eventType = eventType;
         this.entityType = entityType;
-        this.issuerId = issuerId;
-        this.recipientId = recipientId;
+        this.entity = entity;
+        this.data = eventData;
+
     }
 
-    public EventDomain domain() {
-        return domain;
+    public T data() {
+        return data;
     }
 
-    public EventType type() {
-        return type;
+    public EventType eventType() {
+        return eventType;
     }
 
     public EntityType entityType() {
@@ -38,20 +48,32 @@ public class Event {
         return recipientId;
     }
 
-    public static Event toRecipient(int recipientId, int issuerId, EventType eventType, EntityType entityType) {
-        return new Event(EventDomain.DIRECT, eventType, entityType, issuerId, recipientId);
+    public AreaId areaId() {
+        return areaId;
     }
 
-    public static Event toGlobal(int issuerId, EventType eventType, EntityType entityType) {
-        return new Event(EventDomain.GLOBAL, eventType, entityType, issuerId, -1);
+    public IVector2 chunkId() {
+        return chunkId;
     }
 
-    public static Event toSelf(int issuerId, EventType eventType) {
-        return new Event(EventDomain.SELF, eventType, null, issuerId, issuerId);
+    public Entity entity() {
+        return entity;
     }
 
-    public static Event of(int issuerId, EventType eventType, EntityType entityType) {
-        return new Event(eventType.domain, eventType, entityType, issuerId, -1);
-    }
+//    public static Event toRecipient(int recipientId, int issuerId, EventType eventType, EntityType entityType) {
+//        return new Event(EventDomain.DIRECT, eventType, entityType, issuerId, recipientId);
+//    }
+//
+//    public static Event toGlobal(int issuerId, EventType eventType, EntityType entityType) {
+//        return new Event(EventDomain.GLOBAL, eventType, entityType, issuerId, -1);
+//    }
+//
+//    public static Event toSelf(int issuerId, EventType eventType) {
+//        return new Event(EventDomain.SELF, eventType, null, issuerId, issuerId);
+//    }
+//
+//    public static Event of(int issuerId, EventType eventType, EntityType entityType) {
+//        return new Event(eventType.domain, eventType, entityType, issuerId, -1);
+//    }
 
 }

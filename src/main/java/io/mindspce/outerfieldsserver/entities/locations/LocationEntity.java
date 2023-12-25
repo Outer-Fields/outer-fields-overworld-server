@@ -9,8 +9,8 @@ public abstract class LocationEntity extends Entity {
     protected final int key;
     protected final String locationName;
 
-    public LocationEntity(int locationKey, String locationName) {
-        super(EntityType.LOCATION);
+    public LocationEntity(int entityId, int locationKey, String locationName) {
+        super(entityId, EntityType.LOCATION);
         this.key = locationKey;
         this.locationName = locationName;
     }

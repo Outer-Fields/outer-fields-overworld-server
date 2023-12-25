@@ -11,18 +11,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class Entity {
     protected final EntityType entityType;
-    protected volatile int entityId = -1;
-    protected volatile boolean idSet;
+    protected final int entityId;
     protected final List<State> states = new CopyOnWriteArrayList<>();
     protected volatile String name = "";
 
-    public Entity(EntityType entityType) {
+    public Entity(int id, EntityType entityType) {
+        this.entityId = id;
         this.entityType = entityType;
-    }
-
-    public void setEntityId(int entityId) {
-        this.entityId = entityId;
-        idSet = true;
     }
 
     public List<State> states() { return states; }

@@ -38,16 +38,16 @@ public class EntityManager {
     }
 
     public PlayerState newPlayerState(int playerId) {
-        PlayerState playerState = new PlayerState(playerId);
-        int entityId = entityCache.put(playerState);
-        playerState.setEntityId(entityId);
+        int entityId = entityCache.getAndReserveNextIndex();
+        PlayerState playerState = new PlayerState(entityId, playerId);
+        entityCache.putAtReservedIndex(entityId, playerState);
         return playerState;
     }
 
     public LocationState newLocationState(int locationKey, String locationName) {
-        LocationState locationState = new LocationState(locationKey, locationName);
-        int entityId = entityCache.put(locationState);
-        locationState.setEntityId(entityId);
+        int entityId = entityCache.getAndReserveNextIndex();
+        LocationState locationState = new LocationState(entityId, locationKey, locationName);
+        entityCache.putAtReservedIndex(entityId, locationState);
         return locationState;
     }
 
@@ -75,8 +75,12 @@ public class EntityManager {
         }
     }
 
-    public <T extends Callback<T>> void emitCallback(Callback<T> callback) {
-        newPlayerState(10).onCallBack(callback);
+    public <T extends EventListener<T>> void emitCallback(Callback<T> callback) {
+        EventListener<?> listener = newPlayerState(10);
+        if (listener != null && callback.classType().isInstance(listener)) {
+            T castedListener = callback.classType().cast(listener);
+            castedListener.onCallBack(callback.callback());
+        }
     }
 }
 
