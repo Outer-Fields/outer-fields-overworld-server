@@ -3,17 +3,22 @@ package io.mindspce.outerfieldsserver;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mindspce.outerfieldsserver.area.ChunkJson;
+import io.mindspce.outerfieldsserver.components.subcomponents.AreaMonitor;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.core.ServerConst;
+import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.entities.item.ItemEntity;
 import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
 import io.mindspce.outerfieldsserver.enums.Direction;
 import io.mindspce.outerfieldsserver.networking.outgoing.NetMessage;
+import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspce.outerfieldsserver.util.GridUtils;
+import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.util.JsonUtils;
 import org.junit.jupiter.api.Test;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +34,14 @@ import java.util.concurrent.atomic.AtomicLong;
 //@SpringBootTest
 class OuterFieldsServerApplicationTests {
 
+
+    @Test
+    void eventTest() {
+        Entity ent = EntityManager.GET().newPlayerState(1);
+        AreaMonitor aMon = new AreaMonitor(ent, IRect2.of(10,10,10,10));
+        Event<IVector2> areaEvent = Event.newPostionEvent(ent, IVector2.of(100,100));
+        aMon.onEvent(areaEvent);
+    }
 
 
     @Test

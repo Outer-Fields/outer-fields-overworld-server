@@ -6,5 +6,5 @@ import java.util.function.Predicate;
 
 
 public class Task <T> {
-    private final List<Pair<Predicate<T>, Action<T>>>
+   // private final List<Pair<Predicate<T>, Action<T>>>
 }

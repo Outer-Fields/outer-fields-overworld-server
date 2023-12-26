@@ -14,23 +14,27 @@ import java.util.List;
 public class Quest extends Component<Quest> {
     List<LocationEntity> questLocations;
     List<ItemEntity> questItems;
-    List<Task> questProgression;
 
-    public Quest(Entity parentEntity) {
+    protected Quest(Entity parentEntity) {
         super(parentEntity);
-        if (questLocations != null) {
-            listenerCache.addListener(EventType.AREA_ENTERED, );
-        }
     }
+    //List<Task> questProgression;
+
+//    public Quest(Entity parentEntity) {
+////        super(parentEntity);
+////        if (questLocations != null) {
+////            listenerCache.addListener(EventType.AREA_ENTERED, );
+////        }
+//    }
 
     public void locationCheck(Event event) {
-        for (var location : questLocations) {
-            if (location.id() == event.issuerId()) {
-                for(var task : questProgression) {
-                    task.
-                }
-            }
-        }
+//        for (var location : questLocations) {
+//            if (location.id() == event.issuerId()) {
+//                for(var task : questProgression) {
+//                    task.
+//                }
+//            }
+//        }
     }
 
     @Override

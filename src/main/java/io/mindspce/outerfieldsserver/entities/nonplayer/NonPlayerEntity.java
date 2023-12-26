@@ -9,8 +9,8 @@ public abstract class NonPlayerEntity extends Entity {
     private String name = "";
     private OutFit outfit = new OutFit();
 
-    public NonPlayerEntity() {
-        super(EntityType.NON_PLAYER);
+    public NonPlayerEntity(int id) {
+        super(id, EntityType.NON_PLAYER);
     }
 
     public String name() {

@@ -2,15 +2,12 @@ package io.mindspce.outerfieldsserver.area;
 
 import io.mindspce.outerfieldsserver.core.GameSettings;
 
-import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.entities.locations.LocationEntity;
 import io.mindspce.outerfieldsserver.entities.player.PlayerState;
 import io.mindspce.outerfieldsserver.data.wrappers.ActiveEntityUpdate;
 import io.mindspce.outerfieldsserver.enums.AreaId;
-import io.mindspce.outerfieldsserver.enums.EntityEventType;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
-import io.mindspce.outerfieldsserver.systems.event.EntityEvent;
 import io.mindspice.mindlib.data.geometry.QuadItem;
 import io.mindspice.mindlib.data.geometry.*;
 
@@ -75,7 +72,7 @@ public class AreaState {
 
     public void updateGridEntity(ILine2 mVec, Entity entity) {
         entityGrid.update(mVec.start(), mVec.end(), entity);
-        EntityManager.GET().emitEntityEvent(new EntityEvent(arenaName, EntityEventType.NEW_POSITION));
+       // EntityManager.GET().emitEntityEvent(new EntityEvent(arenaName, EntityEventType.NEW_POSITION));
     }
 
     public void addEntityToGrid(IVector2 pos, Entity entity) {

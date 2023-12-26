@@ -37,7 +37,7 @@ public class GameServer {
         return () -> {
             try {
                 long now = System.currentTimeMillis();
-                double deltaTime = (System.currentTimeMillis() -lastTickTime) / 1000.0);
+                double deltaTime = (System.currentTimeMillis() -lastTickTime) / 1000.0;
                         lastTickTime = System.currentTimeMillis();
 
                 WorldState.GET().getAreaList()

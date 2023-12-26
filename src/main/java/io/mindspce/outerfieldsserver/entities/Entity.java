@@ -1,62 +1,92 @@
 package io.mindspce.outerfieldsserver.entities;
 
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.enums.AreaId;
+import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.enums.State;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
-import java.util.*;
+import java.util.BitSet;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public abstract class Entity {
     protected final EntityType entityType;
     protected final int entityId;
-    protected final List<State> states = new CopyOnWriteArrayList<>();
-    protected volatile String name = "";
 
-    public Entity(int id, EntityType entityType) {
+    protected volatile AreaId areaId = null;
+    protected volatile IVector2 chunkIndex = IVector2.of(-1, -1);
+
+    public Entity(int id, EntityType entityType, AreaId areaId) {
         this.entityId = id;
         this.entityType = entityType;
+        this.areaId = areaId;
     }
 
-    public List<State> states() { return states; }
+    public Entity(int id, EntityType entityType, AreaId areaId, IVector2 chunkIndex) {
+        this.entityId = id;
+        this.entityType = entityType;
+        this.areaId = areaId;
+        this.chunkIndex = chunkIndex;
+    }
 
-    public void setStates(List<State> states) { this.states.addAll(states); }
+    public Entity(int id, EntityType entityType, List<Component<?>> components) {
+        this.entityId = id;
+        this.entityType = entityType;
+        components.forEach(c -> attachedComponents.set(c.componentType().ordinal()));
+        this.componentList.addAll(components);
+    }
 
-    public void setName(String name) { this.name = name; }
+    public void addComponents(List<Component<?>> components) {
+        components.forEach(c -> attachedComponents.set(c.componentType().ordinal()));
+        componentList.addAll(components);
+    }
 
-    public String name() { return name; }
+    public void addComponent(Component<?> component) {
+        attachedComponents.set(component.componentType().ordinal());
+        componentList.add(component);
 
-    public void addState(State state) { states.add(state); }
+    }
 
-    public void clearState(State state) { states.clear(); }
+    public int id() {
+        return entityId;
+    }
 
-    public int id() { return entityId; }
+    public EntityType entityType() {
+        return entityType;
+    }
 
-    public EntityType entityType() { return entityType; }
+    public int entityTypeValue() {
+        return entityType.value;
+    }
 
-    public int entityTypeValue() { return entityType.value; }
+    public int entityId() {
+        return entityId;
+    }
 
-    // Implementation Specific, these need to return thread-safe data
-    // Some implementing classes already hold this data so overridden
-    // "handles" to it are used
+    public List<Component<?>> componentList() {
+        return componentList;
+    }
 
-    public abstract IVector2 globalPosition();
+    public BitSet attachedComponents() {
+        return attachedComponents;
+    }
 
-    public abstract IVector2 priorPosition();
+    public AreaId areaId() {
+        return areaId;
+    }
 
-    public abstract AreaId currentArea();
-
-    public abstract IVector2 chunkIndex();
+    public IVector2 chunkIndex() {
+        return chunkIndex;
+    }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Entity: ");
         sb.append("\n  entityType: ").append(entityType);
         sb.append(",\n  id: ").append(entityId);
-        sb.append(",\n  states: ").append(states);
-        sb.append(",\n  name: \"").append(name).append('\"');
         sb.append("\n");
         return sb.toString();
     }

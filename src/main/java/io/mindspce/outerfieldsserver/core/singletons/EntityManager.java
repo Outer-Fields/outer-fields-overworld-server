@@ -18,16 +18,12 @@ import java.util.function.Consumer;
 public class EntityManager {
     public static final EntityManager INSTANCE = new EntityManager();
     private final ConcurrentIndexCache<Entity> entityCache = new ConcurrentIndexCache<>(1000, false);
-    private final Map<EntityType, List<? extends Entity>> entityTypeLists = new EnumMap<>(EntityType.class);
+    //    private final Map<EntityType, List<? extends Entity> entityTypeLists = new EnumMap<>(EntityType.class);
     //private final Map<ComponentType, List<? extends Component<?>>> componentTypeLists = new EnumMap<>(ComponentType.class);
-    private final Map<EventDomain, List<Consumer<Event>>> listenerMap = new EnumMap<>(EventDomain.class);
-    private final List<Consumer<Event>> globalListeners = new CopyOnWriteArrayList<>();
+    private final List<Consumer<Event<?>>> eventListeners = new CopyOnWriteArrayList<>();
+    private final List<Consumer<Callback<?>>> callbackListeners = new CopyOnWriteArrayList<>();
 
-    private EntityManager() {
-        for (var event : EventDomain.values()) {
-            listenerMap.put(event, new CopyOnWriteArrayList<>());
-        }
-    }
+    private EntityManager() { }
 
     public static EntityManager GET() {
         return INSTANCE;
@@ -55,28 +51,23 @@ public class EntityManager {
         return entityCache.getSize();
     }
 
-    public <T extends Entity> void registerEventListener(EventDomain domain, Consumer<Event> listener) {
-        listenerMap.get(domain).add(listener);
-        globalListeners.add(listener);
+    public <T extends Entity> void registerEventListener(Consumer<Event<?>> listener) {
+        eventListeners.add(listener);
     }
 
-    public void emitEvent(Event event) {
-        if (event.domain() == EventDomain.GLOBAL) {
-            globalListeners.forEach(c -> c.accept(event));
-        }
-        if (event.domain() == EventDomain.DIRECT) {
+    public void emitEvent(Event<?> event) {
+//        if (event.isDirect()) {
+//            Entity dEntity = entityCache.get(event.recipientId());
+//            dEntity.(event);
+//        }
 
-        }
-
-        List<Consumer<Event>> listeners = listenerMap.get(event.domain());
-        if (listeners == null) { return; }
-        for (var listener : listeners) {
-            listener.accept(event);
+        for (int i = 0; i < eventListeners.size(); ++i) {
+            eventListeners.get(i).accept(event);
         }
     }
 
     public <T extends EventListener<T>> void emitCallback(Callback<T> callback) {
-        EventListener<?> listener = newPlayerState(10);
+
         if (listener != null && callback.classType().isInstance(listener)) {
             T castedListener = callback.classType().cast(listener);
             castedListener.onCallBack(callback.callback());

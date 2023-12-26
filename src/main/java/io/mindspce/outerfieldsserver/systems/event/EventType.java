@@ -1,14 +1,14 @@
 package io.mindspce.outerfieldsserver.systems.event;
 
 public enum EventType {
-    CHARACTER_POSITION(EventDomain.GLOBAL),
-    PLAYER_POSITION(EventDomain.GLOBAL),
-    PLAYER_CONNECTED(EventDomain.PLAYER),
-    AREA_ENTERED(EventDomain.WORLD);
+    ENTITY_POSITION,
+    PLAYER_POSITION,
+    PLAYER_CONNECTED,
+    MONITORED_AREA_ENTERED,
+    ENTITY_UPDATE,
+    NPC_POSITION,
+    AREA_UPDATE
 
-    public final EventDomain domain;
 
-    EventType(EventDomain domain) { this.domain = domain; }
-    }
-
+}
 

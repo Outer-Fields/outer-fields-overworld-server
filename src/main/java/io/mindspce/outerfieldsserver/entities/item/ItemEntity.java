@@ -8,8 +8,8 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 public abstract class ItemEntity extends Entity {
     private final int key;
 
-    public ItemEntity(int key) {
-        super(EntityType.ITEM);
+    public ItemEntity(int id, int key) {
+        super(id, EntityType.ITEM);
         this.key = key;
     }
 

@@ -1,37 +1,45 @@
 package io.mindspce.outerfieldsserver.systems.event;
 
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspice.mindlib.data.tuples.Pair;
 
 import java.util.BitSet;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;public class ListenerCache<T> {
+import java.util.function.Consumer;
 
-    BitSet listeningFor = new BitSet(EventType.values().length);
-    EnumMap<EventType, BiConsumer<T, Event<?>>> consumers = new EnumMap<>(EventType.class);
+
+public class ListenerCache<T extends Component<T>> {
+    private final BitSet listeningFor = new BitSet(EventType.values().length);
+    private final EnumMap<EventType, List<BiConsumer<T, Event<?>>>> consumers = new EnumMap<>(EventType.class);
 
     public ListenerCache() { }
 
-    public ListenerCache(List<Pair<EventType, BiConsumer<T, Event<?>>>> listeners) {
-        listeners.forEach(e -> {
-            consumers.put(e.first(), e.second());
-            listeningFor.set(e.first().ordinal());
-        });
+    public <E> void addListener(EventType eventType, BiConsumer<T, Event<E>> handler) {
+        List<BiConsumer<T, Event<?>>> handlers = consumers.computeIfAbsent(eventType, k -> new CopyOnWriteArrayList<>());
+        @SuppressWarnings("unchecked")
+        BiConsumer<T, Event<?>> castedHandler = (BiConsumer<T, Event<?>>) (Object) handler;
+        handlers.add(castedHandler);
+        listeningFor.set(eventType.ordinal());
+    }
+
+    public void handleEvent(T selfInstance, Event<?> event) {
+        List<BiConsumer<T, Event<?>>> handlers = consumers.get(event.eventType());
+        if (handlers != null) {
+            for (BiConsumer<T, Event<?>> handler : handlers) {
+                handler.accept(selfInstance, event);
+            }
+        }
+    }
+
+    public <E> void removeListener(EventType eventType, BiConsumer<T, Event<E>> handler) {
+        consumers.getOrDefault(eventType, List.of()).remove(handler);
     }
 
     public boolean isListenerFor(EventType eventType) {
         return listeningFor.get(eventType.ordinal());
-    }
-
-    public <E> void addListener(EventType eventType, BiConsumer<T, Event<E>> handler) {
-        @SuppressWarnings("unchecked")
-        BiConsumer<T, Event<?>> castedHandler = (BiConsumer<T, Event<?>>) (Object) handler;
-        consumers.put(eventType, castedHandler);
-    }
-
-    public void removeListener(EventType eventType) {
-        consumers.remove(eventType);
     }
 
     public boolean enableListener(EventType eventType) {
@@ -46,11 +54,13 @@ import java.util.function.Consumer;public class ListenerCache<T> {
         listeningFor.set(eventType.ordinal(), false);
     }
 
-    public void handleEvent(T selfInstance, Event<?> event) {
-        BiConsumer<T, Event<?>> consumer = consumers.get(event.eventType());
-        if (consumer != null) {
-            consumer.accept(selfInstance, event);
+    public void setAllListing(boolean doListening) {
+        if (!doListening) {
+            listeningFor.clear();
+        } else {
+            consumers.keySet().forEach(c -> listeningFor.set(c.ordinal()));
         }
     }
+
 
 }

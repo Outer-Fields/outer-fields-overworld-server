@@ -5,6 +5,7 @@ import io.mindspce.outerfieldsserver.core.WorldState;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
+import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.systems.event.*;
 import io.mindspce.outerfieldsserver.networking.NetSerializer;
 import io.mindspice.mindlib.data.geometry.IVector2;
@@ -16,14 +17,14 @@ import java.util.List;
 import java.util.function.Consumer;
 
 
-public class PlayerState extends PlayerEntity implements EventListener<PlayerState> {
+public class PlayerState extends Entity {
     private PlayerSession playerSession;
     private final PlayerLocalArea localArea;
-    private final ListenerCache<PlayerState> listeners = new ListenerCache<>();
+    //private final ListenerCache<PlayerState> listeners = new ListenerCache<>();
     private volatile boolean isInit = false;
 
     public PlayerState(int entityId, int playerId) {
-        super(entityId, playerId);
+        super(entityId, EntityType.PLAYER, AreaId.TEST);
         localArea = new PlayerLocalArea(this);
     }
 
@@ -59,12 +60,8 @@ public class PlayerState extends PlayerEntity implements EventListener<PlayerSta
                     // TODO log this this should only happen in testing
                 }
 
-                EntityManager.GET().emitEvent(Event.of(entityId, EventType.PLAYER_POSITION, entityType));
-                EntityManager.GET().emitCallback(new Callback<>(10, PlayerState.class, ((playerState) -> {
-                    playerState.localArea.currChunkIndex() == 10
-
-                }));
                 localArea.currArea().updateGridEntity(localArea.mVector, this);
+                Event.Emit.newPlayerPosition(this, globalPosition());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -153,43 +150,4 @@ public class PlayerState extends PlayerEntity implements EventListener<PlayerSta
 
     }
 
-    @Override
-    public IVector2 globalPosition() {
-        return localArea.currPosition();
-    }
-
-    @Override
-    public IVector2 priorPosition() {
-        return localArea.priorPosition();
-    }
-
-    @Override
-    public AreaId currentArea() {
-        return localArea.currArea().getId();
-    }
-
-    @Override
-    public IVector2 chunkIndex() {
-        return localArea.currChunkIndex();
-    }
-
-    @Override
-    public int hashCode() {
-        return playerId();
-    }
-
-    @Override
-    public void onEvent(Event event) {
-        listeners.handleEvent(this, event);
-    }
-
-    @Override
-    public void onCallBack(Consumer<PlayerState> consumer) {
-
-    }
-
-    @Override
-    public boolean isListenerFor(EventType eventType) {
-        return false;
-    }
 }
