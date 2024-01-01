@@ -3,7 +3,6 @@ package io.mindspce.outerfieldsserver.core.networking.websockets;
 import io.mindspce.outerfieldsserver.core.WorldState;
 import io.mindspce.outerfieldsserver.core.networking.SocketQueue;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
-import io.mindspce.outerfieldsserver.core.statemanagers.EnemyStateManager;
 import io.mindspce.outerfieldsserver.entities.player.PlayerSession;
 import io.mindspce.outerfieldsserver.entities.player.PlayerState;
 import io.mindspce.outerfieldsserver.enums.AreaId;
@@ -56,13 +55,13 @@ public class GameServerSocketHandler extends AbstractWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) {
 
         var ps = EntityManager.GET().newPlayerState(count);
-        playerTable.put(ps.id(), ps);
-        session.getAttributes().put("pid", ps.id());
+        playerTable.put(ps.entityId(), ps);
+        session.getAttributes().put("pid", ps.entityId());
         WorldState.GET().getAreaTable().get(AreaId.TEST).addActivePlayer(ps);
         PlayerSession pSession = new PlayerSession(session);
         pSession.setMessageOutConsumer(socketQueue.networkOutHandler(pSession));
         ps.init(new PlayerSession(session), AreaId.TEST, 0, 0);
-        playerTable.get(ps.id()).setPlayerSession(pSession);
+        playerTable.get(ps.entityId()).setPlayerSession(pSession);
     }
 
     @Override

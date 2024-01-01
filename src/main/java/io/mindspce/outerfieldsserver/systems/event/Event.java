@@ -1,109 +1,122 @@
 package io.mindspce.outerfieldsserver.systems.event;
 
-import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.systems.EventData;
-import io.mindspice.mindlib.data.geometry.IVector2;
+import io.mindspice.mindlib.data.geometry.IRect2;
+
+import java.util.List;
 
 
-public class Event<T> {
-    private final AreaId areaId;
-    private final IVector2 chunkId;
-    private final int issuerId;
-    private final int recipientId;
-    private final EventType eventType;
-    private final EntityType entityType;
-    private final T data;
-
-    private Event(EventType eventType, Entity entity, T eventData) {
-        areaId = entity.areaId();
-        chunkId = entity.chunkIndex();
-        issuerId = entity.id();
-        recipientId = -1;
-        this.eventType = eventType;
-        this.entityType = entity.entityType();
-        this.data = eventData;
+public record Event<T>(
+        EventType eventType,
+        AreaId eventArea,
+        int issuerEntityId,
+        long issuerComponentId,
+        EntityType issuerEntityType,
+        int recipientEntityId,
+        long recipientComponentId,
+        T data
+) {
+    public Event(EventType eventType, AreaId eventArea, Component<?> component, T data) {
+        this(
+                eventType,
+                eventArea,
+                component.entityId(),
+                component.componentId(),
+                component.entityType(),
+                -1,
+                -1,
+                data);
     }
 
-    private Event(EventType eventType, Entity entity, T eventData, int recipientId) {
-        areaId = entity.areaId();
-        chunkId = entity.chunkIndex();
-        issuerId = entity.id();
-        this.recipientId = -recipientId;
-        this.eventType = eventType;
-        this.entityType = entity.entityType();
-        this.data = eventData;
+    public Event(EventType eventType, AreaId eventArea, Component<?> component, int recipientEntityId, T data) {
+        this(
+                eventType,
+                eventArea,
+                component.entityId(),
+                component.componentId(),
+                component.entityType(),
+                recipientEntityId,
+                -1,
+                data);
+    }
+
+    public Event(EventType eventType, AreaId eventArea, Component<?> component, int recipientEntityId, long recipientComponentId, T data) {
+        this(
+                eventType,
+                eventArea,
+                component.entityId(),
+                component.componentId(),
+                component.entityType(),
+                recipientEntityId,
+                recipientComponentId,
+                data);
     }
 
     public boolean isDirect() {
-        return recipientId != 1;
+        return recipientEntityId != -1;
     }
 
-    public AreaId areaId() {
-        return areaId;
+    public boolean isDirectComponent() {
+        return recipientComponentId != -1;
     }
 
-    public IVector2 chunkId() {
-        return chunkId;
-    }
+    public static class Factory {
 
-    public int issuerId() {
-        return issuerId;
-    }
-
-    public int recipientId() {
-        return recipientId;
-    }
-
-    public EventType eventType() {
-        return eventType;
-    }
-
-    public EntityType entityType() {
-        return entityType;
-    }
-
-    public T data() {
-        return data;
-    }
-
-//    public static Event toRecipient(int recipientId, int issuerId, EventType eventType, EntityType entityType) {
-//        return new Event(EventDomain.DIRECT, eventType, entityType, issuerId, recipientId);
-//    }
-//
-//    public static Event toGlobal(int issuerId, EventType eventType, EntityType entityType) {
-//        return new Event(EventDomain.GLOBAL, eventType, entityType, issuerId, -1);
-//    }
-//
-//    public static Event toSelf(int issuerId, EventType eventType) {
-//        return new Event(EventDomain.SELF, eventType, null, issuerId, issuerId);
-//    }
-//
-//    public static Event of(int issuerId, EventType eventType, EntityType entityType) {
-//        return new Event(eventType.domain, eventType, entityType, issuerId, -1);
-//    }
-
-
-    public static class Emit {
-        public static void newEntityPosition(Entity entity, EventData.PositionUpdate position) {
-            EntityManager.GET().emitEvent(new Event<>(EventType.PLAYER_POSITION, entity, position));
+        public static Event<EventData.AreaEntered> newAreaEntered(Component<?> component, EventData.AreaEntered data) {
+            return new Event<>(EventType.AREA_MONITORED_ENTERED, component.areaId(), component, data);
         }
 
-        public static void newMonitoredAreaEntered(Entity entity, EventData.AreaEntered areaEntered) {
-            EntityManager.GET().emitEvent(new Event<>(EventType.MONITORED_AREA_ENTERED, entity, areaEntered));
+        public static Event<EventData.AreaEntered> newEntityViewRectEntered(Component<?> component, EventData.AreaEntered data) {
+            return new Event<>(EventType.ENTITY_VIEW_RECT_ENTERED, component.areaId(), component, data);
         }
 
-        public static void newEntityAreaUpdate(Entity entity, EventData.AreaUpdate areaUpdate) {
-            EntityManager.GET().emitEvent(new Event<>(EventType.AREA_UPDATE, entity, areaUpdate));
+        public static Event<EventData.EntityPositionChanged> newEntityPosition(Component<?> component,
+                EventData.EntityPositionChanged position) {
+            return new Event<>(EventType.ENTITY_POSITION_CHANGED, component.areaId(), component, position);
         }
 
-        public static void newEntityChunkUpdate(Entity entity, EventData.ChunkUpdate chunkUpdate) {
-            EntityManager.GET().emitEvent(new Event<>(EventType.AREA_UPDATE, entity, chunkUpdate));
+        public static List<Event<?>> newEntityAreaChanged(Component<?> component, EventData.EntityAreaChanged data) {
+            return List.of(
+                    new Event<>(EventType.ENTITY_AREA_CHANGED, data.oldArea(), component, data),
+                    new Event<>(EventType.ENTITY_AREA_CHANGED, data.newArea(), component, data));
         }
 
+        public static Event<EventData.EntityChunkChanged> newEntityChunkUpdate(Component<?> component,
+                EventData.EntityChunkChanged entityChunkChanged) {
+            return new Event<>(EventType.ENTITY_AREA_CHANGED, component.areaId(), component, entityChunkChanged);
+        }
 
+        public static Event<EventData.NewEntity> newEntity(Component<?> component, EventData.NewEntity entityData) {
+            return new Event<>(EventType.NEW_ENTITY, component.areaId(), component, entityData);
+        }
+
+        public static Event<IRect2> newEntityViewRectChanged(Component<?> component, IRect2 viewRect) {
+            return new Event<>(EventType.ENTITY_VIEW_RECT_CHANGED, component.areaId(), component, viewRect);
+        }
+
+        public static Event<EventData.Query<?, ?, ?>> newQuery(Component<?> component,
+                EventData.Query<?, ?, ?> queryCallBack, int entityId, long componentId) {
+            return new Event<>(EventType.QUERY, AreaId.GLOBAL, component, entityId, componentId, queryCallBack);
+        }
+
+        public static Event<EventData.QueryResponse<?, ?>> newQueryResponse(Component<?> component,
+                EventData.QueryResponse<?, ?> response, int entityId, long componentId) {
+            return new Event<>(EventType.QUERY_RESPONSE, component.areaId(), component, entityId, componentId, response);
+        }
+
+        public static Event<EventData.CollisionData> newCollisionUpdate(AreaId eventArea,
+                Component<?> component,
+                EventData.CollisionData data) {
+            return new Event<>(EventType.COLLISION_UPDATE, eventArea, component, data);
+        }
+
+        public static Event<EventData.CollisionData> newCollisionChange(Component<?> component, EventData.CollisionData data) {
+            return new Event<>(EventType.COLLISION_CHANGE, component.areaId(), component, data);
+        }
     }
 
 }

@@ -1,12 +1,12 @@
 package io.mindspce.outerfieldsserver.systems.event;
 
+import io.mindspce.outerfieldsserver.enums.ComponentType;
+
 import java.util.function.Consumer;
 
 
-public record Callback<T>(
+public record CallBack<T>(
         int entityId,
-        Class<T> classType,
+        ComponentType componentType,
         Consumer<T> callback
-) {
-
-}
+) { }

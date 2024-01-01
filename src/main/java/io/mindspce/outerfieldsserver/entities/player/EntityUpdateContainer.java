@@ -11,7 +11,6 @@ import io.mindspce.outerfieldsserver.networking.NetSerializer;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.stream.IntStream;
 
 
 public class EntityUpdateContainer {
@@ -50,7 +49,6 @@ public class EntityUpdateContainer {
             nonPlayerEntLength = 50;
         } else {
             Arrays.fill(nonPlayerEntities, null);
-
         }
         if (itemEntLength > 50) {
             itemEntities = new ItemEntity[50];
@@ -85,7 +83,7 @@ public class EntityUpdateContainer {
                 newNonPlayerBitSet.set(nonPlayerEntCount, isNew);
                 nonPlayerEntities[nonPlayerEntCount++] = (NonPlayerEntity) entity;
             }
-            case ITEM -> {
+            case AREA -> {
                 if (itemEntLength == itemEntCount) {
                     itemEntities = Arrays.copyOf(itemEntities, (int) (itemEntLength * 1.2));
                     itemEntLength = (int) (itemEntLength * 1.2);
@@ -185,14 +183,14 @@ public class EntityUpdateContainer {
             if (newItemBitset.get(i)) {
                 NetSerializer.newItemToBuffer(buffer, itemEntities[i]);
             } else {
-                NetSerializer.entityUpdateToBuffer(buffer, EntityType.ITEM, itemEntities[i]);
+                NetSerializer.entityUpdateToBuffer(buffer, EntityType.AREA, itemEntities[i]);
             }
         }
         for (int i = 0; i < locationEntCount; ++i) {
             if (newLocationBitSet.get(i)) {
                 NetSerializer.newLocationToBuffer(buffer, locationEntities[i]);
             } else {
-                NetSerializer.entityUpdateToBuffer(buffer, EntityType.ITEM, locationEntities[i]);
+                NetSerializer.entityUpdateToBuffer(buffer, EntityType.AREA, locationEntities[i]);
             }
         }
         reset();

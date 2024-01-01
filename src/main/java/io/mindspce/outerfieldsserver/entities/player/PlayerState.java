@@ -1,11 +1,15 @@
 package io.mindspce.outerfieldsserver.entities.player;
 
-import io.mindspce.outerfieldsserver.area.AreaState;
+import io.mindspce.outerfieldsserver.area.AreaEntity;
+import io.mindspce.outerfieldsserver.components.Component;
+import io.mindspce.outerfieldsserver.components.GlobalPosition;
 import io.mindspce.outerfieldsserver.core.WorldState;
-import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.entities.PositionalEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
+import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
+import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.*;
 import io.mindspce.outerfieldsserver.networking.NetSerializer;
 import io.mindspice.mindlib.data.geometry.IVector2;
@@ -17,7 +21,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 
-public class PlayerState extends Entity {
+public class PlayerState extends PositionalEntity implements EventListener<PlayerState> {// implements EventListener<PlayerState> {
     private PlayerSession playerSession;
     private final PlayerLocalArea localArea;
     //private final ListenerCache<PlayerState> listeners = new ListenerCache<>();
@@ -31,23 +35,50 @@ public class PlayerState extends Entity {
     public void setPlayerSession(PlayerSession session) {
         localArea.resetKnowEntities();
         playerSession = session;
+
     }
 
-    public void init(PlayerSession playerSession, AreaId id, int startX, int startY) {
+    public void init(PlayerSession playerSession, AreaId id, int startX, int startY, List<Component<?>> components) {
         this.playerSession = playerSession;
-        AreaState areaState = WorldState.GET().getAreaTable().get(id);
-        localArea.updateCurrArea(areaState, startX, startY);
-        areaState.addActivePlayer(this);
-        areaState.addEntityToGrid(IVector2.of(startX, startY), this);
+        AreaEntity areaEntity = WorldState.GET().getAreaTable().get(id);
+        localArea.updateCurrArea(areaEntity, startX, startY);
+        areaEntity.addActivePlayer(this);
+        areaEntity.addEntityToGrid(IVector2.of(startX, startY), this);
         isInit = true;
+        components.forEach(c -> {
+            attachedComponents.set(c.componentType().ordinal());
+            c.getEmitedEvents().forEach(e -> listeningFor.set(e.ordinal()));
+        });
+        Component<?> posComponent = getComponent(ComponentType.GLOBAL_POSITION);
+        if (posComponent == null) {
+            System.out.println("position Component not found for PlayerState");
+            // todo log this;
+            return;
+        }
+    }
+
+    @Override
+    protected void chunkChangedCallBack(EventData.EntityChunkChanged entityChunkChanged) {
+        this.chunkIndex = entityChunkChanged.newChunk();
+    }
+
+    @Override
+    protected void areaChangedCallBack(EventData.EntityAreaChanged entityAreaChanged) {
+        this.areaId = entityAreaChanged.newArea();
     }
 
     public void onPositionUpdate(int posX, int posY, long timestamp) {
 //        if (!isInit) { return; }
 
+        var test = new GlobalPosition(null, null, null, null);
+        test.addConsumer(gp -> {
+            gp.lastPosition().add(2, 2);
+        });
+
+        test.handleCallBack(c -> c.);
         long t = System.nanoTime();
         try {
-            //      System.out.println("ID:" + id() + " Position: " + posX + ", " + posY);
+            //      System.out.println("ID:" + id() + " position: " + posX + ", " + posY);
 
             boolean valid = localArea.validateUpdate(posX, posY, timestamp);
             if (!valid) {
@@ -89,21 +120,21 @@ public class PlayerState extends Entity {
         localArea.currArea().queryEntityGrid(localArea.viewRect(), eUpdateList);
 
         for (var quadItem : eUpdateList) {
-            if (quadItem.item().id() == entityId) { continue; }
-            System.out.println("sending data for id:" + id() + "data_id:" + quadItem.item().id());
+            if (quadItem.item().entityId() == id) { continue; }
+            System.out.println("sending tileData for id:" + entityId() + "data_id:" + quadItem.item().entityId());
 
-            if (knownEntities.get(quadItem.item().id())) {
+            if (knownEntities.get(quadItem.item().entityId())) {
                 //  System.out.println("sent know entity");
-                System.out.println("sending known data for id:" + id() + "  data_id:" + quadItem.item().id());
+                System.out.println("sending known tileData for id:" + entityId() + "  data_id:" + quadItem.item().entityId());
 
                 playerSession.entityUpdateContainer().addEntity(quadItem.item(), false);
             } else {
-                System.out.println("sending new data for id:" + id() + " data_id:" + quadItem.item().id());
+                System.out.println("sending new tileData for id:" + entityId() + " data_id:" + quadItem.item().entityId());
 
                 Utils.printThreadMethod();
                 System.out.println(knownEntities);
-                System.out.println(quadItem.item().id());
-                knownEntities.set(quadItem.item().id());
+                System.out.println(quadItem.item().entityId());
+                knownEntities.set(quadItem.item().entityId());
                 playerSession.entityUpdateContainer().addEntity(quadItem.item(), true);
             }
         }
@@ -149,5 +180,21 @@ public class PlayerState extends Entity {
 //        eUpdateList.clear();
 
     }
+
+    @Override
+    public void onEvent(Event<?> event) {
+
+    }
+
+    @Override
+    public void onCallBack(Consumer<PlayerState> consumer) {
+
+    }
+
+    @Override
+    public boolean isListenerFor(EventType eventType) {
+        return false;
+    }
+
 
 }

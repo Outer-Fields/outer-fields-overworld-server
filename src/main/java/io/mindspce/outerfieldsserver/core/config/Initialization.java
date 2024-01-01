@@ -1,7 +1,7 @@
 package io.mindspce.outerfieldsserver.core.config;
 
-import io.mindspce.outerfieldsserver.area.AreaState;
-import io.mindspce.outerfieldsserver.area.ChunkData;
+import io.mindspce.outerfieldsserver.area.AreaEntity;
+import io.mindspce.outerfieldsserver.area.ChunkEntity;
 import io.mindspce.outerfieldsserver.area.ChunkJson;
 import io.mindspce.outerfieldsserver.core.GameServer;
 import io.mindspce.outerfieldsserver.core.WorldState;
@@ -27,24 +27,24 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Initialization {
 
     @Bean
-    public WorldState worldState(@Qualifier("areaInstance") AreaState areaState) {
+    public WorldState worldState(@Qualifier("areaInstance") AreaEntity areaEntity) {
         WorldState worldState = WorldState.GET();
-        worldState.init(Map.of(AreaId.TEST, areaState));
+        worldState.init(Map.of(AreaId.TEST, areaEntity));
         return worldState;
     }
 
     @Bean
-    AreaState areaInstance() {
+    AreaEntity areaInstance() {
         try {
             // would loop through all chunks here
             ChunkJson chunkJson = GridUtils.parseChunkJson(new File(
                     "/home/mindspice/code/Java/Okra/outer-fields-overworld-server/src/main/resources/chunkdata/chunk_0_0.json")
             );
-            ChunkData chunkData = ChunkData.loadFromJson(chunkJson);
-            ChunkData[][] chunkMap = new ChunkData[1][1];
-            chunkMap[0][0] = chunkData;
+            ChunkEntity chunkEntity = ChunkEntity.loadFromJson(chunkJson);
+            ChunkEntity[][] chunkMap = new ChunkEntity[1][1];
+            chunkMap[0][0] = chunkEntity;
 
-            AreaState area = new AreaState(AreaId.TEST, chunkMap);
+            AreaEntity area = new AreaEntity(AreaId.TEST, chunkMap);
             area.addCollisionToGrid(chunkJson.collisionPolys());
             area.addLocationToGrid(chunkJson.areaRects().entrySet().stream().map(
                     e -> Pair.of(

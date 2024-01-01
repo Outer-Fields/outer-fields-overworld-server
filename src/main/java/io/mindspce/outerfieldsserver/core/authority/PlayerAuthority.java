@@ -1,6 +1,6 @@
 package io.mindspce.outerfieldsserver.core.authority;
 
-import io.mindspce.outerfieldsserver.area.AreaState;
+import io.mindspce.outerfieldsserver.area.AreaEntity;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.data.wrappers.DynamicTileRef;
 import io.mindspce.outerfieldsserver.enums.Direction;
@@ -12,8 +12,8 @@ import java.util.List;
 
 public class PlayerAuthority {
 
-    public static boolean validateCollision(AreaState area, GridArray<DynamicTileRef> tileRefs, IRect2 viewRect,
-            IAtomicLine2 mVector) {
+    public static boolean validateCollision(AreaEntity area, GridArray<DynamicTileRef> tileRefs, IRect2 viewRect,
+            IMutLine2 mVector) {
         for (int i = 0; i < tileRefs.getFlatSize(); ++i) {
             DynamicTileRef tile = tileRefs.getFlat(i);
             if (tile == null || tile.getTileRef() == null) { continue; }
@@ -23,11 +23,11 @@ public class PlayerAuthority {
             for (var quadItem : colShape) {
                 if (quadItem.item().intersects(mVector) || quadItem.item().contains(mVector.end())) {
                     // Calculate the direction vector from start to end
-                    System.out.println(mVector.start());
-                    System.out.println(mVector.end());
+//                    System.out.println(mVector.start());
+//                    System.out.println(mVector.end());
                     IVector2 direction = Direction.getDirectionOf(mVector.start(), mVector.end()).asVec2();
-                    System.out.println(Direction.getDirectionOf(mVector.start(), mVector.end()));
-                    System.out.println(direction);
+//                    System.out.println(Direction.getDirectionOf(mVector.start(), mVector.end()));
+//                    System.out.println(direction);
                     mVector.setEnd(mVector.start().x() + (direction.x() * 32), mVector.start().y() + (direction.y() * 32));
                     return false;
                 }
@@ -49,7 +49,7 @@ public class PlayerAuthority {
 //                    System.out.println("newCenter : " + newCenter);
 //                    ChunkData chunkData = area.getChunkByIndex(GridUtils.globalToChunk(mVector.end()));
 //                    if (chunkData == null) {
-//                        System.out.println("Null chunk data");
+//                        System.out.println("Null chunk tileData");
 //                        continue;
 //                    }
 //
@@ -144,7 +144,7 @@ public class PlayerAuthority {
 ////                                    System.out.println("null chunk");
 ////                                    continue;
 ////                                }
-////                                // null means no tile data (collision)
+////                                // null means no tile tileData (collision)
 ////                                System.out.println("tile null:" + tileRef.getTileRef() == null);
 //////                                System.out.println("tile.has");
 ////                                if (tileRef.getTileRef() == null || !tileRef.getTileRef().hasCollision()) {
@@ -163,7 +163,7 @@ public class PlayerAuthority {
         return true;
     }
 
-    public static boolean validateDistance(IAtomicLine2 mVector, long lastTimestamp, long currentTimestamp) {
+    public static boolean validateDistance(IMutLine2 mVector, long lastTimestamp, long currentTimestamp) {
         double timeDiffSec = (currentTimestamp - lastTimestamp) / 1000.0; // Convert milliseconds to seconds
         double maxDist = GameSettings.GET().maxSpeed() * timeDiffSec;
         double travelDist = mVector.distance();
@@ -183,7 +183,7 @@ public class PlayerAuthority {
 
                 int adjX = mVector.start().x() + moveX;
                 int adjY = mVector.start().y() + moveY;
-                mVector.setEnd(adjX, adjY);
+                mVector.shiftLine(adjX, adjY);
                 //System.out.println("invalid speed");
                 return false;
             }

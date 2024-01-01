@@ -1,4 +1,5 @@
 package io.mindspce.outerfieldsserver.enums;
 
-public class SystemType {
+public enum SystemType {
+    WORLD_STATE,
 }

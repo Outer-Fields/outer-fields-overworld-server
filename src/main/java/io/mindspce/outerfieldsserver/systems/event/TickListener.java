@@ -1,5 +1,8 @@
 package io.mindspce.outerfieldsserver.systems.event;
 
+import io.mindspce.outerfieldsserver.core.Tick;
+
+
 public interface TickListener {
-    void onTick(long tickTime, double delta);
+    void onTick(Tick tick);
 }

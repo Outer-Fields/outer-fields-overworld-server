@@ -1,23 +1,23 @@
 package io.mindspce.outerfieldsserver.data.wrappers;
 
-import io.mindspce.outerfieldsserver.area.AreaState;
-import io.mindspce.outerfieldsserver.area.ChunkData;
+import io.mindspce.outerfieldsserver.area.AreaEntity;
+import io.mindspce.outerfieldsserver.area.ChunkEntity;
 import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
 
 public class DynamicTileRef {
-    private volatile AreaState areaRef;
+    private volatile AreaEntity areaRef;
     private final IVector2 offset;
-    private volatile ChunkData chunkRef;
+    private volatile ChunkEntity chunkRef;
     private volatile TileData tileRef;
 
-    public DynamicTileRef(AreaState area, IVector2 offset) {
+    public DynamicTileRef(AreaEntity area, IVector2 offset) {
         this.areaRef = area;
         this.offset = offset;
     }
 
-    public void updateAreaRef(AreaState areaRef) {
+    public void updateAreaRef(AreaEntity areaRef) {
         if (areaRef == null) {
             throw new IllegalStateException("null area reference passed");
         }
@@ -39,11 +39,11 @@ public class DynamicTileRef {
         return tileRef;
     }
 
-    public ChunkData getChunkRef() {
+    public ChunkEntity getChunkRef() {
         return chunkRef;
     }
 
-    public AreaState getAreaRef() {
+    public AreaEntity getAreaRef() {
         return areaRef;
     }
 
