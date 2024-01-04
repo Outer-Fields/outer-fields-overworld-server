@@ -1,7 +1,5 @@
 package io.mindspce.outerfieldsserver.components;
 
-import gnu.trove.set.TIntSet;
-import io.mindspce.outerfieldsserver.area.ChunkEntity;
 import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
@@ -10,11 +8,9 @@ import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.geometry.IConcurrentPQuadTree;
 import io.mindspice.mindlib.data.geometry.IPolygon2;
-import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 
 public class CollisionGrid extends Component<CollisionGrid> {
@@ -43,12 +39,12 @@ public class CollisionGrid extends Component<CollisionGrid> {
 
     public void addCollisionToGrid(IPolygon2 collisionPoly) {
         collisionGrid.insert(collisionPoly, collisionPoly);
-        emitEvent(Event.Factory.newCollisionChange(this, new EventData.CollisionData(false, collisionPoly)));
+        emitEvent(Event.collisionChange(this, new EventData.CollisionData(false, collisionPoly)));
     }
 
     public void removeCollisionFromGrid(IPolygon2 collisionPoly) {
         collisionGrid.remove(collisionPoly, collisionPoly);
-        emitEvent(Event.Factory.newCollisionChange(this, new EventData.CollisionData(true, collisionPoly)));
+        emitEvent(Event.collisionChange(this, new EventData.CollisionData(true, collisionPoly)));
     }
 
 

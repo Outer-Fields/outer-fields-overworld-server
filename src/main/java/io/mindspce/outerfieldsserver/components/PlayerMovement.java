@@ -2,7 +2,7 @@ package io.mindspce.outerfieldsserver.components;
 
 import io.mindspce.outerfieldsserver.area.AreaEntity;
 import io.mindspce.outerfieldsserver.core.authority.PlayerAuthority;
-import io.mindspce.outerfieldsserver.core.networking.incoming.NetPlayerMovement;
+import io.mindspce.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
 import io.mindspce.outerfieldsserver.data.wrappers.DynamicTileRef;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
@@ -39,12 +39,12 @@ public class PlayerMovement extends Component<PlayerMovement> {
      * @param localGrid    the local grid
      * @param viewRect     the view rect
      */
-    protected PlayerMovement(Entity parentEntity, GridArray<DynamicTileRef> localGrid, IRect2 viewRect) {
-        super(parentEntity, ComponentType.PLAYER_MOVEMENT, List.of(EventType.PLAYER_VALID_MOVEMENT, EventType.PLAYER_INVALID_MOVEMENT));
+    public PlayerMovement(Entity parentEntity, GridArray<DynamicTileRef> localGrid, IRect2 viewRect) {
+        super(parentEntity, ComponentType.NET_PLAYER_POSITION, List.of(EventType.PLAYER_VALID_MOVEMENT, EventType.PLAYER_INVALID_MOVEMENT));
         this.localGrid = localGrid;
         this.viewRect = viewRect;
 
-        registerListener(EventType.NETWORK_IN_PLAYER_MOVEMENT, PlayerMovement::onPlayerMovementIn);
+        registerListener(EventType.NETWORK_IN_PLAYER_POSITION, PlayerMovement::onPlayerMovementIn);
     }
 
     /**
@@ -53,7 +53,7 @@ public class PlayerMovement extends Component<PlayerMovement> {
      * should be broadcast from a GlobalPosition component based on the validation event emitted (via hook and intercept)
      * @param event the network event in
      */
-    public void onPlayerMovementIn(Event<NetPlayerMovement> event) {
+    public void onPlayerMovementIn(Event<NetInPlayerPosition> event) {
         if (timeout > 0) {
             timeout--;
             lastUpdateTime = event.data().timestamp();
@@ -69,7 +69,7 @@ public class PlayerMovement extends Component<PlayerMovement> {
         lastUpdateTime = event.data().timestamp();
 
         if (!mVector.start().equals(mVector.end())) { // Sending mutable tileData since this get intercepted at the controller component level
-            emitEvent(Event.Factory.newEntityPosition(this, new EventData.EntityPositionChanged(true, mVector.start(), mVector.end())));
+            emitEvent(Event.entityPosition(this, new EventData.EntityPositionChanged(true, mVector.start(), mVector.end())));
         }
 
     }

@@ -3,76 +3,45 @@ package io.mindspce.outerfieldsserver.core.config;
 import io.mindspce.outerfieldsserver.area.AreaEntity;
 import io.mindspce.outerfieldsserver.area.ChunkEntity;
 import io.mindspce.outerfieldsserver.area.ChunkJson;
-import io.mindspce.outerfieldsserver.core.GameServer;
-import io.mindspce.outerfieldsserver.core.WorldState;
-import io.mindspce.outerfieldsserver.core.networking.SocketQueue;
+import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
-import io.mindspce.outerfieldsserver.entities.locations.LocationEntity;
-import io.mindspce.outerfieldsserver.entities.player.PlayerState;
+import io.mindspce.outerfieldsserver.core.systems.WorldSystem;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.util.GridUtils;
-import io.mindspice.mindlib.data.tuples.Pair;
-import org.jctools.maps.NonBlockingHashMapLong;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
+import io.mindspice.mindlib.data.geometry.IRect2;
+import io.mindspice.mindlib.data.geometry.IVector2;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 
 @Configuration
 public class Initialization {
+    //
+    EntityManager entityManager = EntityManager.GET();
 
-    @Bean
-    public WorldState worldState(@Qualifier("areaInstance") AreaEntity areaEntity) {
-        WorldState worldState = WorldState.GET();
-        worldState.init(Map.of(AreaId.TEST, areaEntity));
-        return worldState;
-    }
+    public WorldSystem worldSystem() throws IOException {
 
-    @Bean
-    AreaEntity areaInstance() {
-        try {
-            // would loop through all chunks here
-            ChunkJson chunkJson = GridUtils.parseChunkJson(new File(
-                    "/home/mindspice/code/Java/Okra/outer-fields-overworld-server/src/main/resources/chunkdata/chunk_0_0.json")
-            );
-            ChunkEntity chunkEntity = ChunkEntity.loadFromJson(chunkJson);
-            ChunkEntity[][] chunkMap = new ChunkEntity[1][1];
-            chunkMap[0][0] = chunkEntity;
+        ChunkJson chunkJson = GridUtils.parseChunkJson(new File(
+                "/home/mindspice/code/Java/Okra/outer-fields-overworld-server/src/main/resources/chunkdata/chunk_0_0.json")
+        );
+        Map<IVector2, TileData> chunkData = ChunkEntity.loadFromJson(chunkJson);
+        ChunkEntity[][] chunkMap = new ChunkEntity[1][1];
+        chunkMap[0][0] = EntityManager.GET().newChunkEntity(AreaId.TEST, IVector2.of(1, 1), chunkJson);
 
-            AreaEntity area = new AreaEntity(AreaId.TEST, chunkMap);
-            area.addCollisionToGrid(chunkJson.collisionPolys());
-            area.addLocationToGrid(chunkJson.areaRects().entrySet().stream().map(
-                    e -> Pair.of(
-                            e.getValue(),
-                            (LocationEntity) EntityManager.GET().newLocationState(ThreadLocalRandom.current().nextInt(10), e.getKey())
-                    )).toList());
-            return area;
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
+        AreaEntity area = EntityManager.GET().newAreaEntity(
+                AreaId.TEST,
+                chunkMap,
+                IRect2.of(0, 0, 1920, 1920),
+                IVector2.of(1920, 1920)
+        );
 
-    @Bean
-    NonBlockingHashMapLong<PlayerState> playerTableInstance() {
-        return new NonBlockingHashMapLong<>(50);
-    }
+        area.addCollisionToGrid(chunkJson.collisionPolys());
 
-    @Bean
-    GameServer gameServerInstance(
-            @Qualifier("playerTableInstance") NonBlockingHashMapLong<PlayerState> playerTable
-    ) {
-        return new GameServer(playerTable);
-    }
-
-    @Bean
-    SocketQueue socketInQueue(
-            @Qualifier("playerTableInstance") NonBlockingHashMapLong<PlayerState> playerTable
-    ) {
-        return new SocketQueue(playerTable);
+        WorldSystem worldSystem = new WorldSystem(true, Map.of(AreaId.TEST, area));
+        entityManager.registerSystem(worldSystem);
+        return worldSystem;
     }
 }

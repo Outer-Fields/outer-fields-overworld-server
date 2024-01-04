@@ -25,8 +25,6 @@ public class ChunkMap extends Component<ChunkMap> {
         this.chunkMap = chunkMap;
         registerListener(EventType.ENTITY_CHUNK_CHANGED, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, ChunkMap::onEntityChunkChanged));
         registerListener(EventType.TILE_DATA_UPDATE, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, ChunkMap::onTileDataUpdate));
-        registerQueryListener(QueryType.CHUNK_ACTIVE_PLAYERS, ChunkMap::onActivePlayersQuery);
-
     }
 
 
@@ -65,15 +63,6 @@ public class ChunkMap extends Component<ChunkMap> {
         chunk.addActivePlayer(event.issuerEntityId());
     }
 
-    public void onActivePlayersQuery(Event<EventData.Query<?, TIntSet, IVector2>> query) {
-        ChunkEntity chunk = getChunkByIndex(query.data().queryData());
-        if (chunk == null) {
-            //todo log this
-            return;
-        }
-        var queryResponse = new EventData.QueryResponse<>(chunk.getActivePlayers(), query.data().queryCallBack());
-        emitEvent(Event.Factory.newQueryResponse(this, queryResponse, query.issuerEntityId(), query.issuerComponentId()));
-    }
 
     @Nullable
     public ChunkEntity getChunkByGlobalPos(IVector2 pos) {

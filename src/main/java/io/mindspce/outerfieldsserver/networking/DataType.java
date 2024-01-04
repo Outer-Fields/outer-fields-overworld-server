@@ -1,8 +1,8 @@
 package io.mindspce.outerfieldsserver.networking;
 
 public enum DataType {
-    ENTITY_UPDATE((byte) 0),
-    NEW_CHARACTER((byte) 1),
+    ENTITY_POSITION((byte) 0),
+    NEW_ENTITY((byte) 1),
     NEW_ITEM((byte) 2),
     NEW_LOCATION((byte) 3);
 

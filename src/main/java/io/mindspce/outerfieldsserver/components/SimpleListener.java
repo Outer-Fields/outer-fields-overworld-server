@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public class SimpleListener extends Component<SimpleListener>{
-    protected SimpleListener(Entity parentEntity) {
+    public SimpleListener(Entity parentEntity) {
         super(parentEntity, ComponentType.SIMPLER_LISTENER, List.of());
     }
 }

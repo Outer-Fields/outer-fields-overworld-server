@@ -1,14 +1,6 @@
 package io.mindspce.outerfieldsserver.core.networking.websockets;
 
-import io.mindspce.outerfieldsserver.core.WorldState;
-import io.mindspce.outerfieldsserver.core.networking.SocketQueue;
-import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
-import io.mindspce.outerfieldsserver.entities.player.PlayerSession;
-import io.mindspce.outerfieldsserver.entities.player.PlayerState;
-import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.networking.NetMsgIn;
-import io.mindspce.outerfieldsserver.networking.incoming.NetMessageIn;
-import org.jctools.maps.NonBlockingHashMapLong;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.BinaryMessage;
@@ -22,13 +14,13 @@ import java.nio.ByteBuffer;
 
 @Controller
 public class GameServerSocketHandler extends AbstractWebSocketHandler {
-    private final SocketQueue socketQueue;
-    private final NonBlockingHashMapLong<PlayerState> playerTable;
+//    private final SocketService socketService;
+//    private final NonBlockingHashMapLong<PlayerState> playerTable;
 
-    public GameServerSocketHandler(SocketQueue socketQueue,
-            NonBlockingHashMapLong<PlayerState> playerTableInstance) {
-        this.socketQueue = socketQueue;
-        playerTable = playerTableInstance;
+    public GameServerSocketHandler(/*SocketService socketService,
+//            NonBlockingHashMapLong<PlayerState> playerTableInstance*/) {
+//        this.socketService = socketService;
+//        playerTable = playerTableInstance;
     }
 
     @Override
@@ -40,8 +32,9 @@ public class GameServerSocketHandler extends AbstractWebSocketHandler {
 
             int pid = (int) session.getAttributes().get("pid");
 
-            NetMessageIn netMessageIn = new NetMessageIn(System.currentTimeMillis(), pid, messageType, byteBuffer);
-            socketQueue.handOffMessageIn(netMessageIn);
+           // NetMessageIn netMessageIn = new NetMessageIn(System.currentTimeMillis(), pid, messageType, byteBuffer);
+
+        //    socketService.handOffMessageIn(netMessageIn);
 
         } catch (Exception e) {
             //todo logging
@@ -54,14 +47,14 @@ public class GameServerSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
 
-        var ps = EntityManager.GET().newPlayerState(count);
-        playerTable.put(ps.entityId(), ps);
-        session.getAttributes().put("pid", ps.entityId());
-        WorldState.GET().getAreaTable().get(AreaId.TEST).addActivePlayer(ps);
-        PlayerSession pSession = new PlayerSession(session);
-        pSession.setMessageOutConsumer(socketQueue.networkOutHandler(pSession));
-        ps.init(new PlayerSession(session), AreaId.TEST, 0, 0);
-        playerTable.get(ps.entityId()).setPlayerSession(pSession);
+//        var ps = EntityManager.GET().newPlayerState(count);
+//        playerTable.put(ps.entityId(), ps);
+//        session.getAttributes().put("pid", ps.entityId());
+//        WorldState.GET().getAreaTable().get(AreaId.TEST).addActivePlayer(ps);
+//        PlayerSession pSession = new PlayerSession(session);
+//        pSession.setMessageOutConsumer(socketService.networkOutHandler(pSession));
+//        ps.init(new PlayerSession(session), AreaId.TEST, 0, 0);
+//        playerTable.get(ps.entityId()).setPlayerSession(pSession);
     }
 
     @Override

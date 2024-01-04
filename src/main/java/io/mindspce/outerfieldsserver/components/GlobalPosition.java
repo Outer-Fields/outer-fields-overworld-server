@@ -5,11 +5,12 @@ import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
+import io.mindspce.outerfieldsserver.networking.NetSerializable;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspice.mindlib.data.geometry.*;
-import org.springframework.lang.NonNull;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -17,13 +18,13 @@ import java.util.function.Supplier;
 import static io.mindspce.outerfieldsserver.systems.event.EventType.*;
 
 
-public class GlobalPosition extends Component<GlobalPosition> {
+public class GlobalPosition extends Component<GlobalPosition> implements NetSerializable {
 
     private volatile AreaId currArea;
     private volatile IVector2 currChunkIndex;
     private volatile IMutLine2 mVector;
 
-    protected GlobalPosition(Entity parentEntity, AreaId currArea,  IVector2 currChunkIndex, IVector2 mVector) {
+    protected GlobalPosition(Entity parentEntity, AreaId currArea, IVector2 currChunkIndex, IVector2 mVector) {
         super(parentEntity, ComponentType.GLOBAL_POSITION,
                 List.of(ENTITY_AREA_CHANGED, ENTITY_CHUNK_CHANGED, ENTITY_POSITION_CHANGED)
         );
@@ -31,7 +32,7 @@ public class GlobalPosition extends Component<GlobalPosition> {
         this.currChunkIndex = IVector2.of(currChunkIndex);
         this.mVector = ILine2.ofMutable(mVector, mVector);
         registerListener(ENTITY_POSITION_CHANGED, GlobalPosition::onSelfPositionUpdate);
-        registerListener(ENTITY_AREA_UPDATE, GlobalPosition::onSelfPositionUpdate);
+        registerListener(ENTITY_AREA_UPDATE, GlobalPosition::onSelfAreaUpdate);
     }
 
     public GlobalPosition(Entity parentEntity) {
@@ -52,7 +53,7 @@ public class GlobalPosition extends Component<GlobalPosition> {
         );
         currArea = newArea;
 
-        emitEvent(Event.Factory.newEntityAreaChanged(this, eventData));
+        emitEvent(Event.entityAreaChanged(this, eventData));
     }
 
     public void onSelfPositionUpdate(Event<IVector2> positionUpdate) {
@@ -78,7 +79,7 @@ public class GlobalPosition extends Component<GlobalPosition> {
                     newChunkIndex
             );
             currChunkIndex = newChunkIndex;
-            emitEvent(Event.Factory.newEntityChunkUpdate(this, eventData));
+            emitEvent(Event.entityChunkUpdate(this, eventData));
         }
 
         if (currPosition().x() != x || currPosition().y() != y) {
@@ -88,7 +89,7 @@ public class GlobalPosition extends Component<GlobalPosition> {
                     IVector2.of(IVector2.of(lastPosition())),
                     IVector2.of(IVector2.of(currPosition()))
             );
-            emitEvent(Event.Factory.newEntityPosition(this, eventData));
+            emitEvent(Event.entityPosition(this, eventData));
         }
     }
 
@@ -118,5 +119,24 @@ public class GlobalPosition extends Component<GlobalPosition> {
 
     public void addConsumer(Consumer<GlobalPosition> consumer) {
 
+    }
+
+    @Override
+    public int byteSize() {
+        return 8;
+    }
+
+    @Override
+    public byte[] getBytes() {
+        ByteBuffer buffer = NetSerializable.getEmptyBuffer(8);
+        buffer.putInt(currPosition().x());
+        buffer.putInt(currPosition().y());
+        return buffer.array();
+    }
+
+    @Override
+    public void addBytesToBuffer(ByteBuffer buffer) {
+        buffer.putInt(currPosition().x());
+        buffer.putInt(currPosition().y());
     }
 }

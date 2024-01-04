@@ -26,7 +26,7 @@ public class SubSystem extends Component<SubSystem> {
     public SubSystem(Entity parentEntity, List<Component<?>> components, EventProcMode mode) {
         super(
                 parentEntity,
-                ComponentType.CONTROLLER,
+                ComponentType.SUB_SYSTEM,
                 components.stream().flatMap(c -> c.emittedEvents().stream()).distinct().toList()
         );
 
@@ -46,8 +46,6 @@ public class SubSystem extends Component<SubSystem> {
     public void onEvent(Event<?> event) {
         onEventConsumer.accept(event);
     }
-
-
 
     private void doTick(Tick tick) {
         for (int i = 0; i < componentList.length; ++i) {
@@ -146,6 +144,10 @@ public class SubSystem extends Component<SubSystem> {
             case INTERCEPT_AND_PASS -> onEventConsumer = this::interceptAndPassHandler;
         }
         currentMode = mode;
+    }
+
+    public List<Component<?>> getSubComponent(ComponentType componentType) {
+        return Arrays.stream(componentList).filter(c -> c.componentType == componentType).toList();
     }
 
 

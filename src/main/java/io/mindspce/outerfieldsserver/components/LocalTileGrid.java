@@ -6,7 +6,6 @@ import io.mindspce.outerfieldsserver.data.wrappers.DynamicTileRef;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
-import io.mindspce.outerfieldsserver.enums.QueryType;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
@@ -22,6 +21,11 @@ public class LocalTileGrid extends Component<LocalTileGrid> {
     public LocalTileGrid(Entity parentEntity, int size) {
         super(parentEntity, ComponentType.LOCAL_TILE_GRID, List.of());
         this.localTileGrid = new GridArray<>(size, size);
+        for(int x = 0; x < size; ++x) {
+            for(int y = 0; y < size; ++y) {
+                localTileGrid.set(x,y,new DynamicTileRef(parentEntity.areaEntity(),IVector2.of(-x,-y)));
+            }
+        }
         registerListener(EventType.ENTITY_POSITION_CHANGED, LocalTileGrid::onSelfPositionChanged);
         registerListener(EventType.ENTITY_AREA_CHANGED, LocalTileGrid::onSelfAreaChanged);
 
@@ -44,7 +48,7 @@ public class LocalTileGrid extends Component<LocalTileGrid> {
     }
 
     public void calcAreaChange(AreaId areaId) {
-        AreaEntity area = EntityManager.GET().areaState(areaId);
+        AreaEntity area = EntityManager.GET().areaById(areaId);
         for (int x = 0; x < localTileGrid.getWidth(); ++x) {
             for (int y = 0; y < localTileGrid.getHeight(); ++y) {
                 localTileGrid.get(x, y).updateAreaRef(area);

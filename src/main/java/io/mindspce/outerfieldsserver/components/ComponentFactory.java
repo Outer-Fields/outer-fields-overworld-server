@@ -2,16 +2,20 @@ package io.mindspce.outerfieldsserver.components;
 
 import io.mindspce.outerfieldsserver.area.ChunkEntity;
 import io.mindspce.outerfieldsserver.core.GameSettings;
+import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.entities.PositionalEntity;
+import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
+import io.mindspce.outerfieldsserver.enums.ClothingItem;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
+import io.mindspce.outerfieldsserver.enums.EntityState;
 import io.mindspce.outerfieldsserver.enums.EventProcMode;
-import io.mindspce.outerfieldsserver.enums.QueryType;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.geometry.IConcurrentPQuadTree;
 import io.mindspice.mindlib.data.geometry.IPolygon2;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
 
@@ -21,7 +25,7 @@ public class ComponentFactory {
     public static GlobalPosition addGlobalPosition(Entity entity) {
         if (entity.hasAttachedComponent(ComponentType.GLOBAL_POSITION)) {
             //TODO debug log this
-            return ComponentType.GLOBAL_POSITION.castComponent(
+            return ComponentType.GLOBAL_POSITION.castOrNull(
                     entity.getComponent(ComponentType.GLOBAL_POSITION).getFirst());
         }
         GlobalPosition globalPosition = new GlobalPosition(entity);
@@ -29,8 +33,8 @@ public class ComponentFactory {
         return globalPosition;
     }
 
-    public static SimpleListener addSimpleListener(Entity entity, List<QueryType> queryTypes) {
-        SimpleListener listener = new SimpleListener(entity, queryTypes);
+    public static SimpleListener addSimpleListener(Entity entity) {
+        SimpleListener listener = new SimpleListener(entity);
         entity.addComponent(listener);
         return listener;
     }
@@ -53,8 +57,8 @@ public class ComponentFactory {
         return chunkMap;
     }
 
-    public static ActiveEntitiesGrid addActiveEntityGrid(Entity entity, int initialSetSize, IRect2 areaRect, int maxPerQuad) {
-        ActiveEntitiesGrid grid = new ActiveEntitiesGrid(entity, initialSetSize, areaRect, maxPerQuad);
+    public static ActiveEntities addActiveEntityGrid(Entity entity, int initialSetSize, IRect2 areaRect, int maxPerQuad) {
+        ActiveEntities grid = new ActiveEntities(entity, initialSetSize, areaRect, maxPerQuad);
         entity.addComponent(grid);
         return grid;
     }
@@ -66,7 +70,7 @@ public class ComponentFactory {
     }
 
     public static ViewRect addViewRect(PositionalEntity entity, IVector2 size, IVector2 position, boolean emitMutable) {
-        GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castComponent(
+        GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castOrNull(
                 entity.getComponent(ComponentType.GLOBAL_POSITION).getFirst()
         );
         if (globalPosition == null) {
@@ -80,37 +84,22 @@ public class ComponentFactory {
 
     public static class System {
 
-        /**
-         * Returns a movement subsystem for a player entity, include the following:
-         * <br><br>
-         * PlayerMovement component: Accepts and validates player movement packets, broadcast the result to the event system.
-         * <br><br>
-         * ViewRect component: Provides the coordinates and rect of the players view buffer, used to query entities and for
-         * collision validation area.
-         * <br><br>
-         * LocalTileGrid component: Use for collision testing, stays update with a 5x5 tile grid around the player that can be
-         * queried for existing collisions
-         * <br><br>
-         * GlobalPosition component: Keeps track of the players position in the world. Receives the PLAYER_VALID_MOVEMENT event
-         * directly from PlayerMovement, Transmit Position, Chunk and area updates as needed to the event system.
-         * < <br><br>
-         * ViewRect and local tile grid emit no events and register hooks into global position to keep their data upto date.
-         *
-         * @param entity the entity to apply the component to.
-         * @return returns the positional entity back, though component is mutably applied.
-         */
-        static SubSystem playerNetworkIn(PositionalEntity entity) {
-            GlobalPosition globalPosition = new GlobalPosition(entity);
-            ViewRect viewRect = new ViewRect(
-                    entity,
-                    GameSettings.GET().playerViewWithBuffer(),
-                    IVector2.of(0, 0),
-                    true
+        public static void initPlayerEntityComponents(PlayerEntity entity, IVector2 currPosition,
+                List<EntityState> initStates, ClothingItem[] initOutFit, WebSocketSession webSocketSession) {
+            GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castOrNull(
+                    entity.getComponent(ComponentType.GLOBAL_POSITION).getFirst()
             );
+            if (globalPosition == null) { throw new IllegalStateException("Entity must have an existing GlobalPosition component"); }
+
+            // Add view
+            ViewRect viewRect = new ViewRect(entity, GameSettings.GET().playerViewWithBuffer(), currPosition, true);
+
             // PlayerMovement requires a reference to local tile grid
             LocalTileGrid localTileGrid = new LocalTileGrid(entity, 5);
-            PlayerMovement playerMovement = new PlayerMovement(entity, localTileGrid.tileGrid(), viewRect.getRect());
 
+            // Net Movement In
+            // TODO network in should be a module that accepts all possible input packets and performs validation on them
+            PlayerMovement playerMovement = new PlayerMovement(entity, localTileGrid.tileGrid(), viewRect.getRect());
             // Intercept and hook the valid movement event from PlayerMovement to GlobalPosition
             playerMovement.registerOutputHook(EventType.PLAYER_VALID_MOVEMENT, globalPosition::onSelfPositionUpdate, true);
 
@@ -119,35 +108,72 @@ public class ComponentFactory {
             globalPosition.registerOutputHook(EventType.ENTITY_POSITION_CHANGED, localTileGrid::onSelfPositionChanged, false);
             globalPosition.registerOutputHook(EventType.ENTITY_AREA_CHANGED, localTileGrid::onSelfAreaChanged, false);
 
+            // Net Out
+            PlayerSession playerSession = new PlayerSession(
+                    entity, webSocketSession, EntityManager.GET().socketService().networkOutHandler()
+            );
+            KnownEntities knownEntities = new KnownEntities(entity);
+
+            // Couples this with multiple inner components to avoid using the event system and overhead
+            PlayerNetOut playerNetOut = new PlayerNetOut(entity, playerSession, viewRect, knownEntities);
+
+            // Hook into area and view rect changes to keep know entities state synced
+            globalPosition.registerOutputHook(EventType.ENTITY_AREA_CHANGED, knownEntities::onPlayerAreaChanged, false);
+            viewRect.registerOutputHook(EventType.ENTITY_VIEW_RECT_CHANGED, knownEntities::onSelfViewRectChanged, false);
+
             // Combine into a SubSystem for easy management
-            SubSystem componentSystem = new SubSystem(
+            SubSystem playerNetInSystem = new SubSystem(
                     entity,
-                    List.of(globalPosition, viewRect, localTileGrid, playerMovement),
+                    List.of(playerMovement, globalPosition, viewRect, localTileGrid, playerSession, knownEntities, playerNetOut),
                     EventProcMode.PASS_THROUGH
-            ).withName("NetworkOutSubSystem");
+            ).withComponentName("PlayerNetworkController");
+            entity.addComponent(playerNetInSystem);
 
-            entity.addComponent(componentSystem);
-            return componentSystem;
-        }
+            // TODO these will need to be linked to network in
+            EntityStateComp stateComp = new EntityStateComp(entity, initStates);
+            CharacterOutfit outfit = new CharacterOutfit(entity, initOutFit);
 
-        static SubSystem playerNetworkOut(PositionalEntity entity) {
-            GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castComponent(
-                    entity.getComponent(ComponentType.GLOBAL_POSITION).getFirst()
-            );
-            ViewRect viewRect = ComponentType.VIEW_RECT.castComponent(
-                    entity.getComponent(ComponentType.VIEW_RECT).getFirst()
-            );
-            if (globalPosition == null) {
-                throw new IllegalStateException("Entity must have an existing GlobalPosition component to add NetworkOutSubSystem");
-            }
-            if (viewRect == null) {
-                throw new IllegalStateException("Entity must have an existing ViewRectComponent component to add NetworkOutSubSystem");
-            }
-
-
+            // Module for serializing info on request
+            NetSerializer serializer = new NetSerializer(entity, List.of(stateComp, outfit));
+            entity.addComponents(List.of(stateComp, outfit, serializer));
         }
 
 
     }
+
+//        static SubSystem playerNetworkOut(PositionalEntity entity, WebSocketSession webSocketSession) {
+//            GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castComponent(
+//                    entity.getComponent(ComponentType.GLOBAL_POSITION).getFirst()
+//            );
+//            ViewRect viewRect = ComponentType.VIEW_RECT.castComponent(
+//                    entity.getComponent(ComponentType.VIEW_RECT).getFirst()
+//            );
+//            if (globalPosition == null) {
+//                throw new IllegalStateException("Entity must have an existing GlobalPosition component to add NetworkOutSubSystem");
+//            }
+//            if (viewRect == null) {
+//                throw new IllegalStateException("Entity must have an existing ViewRectComponent component to add NetworkOutSubSystem");
+//            }
+//            PlayerSession playerSession = new PlayerSession(
+//                    entity, webSocketSession, EntityManager.GET().socketService().networkOutHandler()
+//            );
+//            KnownEntities knownEntities = new KnownEntities(entity);
+//
+//            // Couples this with multiple inner components to avoid using the event system and overhead
+//            PlayerNetOut playerNetOut = new PlayerNetOut(entity, playerSession, viewRect, knownEntities);
+//
+//            // Hook into area and view rect changes to keep know entities state synced
+//            globalPosition.registerOutputHook(EventType.ENTITY_AREA_CHANGED, knownEntities::onPlayerAreaChanged, false);
+//            viewRect.registerOutputHook(EventType.ENTITY_VIEW_RECT_CHANGED, knownEntities::onSelfViewRectChanged, false);
+//
+//            SubSystem playerNetOutSystem = new SubSystem(
+//                    entity,
+//                    List.of(knownEntities, playerSession, playerNetOut),
+//                    EventProcMode.PASS_THROUGH
+//            ).withName("NetworkOutSubSystem");
+//            entity.addComponent(playerNetOutSystem);
+//            return playerNetOutSystem;
+//        }
+//    }
 
 }

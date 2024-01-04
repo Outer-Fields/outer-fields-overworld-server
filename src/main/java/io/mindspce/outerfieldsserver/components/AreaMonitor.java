@@ -7,6 +7,8 @@ import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.*;
 import io.mindspice.mindlib.data.geometry.IRect2;
+import io.mindspice.mindlib.data.geometry.IVector2;
+import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 
 import java.util.List;
@@ -15,8 +17,8 @@ import java.util.List;
 public class AreaMonitor extends Component<AreaMonitor> {
     private final IRect2 monitoredArea;
 
-    protected AreaMonitor(Entity parent, IRect2 monitoredArea) {
-        super(parent, ComponentType.AREA_MONITOR, List.of(EventType.AREA_MONITORED_ENTERED));
+    public AreaMonitor(Entity parent, IRect2 monitoredArea) {
+        super(parent, ComponentType.AREA_MONITOR, List.of(EventType.AREA_MONITOR_ENTERED));
         this.monitoredArea = monitoredArea;
         registerListener(EventType.ENTITY_POSITION_CHANGED, BiPredicatedBiConsumer.of(
                 PredicateLib::isSameAreaEvent, AreaMonitor::onEntityPositionChanged
@@ -24,11 +26,14 @@ public class AreaMonitor extends Component<AreaMonitor> {
         registerListener(EventType.ENTITY_POSITION_CHANGED, BiPredicatedBiConsumer.of(
                 PredicateLib::isSameAreaEvent, AreaMonitor::onNewEntity
         ));
+//        registerListener(EventType.AREA_MONITOR_QUERY, BiPredicatedBiConsumer.of(
+//                PredicateLib::isSameAreaEvent,
+//                ));
     }
 
     public void onEntityPositionChanged(Event<EventData.EntityPositionChanged> event) {
         if (monitoredArea.contains(event.data().newPosition())) {
-            emitEvent(Event.Factory.newAreaEntered(
+            emitEvent(Event.areaEntered(
                     this, new EventData.AreaEntered(event.issuerEntityType() == EntityType.PLAYER, event.issuerEntityId())
             ));
         }
@@ -36,10 +41,17 @@ public class AreaMonitor extends Component<AreaMonitor> {
 
     public void onNewEntity(Event<EventData.NewEntity> event) {
         if (monitoredArea.contains(event.data().position())) {
-            emitEvent(Event.Factory.newAreaEntered(
+            emitEvent(Event.areaEntered(
                     this, new EventData.AreaEntered(event.issuerEntityType() == EntityType.PLAYER, event.issuerEntityId())
             ));
         }
+    }
+
+    public void onQuery(Event<List<Pair<IVector2, Integer>>> event) {
+        List<Integer> contains = event.data().stream()
+                .filter(e -> monitoredArea.contains(e.first()))
+                .map(Pair::second).toList();
+        emitEvent(Event.responseEvent(this, event, EventType.AREA_MONITOR_RESP, contains));
     }
 
 

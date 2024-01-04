@@ -1,8 +1,8 @@
 package io.mindspce.outerfieldsserver.enums;
 
-public enum State {
+public enum EntityState {
     ;
     public final byte value;
 
-    State(byte value) { this.value = value; }
+    EntityState(byte value) { this.value = value; }
 }

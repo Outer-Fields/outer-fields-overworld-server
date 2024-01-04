@@ -5,8 +5,7 @@ import io.mindspce.outerfieldsserver.enums.ComponentType;
 import java.util.function.Consumer;
 
 
-public record CallBack<T>(
-        int entityId,
-        ComponentType componentType,
+public record CallBack<T, U>(
+        U data,
         Consumer<T> callback
 ) { }

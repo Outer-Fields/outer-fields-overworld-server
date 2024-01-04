@@ -1,25 +1,45 @@
 package io.mindspce.outerfieldsserver.enums;
 
+import io.mindspce.outerfieldsserver.area.AreaEntity;
 import io.mindspce.outerfieldsserver.area.ChunkEntity;
-import io.mindspce.outerfieldsserver.entities.item.ItemEntity;
-import io.mindspce.outerfieldsserver.entities.locations.LocationEntity;
-import io.mindspce.outerfieldsserver.entities.nonplayer.NonPlayerEntity;
+import io.mindspce.outerfieldsserver.entities.LocationEntity;
 import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
+import jakarta.annotation.Nullable;
+
+import java.util.Objects;
+import java.util.function.Predicate;
 
 
 public enum EntityType {
-    PLAYER((byte) 0, PlayerEntity.class),
-    NON_PLAYER((byte) 1, NonPlayerEntity.class),
-    AREA((byte) 2, ItemEntity.class),
-    LOCATION((byte) 3, LocationEntity.class),
-    CHUNK_ENTITY((byte) 4, ChunkEntity.class);
+    ANY((byte) -1, Object.class, Objects::nonNull),
+    PLAYER((byte) 0, Object.class, x -> x instanceof PlayerEntity),
+    NON_PLAYER((byte) 1, Object.class, Objects::nonNull),
+    AREA_ENTITY((byte) 2, AreaEntity.class, x -> x instanceof AreaEntity),
+    LOCATION_ENTITY((byte) 3, LocationEntity.class, x -> x instanceof LocationEntity),
+    CHUNK_ENTITY((byte) 4, ChunkEntity.class, x -> x instanceof ChunkEntity);
 
     public final byte value;
-    public final Class<?> clazz;
+    public final Class<?> dataClass;
+    private final Predicate<Object> validator;
 
-    EntityType(byte value, Class<?> clazz) {
+    EntityType(byte value, Class<?> dataClass, Predicate<Object> validator) {
         this.value = value;
-        this.clazz = clazz;
+        this.dataClass = dataClass;
+        this.validator = validator;
+    }
+
+    public boolean validate(Object dataObj) {
+        return validator.test(dataObj);
+    }
+
+    @Nullable
+    public <T> T castOrNull(Object dataObj) {
+        if (validate(dataObj)) {
+            @SuppressWarnings("unchecked")
+            T casted = (T) dataObj;
+            return casted;
+        }
+        return null;
     }
 
 }

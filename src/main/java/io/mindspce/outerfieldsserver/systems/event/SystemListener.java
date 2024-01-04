@@ -7,11 +7,13 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
+import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
-import io.mindspce.outerfieldsserver.enums.QueryType;
+import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.enums.SystemType;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspice.mindlib.data.collections.sets.AtomicBitSet;
+import io.mindspice.mindlib.util.Utils;
 import org.jctools.queues.MpscUnboundedXaddArrayQueue;
 
 import java.util.*;
@@ -21,12 +23,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 
-public abstract class CoreSystem implements EventListener<CoreSystem> {
+public abstract class SystemListener implements EventListener<SystemListener> {
     // Registries for various O(1) lookups
     private final SystemType systemType;
     private final Map<EventType, List<EventListener<?>>> listenerRegistry = new EnumMap<>(EventType.class);
-    private final Map<QueryType, List<EventListener<?>>> queryRegistry = new EnumMap<>(QueryType.class);
-    private final TIntObjectMap<List<EventListener<?>>> entityRegistry = new TIntObjectHashMap<>(100);
+    private final TIntObjectMap<List<Component<?>>> entityRegistry = new TIntObjectHashMap<>(100);
     private final Map<ComponentType, List<Component<?>>> componentTypeRegistry = new HashMap<>(100);
     private final TLongObjectMap<Component<?>> componentRegistry = new TLongObjectHashMap<>(100);
 
@@ -35,7 +36,6 @@ public abstract class CoreSystem implements EventListener<CoreSystem> {
 
     // Thread safe lookup tables for message delivery
     private final AtomicBitSet listeningFor = new AtomicBitSet(EventType.values().length);
-    private final AtomicBitSet queryableFor = new AtomicBitSet(QueryType.values().length);
     private final AtomicBitSet listeningEntities = new AtomicBitSet(EntityManager.GET().entityCount());
 
     // Queue/Executor
@@ -43,13 +43,16 @@ public abstract class CoreSystem implements EventListener<CoreSystem> {
     private volatile boolean running = false;
     private final MpscUnboundedXaddArrayQueue<Event<?>> eventQueue = new MpscUnboundedXaddArrayQueue<>(50);
 
-    public CoreSystem(SystemType systemType, boolean doStart) {
+    public SystemListener(SystemType systemType, boolean doStart) {
         this.systemType = systemType;
         if (doStart) { start(); }
+        listeningFor.set(EventType.CALLBACK.ordinal());
+        listeningFor.set(EventType.TICK.ordinal());
+        listeningFor.set(EventType.COMPLETABLE_EVENT.ordinal());
     }
 
     @Override
-    public String name() {
+    public String componentName() {
         return systemType.name();
     }
 
@@ -73,7 +76,7 @@ public abstract class CoreSystem implements EventListener<CoreSystem> {
         return 0;
     }
 
-    public SystemType getSystemType() {
+    public SystemType systemType() {
         return systemType;
     }
 
@@ -111,12 +114,7 @@ public abstract class CoreSystem implements EventListener<CoreSystem> {
                 switch (nextEvent.eventType()) {
                     case EventType.TICK -> handleTick((Tick) nextEvent.data());
                     case EventType.CALLBACK -> handleCallBack(nextEvent);
-
-                    case EventType.QUERY -> {
-                        @SuppressWarnings("unchecked")
-                        var castedEvent = (Event<EventData.Query<?, ?, ?>>) nextEvent;
-                        handleQuery(castedEvent);
-                    }
+                    case EventType.COMPLETABLE_EVENT -> handleCompletableEvent(nextEvent);
                     default -> {
                         if (nextEvent.isDirect()) {
                             handleDirectEvent(nextEvent);
@@ -154,7 +152,7 @@ public abstract class CoreSystem implements EventListener<CoreSystem> {
     }
 
     public void registerComponent(Component<?> component) {
-        List<EventListener<?>> existingListeners = entityRegistry.get(component.entityId());
+        List<Component<?>> existingListeners = entityRegistry.get(component.entityId());
         if (existingListeners == null) {
             existingListeners = new ArrayList<>(4);
         }
@@ -168,17 +166,16 @@ public abstract class CoreSystem implements EventListener<CoreSystem> {
             listeningFor.set(event.ordinal());
         }
 
-        for (var query : component.getAllQueryableFor()) {
-            queryRegistry.computeIfAbsent(query, v -> new ArrayList<>()).add(component);
-            queryableFor.set(query.ordinal());
-        }
-
         if (component.isOnTick()) {
             tickListeners.add(component);
         }
         listeningEntities.set(component.entityId());
-
-
+        var existingEntity = entityRegistry.get(component.entityId());
+        if (existingEntity == null) {
+            existingEntity = new ArrayList<>(2);
+            entityRegistry.put(component.entityId(), existingEntity);
+        }
+        existingEntity.add(component);
     }
 
     public void registerComponents(List<Component<?>> components) {
@@ -237,17 +234,19 @@ public abstract class CoreSystem implements EventListener<CoreSystem> {
     }
 
     private void handleCallBack(Event<?> event) {
-        CallBack<?> data = (CallBack<?>) event.data();
-        if (data.entityId() == -1) {
-            componentTypeRegistry.getOrDefault(data.componentType(), List.of()).forEach(c -> c.onEvent(event));
+        if (!event.isDirect()) {
+            componentTypeRegistry.getOrDefault(event.recipientCompType(), List.of())
+                    .forEach(c -> { if (c.entityId() != event.issuerEntityId()) { c.onEvent(event); } });
         } else {
-            List<Component<?>> components = componentTypeRegistry.get(data.componentType());
-            for (int i = 0; i < components.size(); i++) {
-                if (components.get(i).entityId() == data.entityId()) {
-                    components.get(i).onEvent(event);
-                    return;
-                }
-
+            if (event.isDirectComponent()) {
+                Component<?> component = componentRegistry.get(event.recipientComponentId());
+                component.onEvent(event);
+            } else {
+                entityRegistry.get(event.recipientEntityId()).forEach(c -> {
+                    if (c.componentType() == event.recipientCompType()) {
+                        c.onEvent(event);
+                    }
+                });
             }
         }
     }
@@ -265,18 +264,20 @@ public abstract class CoreSystem implements EventListener<CoreSystem> {
             return;
         }
         for (int i = 0; i < listeners.size(); ++i) {
-            listeners.get(i).onEvent(event);
+            var listener = listeners.get(i);
+            if (listener.entityId() == event.issuerEntityId()) { continue; }
+            listener.onEvent(event);
         }
     }
 
-    private void handleQuery(Event<EventData.Query<?, ?, ?>> event) {
-        List<EventListener<?>> listeners = queryRegistry.get(event.data().queryType());
-        if (listeners == null) {
-            //TODO logs this
+    private void handleCompletableEvent(Event<?> event) {
+        EventData.CompletableEvent<?, ?> data = (EventData.CompletableEvent<?, ?>) event.data();
+        if (data.mainEvent().eventType() == EventType.CALLBACK) {
+            handleCallBack(data.mainEvent());
+        } else {
+            handleEvent(data.mainEvent());
         }
-        for (int i = 0; i < listeners.size(); i++) {
-            listeners.get(i).onQuery(event);
-        }
+        EntityManager.GET().emitEvent(data.completionEvent());
     }
 
     private void handleDirectEvent(Event<?> event) {
@@ -288,13 +289,15 @@ public abstract class CoreSystem implements EventListener<CoreSystem> {
             }
             component.onEvent(event);
         } else {
-            List<EventListener<?>> listeners = entityRegistry.get(event.recipientEntityId());
+            List<Component<?>> listeners = entityRegistry.get(event.recipientEntityId());
             if (listeners == null) {
                 // TODO log this? might not be error as we dont track entity ids before issuing?
                 return;
             }
             for (int i = 0; i < listeners.size(); ++i) {
-                listeners.get(i).onEvent(event);
+                if (listeners.get(i).isListenerFor(event.eventType())) {
+                    listeners.get(i).onEvent(event);
+                }
             }
         }
     }
@@ -316,5 +319,45 @@ public abstract class CoreSystem implements EventListener<CoreSystem> {
                 .filter(c -> c.componentId() == componentId)
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Override
+    public List<EventType> emittedEvents() {
+        return List.of(); // TODO fix this?
+    }
+
+    @Override
+    public List<EventType> hasInputHooksFor() {
+        return List.of();
+    }
+
+    @Override
+    public List<EventType> hasOutputHooksFor() {
+        return List.of();
+    }
+
+    @Override
+    public boolean isListening() {
+        return true; // TODO change this if systems can be toggled
+    }
+
+    @Override
+    public boolean isOnTick() {
+        return true; // TODO change this if ontick can be toggled
+    }
+
+    @Override
+    public AreaId areaId() {
+        return AreaId.GLOBAL;
+    }
+
+    @Override
+    public EntityType entityType() {
+        return EntityType.ANY;
+    }
+
+    @Override
+    public String entityName() {
+        return systemType().name();
     }
 }

@@ -1,53 +1,50 @@
 package io.mindspce.outerfieldsserver.core;
 
-import io.mindspce.outerfieldsserver.core.networking.SocketQueue;
-import io.mindspce.outerfieldsserver.entities.player.PlayerState;
+import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
 import org.jctools.maps.NonBlockingHashMapLong;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 
 public class GameServer {
-    private final NonBlockingHashMapLong<PlayerState> playerTable;
+    private final NonBlockingHashMapLong<PlayerEntity> playerTable;
     private volatile long lastTickTime;
-    @Autowired private SocketQueue socketQueue;
+   // @Autowired private SocketService socketService;
     private final ScheduledExecutorService tickExecutor = Executors.newSingleThreadScheduledExecutor();
 
-    public GameServer(NonBlockingHashMapLong<PlayerState> playerTable) {
+    public GameServer(NonBlockingHashMapLong<PlayerEntity> playerTable) {
         this.playerTable = playerTable;
-        tickExecutor.scheduleAtFixedRate(
-                playerUpdateTick(),
-                0,
-                //2,
-                ServerConst.NANOS_IN_SEC / GameSettings.GET().tickRate(),
-                TimeUnit.NANOSECONDS
-                // TimeUnit.SECONDS
-        );
+//        tickExecutor.scheduleAtFixedRate(
+//                playerUpdateTick(),
+//                0,
+//                //2,
+//                ServerConst.NANOS_IN_SEC / GameSettings.GET().tickRate(),
+//                TimeUnit.NANOSECONDS
+//                // TimeUnit.SECONDS
+//        );
         //tickExecutor.execute(initPlayer1());
     }
 
-    public PlayerState getPlayer(int id) {
+    public PlayerEntity getPlayer(int id) {
         return playerTable.get(id);
     }
 
-    public Runnable playerUpdateTick() {
-        return () -> {
-            try {
-                long now = System.currentTimeMillis();
-                double deltaTime = (System.currentTimeMillis() -lastTickTime) / 1000.0;
-                        lastTickTime = System.currentTimeMillis();
-
-                WorldState.GET().getAreaList()
-                        .forEach(a -> a.getActivePlayers()
-                                .forEach(p -> p.onTick(lastTickTime, deltaTime)));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
-    }
+  //  public Runnable playerUpdateTick() {
+//        return () -> {
+//            try {
+//                long now = System.currentTimeMillis();
+//                double deltaTime = (System.currentTimeMillis() -lastTickTime) / 1000.0;
+//                        lastTickTime = System.currentTimeMillis();
+//
+//                WorldState.GET().getAreaList()
+//                        .forEach(a -> a.getActivePlayers()
+//                                .forEach(p -> p.onTick(lastTickTime, deltaTime)));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        };
+  //  }
 
     // FIXME this is for testing
 

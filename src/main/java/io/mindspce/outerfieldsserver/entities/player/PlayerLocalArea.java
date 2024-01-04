@@ -54,15 +54,15 @@ public class PlayerLocalArea {
 //
 //    public void updateCurrArea(AreaState area, int posX, int posY) {
 //        currPosition().setXY(posX, posY);
-//        // clear old subscriptions if they exist
+//        // clearExisting old subscriptions if they exist
 //        if (currArea != null) {
 //            for (var chunk : chunkList) {
 //                currArea.unSubscribeToChunk(chunk.end(), EventType.ENTITY_UPDATE, playerState);
 //            }
 //        }
-//        // remove and clear old enities bitset, to be recalculated
+//        // remove and clearExisting old enities bitset, to be recalculated
 //        System.out.println("cleared known");
-//        knownEntities.clear();
+//        knownEntities.clearExisting();
 //        this.currArea = area;
 //        viewRect.reCenter(currPosition());
 //        updateChunks();
@@ -85,7 +85,7 @@ public class PlayerLocalArea {
 //
 //    public void resetKnowEntities() {
 //        System.out.println("here");
-//        knownEntities.clear();
+//        knownEntities.clearExisting();
 //    }
 //
 //    public boolean validateUpdate(int posX, int posY, long currTimestamp) {
@@ -223,8 +223,8 @@ public class PlayerLocalArea {
 //                }
 //            }
 //        }
-//        if (didSub) { newSubTable.clear(); }
-//        if (didUnSub) { unSubTable.clear(); }
+//        if (didSub) { newSubTable.clearExisting(); }
+//        if (didUnSub) { unSubTable.clearExisting(); }
 //    }
 //
 //    public void removeOldKnownEntities(ChunkData chunk) {
@@ -255,7 +255,7 @@ public class PlayerLocalArea {
 //                IVector2 vec = IVector2.of(chunkList[i].start());
 //                BitSet entityBitSet = knownEntities.remove(vec);
 //                if (entityBitSet != null) {
-//                    entityBitSet.clear();
+//                    entityBitSet.clearExisting();
 //                    freeEntitiesSets.add(entityBitSet);
 //                }
 //            }

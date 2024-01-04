@@ -21,10 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkEntity extends Entity {
     // direct reference to the map stored in the component
-    final Map<IVector2, TileData> activeTiles;
+    volatile Map<IVector2, TileData> activeTiles;
     final TIntSet activePlayers = new TIntHashSet();
 
-    public ChunkEntity(int entityId, AreaId areaId, IVector2 index, ConcurrentHashMap<IVector2,
+    public ChunkEntity(int entityId, AreaId areaId, IVector2 index, Map<IVector2,
             TileData> activeTiles) {
         super(entityId, EntityType.CHUNK_ENTITY, areaId, index);
         this.activeTiles = activeTiles;
@@ -38,8 +38,10 @@ public class ChunkEntity extends Entity {
     public void updateChunkData(EventData.TileDataUpdate data) {
         if (data.isRemoval()) {
             data.tileData().forEach(e -> activeTiles.remove(e.first()));
+            activeTiles = Map.copyOf(activeTiles);
         } else {
             data.tileData().forEach(e -> activeTiles.put(e.first(), e.second()));
+            activeTiles = Map.copyOf(activeTiles);
         }
     }
 
@@ -65,7 +67,7 @@ public class ChunkEntity extends Entity {
         return activeTiles.get(index);
     }
 
-    private Map<IVector2, TileData> loadFromJson(ChunkJson json) {
+    public static Map<IVector2, TileData> loadFromJson(ChunkJson json) {
         ConcurrentHashMap<IVector2, TileData> tileData = new ConcurrentHashMap<>(50);
 
         for (var collision : json.collisionMask()) {
