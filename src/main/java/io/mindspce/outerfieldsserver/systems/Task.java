@@ -56,6 +56,11 @@ public class Task<T extends Enum<T>, U> {
         return isCompleted;
     }
 
+    public void resume() {
+        if (subTasks.isEmpty()) { return; }
+        subTasks.getFirst().onStart();
+    }
+
     public boolean isSuspendable() {
         if (subTasks.isEmpty()) { return true; }
         return subTasks.getFirst().suspendable();

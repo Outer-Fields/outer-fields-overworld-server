@@ -45,6 +45,17 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>> extends Comp
             return;
         }
 
+        if (currentTask.isCompleted()) {
+            var queuedTask = queuedTasks.poll();
+            if (queuedTask != null) {
+                currentTask = queuedTask;
+                currentTask.resume();
+            }
+        }
+
+        if (calculateSuspendable(tryingToDo, tick)) { return; }
+        if (calculateSuspendable(wantingToDo, tick)) { return; }
+
         if (!canDo.isEmpty()) {
             if (calculateTask(tryingToDo, tick)) { return; }
             if (calculateTask(wantingToDo, tick)) { return; }
@@ -56,6 +67,10 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>> extends Comp
                 randomTasks.remove(randThought);
             }
         }
+    }
+
+    public void queueTask(Task<T, U> task) {
+        queuedTasks.add(task);
     }
 
     public boolean calculateSuspendable(List<Thought<T, U>> taskList, Tick tick) {
@@ -74,8 +89,8 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>> extends Comp
                     return true;
                 }
             }
-
         }
+        return false;
     }
 
     public boolean calculateTask(List<Thought<T, U>> taskList, Tick tick) {
@@ -94,10 +109,6 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>> extends Comp
             }
         }
         return false;
-    }
-
-    public void queueTask(Task<T, U> task) {
-        queuedTasks.add(task);
     }
 
     public record Thought<T extends Enum<T>, U extends Task<T, U>>(
