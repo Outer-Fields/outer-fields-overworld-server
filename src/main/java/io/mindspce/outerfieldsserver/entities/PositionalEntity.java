@@ -10,7 +10,7 @@ import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
 
-public abstract class PositionalEntity extends Entity {
+public class PositionalEntity extends Entity {
 
     public PositionalEntity(int id, EntityType entityType,
             AreaId areaId) {

@@ -13,19 +13,19 @@ import java.util.*;
 public abstract class Component<T extends Component<T>> extends ListenerCache<T> implements EventListener<T> {
     protected final Entity parentEntity;
     protected final ComponentType componentType;
-    protected final long id = UUID.randomUUID().getLeastSignificantBits();
-    protected String componenetName;
+    protected final long id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+    protected String componentName;
 
     public Component(Entity parentEntity, ComponentType componentType,
             List<EventType> emittedEvents) {
         super(emittedEvents);
         this.parentEntity = parentEntity;
         this.componentType = componentType;
-        this.componenetName = parentEntity.entityType() + ":" + parentEntity.entityId() + ":" + componentType.name() + ":" + id;
+        this.componentName = parentEntity.entityType() + ":" + parentEntity.entityId() + ":" + componentType.name() + ":" + id;
     }
 
     public T withComponentName(String name) {
-        this.componenetName += ":" + name;
+        this.componentName += ":" + name;
         @SuppressWarnings("unchecked")
         T with = (T) this;
         return with;
@@ -41,7 +41,7 @@ public abstract class Component<T extends Component<T>> extends ListenerCache<T>
 
     @Override
     public String componentName() {
-        return componenetName;
+        return componentName;
     }
 
     @Override

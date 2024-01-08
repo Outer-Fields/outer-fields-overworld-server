@@ -6,7 +6,9 @@ import io.mindspce.outerfieldsserver.entities.LocationEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ClothingItem;
 import io.mindspce.outerfieldsserver.systems.EventData;
+import io.mindspce.outerfieldsserver.systems.Task;
 import io.mindspice.mindlib.data.geometry.IRect2;
+import io.mindspice.mindlib.data.tuples.Pair;
 import jakarta.annotation.Nullable;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -58,15 +60,21 @@ public enum EventType {
     ENTITY_NAME_UPDATE(String.class, x -> x instanceof String),
     ENTITY_GRID_QUERY(IRect2.class, x -> x instanceof IRect2),
     ENTITY_GRID_RESPONSE(int[].class, x -> x instanceof int[]),
-    SERIALIZED_ENTITY_REQUEST(int[].class, x -> x instanceof int[]),
+    SERIALIZED_ENTITY_REQUEST(Integer.class, x -> x instanceof int[]),
+    SERIALIZED_ENTITY_RESP(byte[].class, x -> x instanceof byte[]),
+    SERIALIZED_ENTITIES_REQUEST(Predicate.class, x -> x instanceof Predicate<?>),
+    SERIALIZED_ENTITIES_RESP(Pair.class, x -> x instanceof Pair<?, ?>),
 
-    SERIALIZED_ENTITY_RESPONSE(byte[].class, x -> x instanceof byte[]),
     CHARACTER_OUTFIT_CHANGED(ClothingItem.class, x -> x instanceof ClothingItem[]),
     CHARACTER_OUTFIT_UPDATE(byte[].class, x -> x instanceof byte[]),
     NEW_LOCATION(LocationEntity.class, x -> x instanceof LocationEntity),
     REMOVE_LOCATION(Integer.class, x -> x instanceof Integer),
     AREA_MONITOR_QUERY(List.class, x -> x instanceof List), //List<Pair<IVector2,Integer>
-    AREA_MONITOR_RESP(List.class, x -> x instanceof List);//List<Integer>
+    AREA_MONITOR_RESP(List.class, x -> x instanceof List), //List<Integer>
+    SYSTEM_ENTITIES_QUERY(Predicate.class, x -> x instanceof Predicate<?>),
+    SYSTEM_ENTITIES_RESP(List.class, x -> x instanceof List<?>),
+    KEY_VALUE_EVENT(Pair.class, x -> x instanceof Pair),
+    DO_TASK(Task.class, x -> x instanceof Task);
 
     public final Class<?> dataClass;
     private final Predicate<Object> validator;

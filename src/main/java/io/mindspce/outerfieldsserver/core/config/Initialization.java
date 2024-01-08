@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 
@@ -35,7 +36,8 @@ public class Initialization {
                 AreaId.TEST,
                 chunkMap,
                 IRect2.of(0, 0, 1920, 1920),
-                IVector2.of(1920, 1920)
+                IVector2.of(1920, 1920),
+                List.of()
         );
 
         area.addCollisionToGrid(chunkJson.collisionPolys());

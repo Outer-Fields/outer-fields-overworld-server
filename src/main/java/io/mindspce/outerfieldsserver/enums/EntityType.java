@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 
-public enum EntityType {
+public enum EntityType{
     ANY((byte) -1, Object.class, Objects::nonNull),
     PLAYER((byte) 0, Object.class, x -> x instanceof PlayerEntity),
     NON_PLAYER((byte) 1, Object.class, Objects::nonNull),

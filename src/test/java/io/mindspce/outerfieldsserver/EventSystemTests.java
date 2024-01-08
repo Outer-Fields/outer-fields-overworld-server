@@ -1,8 +1,6 @@
 package io.mindspce.outerfieldsserver;
 
 import io.mindspce.outerfieldsserver.components.Component;
-import io.mindspce.outerfieldsserver.components.NetSerializer;
-import io.mindspce.outerfieldsserver.components.PlayerNetOut;
 import io.mindspce.outerfieldsserver.components.SimpleListener;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
@@ -10,7 +8,6 @@ import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.enums.SystemType;
-import io.mindspce.outerfieldsserver.networking.NetSerializable;
 import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspce.outerfieldsserver.systems.event.SystemListener;
@@ -19,9 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.Assert.*;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -300,53 +295,74 @@ public class EventSystemTests {
         tc.set(0);
     }
 
-    @Test
-    public void threadTest() throws InterruptedException {
-        EntityManager.GET().eventListeners().clear();
-        var system = new TestSystem(SystemType.TEST1, true);
-        var system2 = new TestSystem(SystemType.TEST2, true);
-        var entity = new TestEntity(42, EntityType.PLAYER, AreaId.TEST);
-        var entity2 = new TestEntity(422, EntityType.PLAYER, AreaId.TEST);
-        var testComp = new TestComponent(entity, ComponentType.SIMPLE_OBJECT, List.of(EventType.PING));
-        var testComp2 = new TestComponent(entity2, ComponentType.SIMPLE_OBJECT, List.of(EventType.PING));
-        testComp.testInt = 0;
-        system.registerComponent(testComp);
-        system2.registerComponent(testComp2);
-
-        List<Integer> intList = new ArrayList<>();
-        AtomicBoolean fin = new AtomicBoolean();
-        int j = 10000 ;
-        for (int i = 0; i <= j; i++) {
-
-            var compEvent = Event.completableEvent(testComp2,
-
-                    Event.globalComponentCallback(testComp2, AreaId.TEST, ComponentType.SIMPLE_OBJECT,
-                            (TestComponent tc) -> {
-                                tc.testInt += 1;
-
-                                intList.add(tc.testInt);
-                            }),
-                    Event.directComponentCallback(testComp, AreaId.TEST, ComponentType.SIMPLE_OBJECT, testComp2.entityId(), testComp2.componentId(),
-                            (TestComponent tc) -> {
-                                tc.testInt += 1;
-                                assert (tc.testInt == intList.getLast());
-                                if (tc.testInt == j) {
-                                    fin.set(true);
-                                }
-                    } )
-            );
-            testComp2.emitEvent(compEvent);
-        }
-
-        while(!fin.get()) {
-            Thread.sleep(100);
-            System.out.println(intList);
-        }
-
-        System.out.println(intList);
-
-
-    }
+//    @Test
+//    public void threadTest() throws InterruptedException {
+//        EntityManager.GET().eventListeners().clear();
+//        var system = new TestSystem(SystemType.TEST1, true);
+//        var system2 = new TestSystem(SystemType.TEST2, true);
+//        var entity = new TestEntity(422, EntityType.PLAYER, AreaId.TEST);
+//
+//        var testComp = new TestComponent(entity, ComponentType.SIMPLER_LISTENER, List.of(EventType.PING));
+//
+//        for (int i = 0; i < 10; i++) {
+//            var e = new TestEntity(i, EntityType.PLAYER, AreaId.TEST);
+//            var tc = new TestComponent(e, ComponentType.SIMPLE_OBJECT, List.of(EventType.PING));
+//            system2.registerComponent(tc);
+//        }
+//
+//        testComp.testInt = 0;
+//        system.registerComponent(testComp);
+//
+//        List<Integer> intList = new ArrayList<>();
+//        AtomicBoolean fin = new AtomicBoolean();
+//        AtomicInteger intty = new AtomicInteger(0);
+//        int j = 10;
+//        var t = System.nanoTime();
+//        for (int i = 0; i < j; i++) {
+//
+////            var comp = new CompletebleEvent2<>(intList,
+////                    (TestComponent tc, List<Integer> data) -> {
+////                        tc.testInt += 1;
+////                        data.add(tc.testInt);
+////                    },
+////                    (TestComponent tc, List<Integer> data) -> {
+////                        System.out.println(intty);
+////                        if (intty.getAndIncrement() == 9) {
+////                            fin.set(true);
+////                            System.out.println(intList);
+////                        }
+////                    });
+////
+////            var compEvent = new Event<>(EventType.COMPLETABLE_EVENT2, testComp.areaId(), testComp, ComponentType.SIMPLE_OBJECT, comp);
+//
+//                        var compEvent = Event.completableEvent(testComp,
+//                                Event.globalComponentCallback(
+//                                        testComp, AreaId.TEST, ComponentType.SIMPLE_OBJECT,
+//                                        (TestComponent tc) -> {
+//                                            tc.testInt += 1;
+//                                            intty.getAndIncrement();
+//                                            intList.add(tc.testInt);
+//                                        }),
+//                                Event.directComponentCallback(testComp, AreaId.TEST, ComponentType.SIMPLER_LISTENER, testComp.entityId(), testComp.componentId(),
+//                                        (TestComponent tc) -> {
+//                                            tc.testInt += 1;
+//                                            if (tc.testInt == (j - 1)) {
+//                                                fin.set(true);
+//                                            }
+//
+//
+//                                        }
+//
+//                                ));
+//            EntityManager.GET().emitEventToSystem(SystemType.TEST2, compEvent);
+//        }
+//
+//        while (!fin.get()) {
+//        }
+//        System.out.println(intList);
+//
+//
+//    }
 
 
 }

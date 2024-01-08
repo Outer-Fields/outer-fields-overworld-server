@@ -69,6 +69,12 @@ public class ComponentFactory {
         return grid;
     }
 
+    public static <T extends Entity> TrackedEntities<T> addTrackedEntities(Entity entity, List<T> trackedEntities) {
+        var tracker = new TrackedEntities<>(entity, trackedEntities);
+        entity.addComponent(tracker);
+        return tracker;
+    }
+
     public static ViewRect addViewRect(PositionalEntity entity, IVector2 size, IVector2 position, boolean emitMutable) {
         GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castOrNull(
                 entity.getComponent(ComponentType.GLOBAL_POSITION).getFirst()
@@ -122,7 +128,7 @@ public class ComponentFactory {
             viewRect.registerOutputHook(EventType.ENTITY_VIEW_RECT_CHANGED, knownEntities::onSelfViewRectChanged, false);
 
             // Combine into a SubSystem for easy management
-            SubSystem playerNetInSystem = new SubSystem(
+            ComponentSystem playerNetInSystem = new ComponentSystem(
                     entity,
                     List.of(playerMovement, globalPosition, viewRect, localTileGrid, playerSession, knownEntities, playerNetOut),
                     EventProcMode.PASS_THROUGH

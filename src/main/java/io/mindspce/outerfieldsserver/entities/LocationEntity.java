@@ -10,7 +10,7 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 public class LocationEntity extends PositionalEntity {
     private final int locationKey;
 
-    public LocationEntity(int id, EntityType entityType, AreaId areaId, IVector2 position, int locationKey) {
+    public LocationEntity(int id, AreaId areaId, IVector2 position, int locationKey) {
         super(id, EntityType.LOCATION_ENTITY, areaId, position);
         this.locationKey = locationKey;
     }

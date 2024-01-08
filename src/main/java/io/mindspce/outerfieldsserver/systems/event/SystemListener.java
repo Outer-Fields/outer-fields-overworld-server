@@ -4,6 +4,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import io.micrometer.observation.Observation;
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
@@ -13,7 +14,7 @@ import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.enums.SystemType;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspice.mindlib.data.collections.sets.AtomicBitSet;
-import io.mindspice.mindlib.util.Utils;
+import io.mindspice.mindlib.data.collections.sets.AtomicByteSet;
 import org.jctools.queues.MpscUnboundedXaddArrayQueue;
 
 import java.util.*;
@@ -21,6 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 
 public abstract class SystemListener implements EventListener<SystemListener> {
@@ -35,7 +37,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     private final List<EventListener<?>> tickListeners = new ArrayList<>();
 
     // Thread safe lookup tables for message delivery
-    private final AtomicBitSet listeningFor = new AtomicBitSet(EventType.values().length);
+    private final AtomicIntegerArray listeningFor = new AtomicIntegerArray(EventType.values().length);
     private final AtomicBitSet listeningEntities = new AtomicBitSet(EntityManager.GET().entityCount());
 
     // Queue/Executor
@@ -46,9 +48,9 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     public SystemListener(SystemType systemType, boolean doStart) {
         this.systemType = systemType;
         if (doStart) { start(); }
-        listeningFor.set(EventType.CALLBACK.ordinal());
-        listeningFor.set(EventType.TICK.ordinal());
-        listeningFor.set(EventType.COMPLETABLE_EVENT.ordinal());
+        listeningFor.incrementAndGet(EventType.CALLBACK.ordinal());
+        listeningFor.incrementAndGet(EventType.TICK.ordinal());
+        listeningFor.incrementAndGet(EventType.COMPLETABLE_EVENT.ordinal());
     }
 
     @Override
@@ -91,7 +93,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     }
 
     public boolean isListeningFor(EventType eventType) {
-        return listeningFor.get(eventType.ordinal());
+        return listeningFor.get(eventType.ordinal()) > 0;
     }
 
     public boolean hasListeningEntity(int entityId) {
@@ -110,7 +112,6 @@ public abstract class SystemListener implements EventListener<SystemListener> {
                 while ((nextEvent = eventQueue.relaxedPoll()) == null) {
                     Thread.onSpinWait();
                 }
-
                 switch (nextEvent.eventType()) {
                     case EventType.TICK -> handleTick((Tick) nextEvent.data());
                     case EventType.CALLBACK -> handleCallBack(nextEvent);
@@ -163,7 +164,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
 
         for (var event : component.getAllListeningFor()) {
             listenerRegistry.computeIfAbsent(event, v -> new ArrayList<>()).add(component);
-            listeningFor.set(event.ordinal());
+            listeningFor.incrementAndGet(event.ordinal());
         }
 
         if (component.isOnTick()) {
@@ -176,6 +177,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
             entityRegistry.put(component.entityId(), existingEntity);
         }
         existingEntity.add(component);
+        component.linkSystemUpdates(this::addListeningEvent, this::removeListeningEvent);
     }
 
     public void registerComponents(List<Component<?>> components) {
@@ -190,7 +192,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
             listenerList.getValue().removeIf(l -> l.componentId() == componentId);
 
             if (listenerList.getValue().isEmpty()) {
-                listeningFor.set(listenerList.getKey().ordinal());
+                listeningFor.incrementAndGet(listenerList.getKey().ordinal());
                 itr.remove();
             }
         }
@@ -217,7 +219,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
             Map.Entry<EventType, List<EventListener<?>>> listenerList = itr.next();
             listenerList.getValue().removeIf(l -> l.entityId() == entityId);
             if (listenerList.getValue().isEmpty()) {
-                listeningFor.set(listenerList.getKey().ordinal(), false);
+                listeningFor.decrementAndGet(listenerList.getKey().ordinal());
                 itr.remove();
             }
         }
@@ -359,5 +361,13 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     @Override
     public String entityName() {
         return systemType().name();
+    }
+
+    private void addListeningEvent(EventType type) {
+        listeningFor.incrementAndGet(type.ordinal());
+    }
+
+    private void removeListeningEvent(EventType eventType) {
+        listeningFor.decrementAndGet(eventType.ordinal());
     }
 }

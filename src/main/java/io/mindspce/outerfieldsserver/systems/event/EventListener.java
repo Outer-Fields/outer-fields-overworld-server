@@ -1,5 +1,6 @@
 package io.mindspce.outerfieldsserver.systems.event;
 
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EntityType;
@@ -35,6 +36,5 @@ public interface EventListener<T extends EventListener<T>> {
     AreaId areaId();
 
     EntityType entityType();
-
 
 }

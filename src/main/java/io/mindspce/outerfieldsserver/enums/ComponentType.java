@@ -1,8 +1,10 @@
 package io.mindspce.outerfieldsserver.enums;
 
+import io.mindspce.outerfieldsserver.ai.logic.ThoughtModule;
 import io.mindspce.outerfieldsserver.components.*;
 import io.mindspce.outerfieldsserver.components.ChunkMap;
-import io.mindspce.outerfieldsserver.components.logic.LocationEntities;
+import io.mindspce.outerfieldsserver.components.LocationEntities;
+import io.mindspce.outerfieldsserver.components.ai.BehaviorModule;
 import jakarta.annotation.Nullable;
 
 import java.util.Objects;
@@ -12,7 +14,7 @@ import java.util.function.Predicate;
 public enum ComponentType {
     ANY(Object.class, Objects::nonNull),
     AREA_MONITOR(AreaMonitor.class, x -> x instanceof AreaMonitor),
-    SUB_SYSTEM(SubSystem.class, x -> x instanceof SubSystem),
+    SUB_SYSTEM(ComponentSystem.class, x -> x instanceof ComponentSystem),
     VIEW_RECT(ViewRect.class, x -> x instanceof ViewRect),
     LOCAL_TILE_GRID(LocalTileGrid.class, x -> x instanceof LocalTileGrid),
     NET_PLAYER_POSITION(PlayerMovement.class, x -> x instanceof PlayerMovement),
@@ -31,7 +33,11 @@ public enum ComponentType {
     OUTFIT(CharacterOutfit.class, x -> x instanceof CharacterOutfit),
     EntityProperties(EntityProperties.class, x -> x instanceof EntityProperties),
     NET_SERIALIZER(NetSerializer.class, x -> x instanceof NetSerializer),
-    LOCATION_ENTITIES(LocationEntities.class, x -> x instanceof LocationEntities);
+    LOCATION_ENTITIES(LocationEntities.class, x -> x instanceof LocationEntities),
+    TRACKED_ENTITIES(TrackedEntities.class, x -> x instanceof TrackedEntities),
+    BEHAVIOR_MODULE(BehaviorModule.class, x -> x instanceof BehaviorModule),
+    THOUGHT_MODULE(ThoughtModule.class, x -> x instanceof ThoughtModule<?,?>),
+    DECISION_TREE(DecisionTree.class, x -> x instanceof DecisionTree );
 
     public final Class<?> componentClass;
     private final Predicate<Object> validator;

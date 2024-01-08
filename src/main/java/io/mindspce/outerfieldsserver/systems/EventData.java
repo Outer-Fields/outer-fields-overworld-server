@@ -11,12 +11,14 @@ import io.mindspice.mindlib.data.geometry.IPolygon2;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
+import io.mindspice.mindlib.functional.consumers.PredicatedConsumer;
 
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 
 public class EventData {
@@ -55,5 +57,7 @@ public class EventData {
 
 
     public record EntitySerialization(int[] ids, ByteBuffer buffer) { }
+
+
 
 }

@@ -5,8 +5,10 @@ import io.mindspce.outerfieldsserver.area.ChunkEntity;
 import io.mindspce.outerfieldsserver.area.ChunkJson;
 import io.mindspce.outerfieldsserver.core.networking.SocketService;
 import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.entities.LocationEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EntityType;
+import io.mindspce.outerfieldsserver.enums.SystemType;
 import io.mindspce.outerfieldsserver.systems.event.*;
 import io.mindspice.mindlib.data.cache.ConcurrentIndexCache;
 import io.mindspice.mindlib.data.collections.lists.primative.IntList;
@@ -24,6 +26,7 @@ public class EntityManager {
     private final Map<EntityType, IntList> entityMap = new EnumMap<>(EntityType.class);
     public final StampedLock lock = new StampedLock();
     private final List<SystemListener> eventListeners = new CopyOnWriteArrayList<>();
+    private final Map<SystemType, List<SystemListener>> systemMap = new EnumMap<>(SystemType.class);
 
     private EntityManager() { }
 
@@ -89,16 +92,41 @@ public class EntityManager {
 
     public <T extends Entity> void registerSystem(SystemListener system) {
         eventListeners.add(system);
+        systemMap.computeIfAbsent(system.systemType(), val -> new CopyOnWriteArrayList<>()).add(system);
     }
 
     public void emitEvent(Event<?> event) {
         for (int i = 0; i < eventListeners.size(); ++i) {
             var listener = eventListeners.get(i);
             if (event.isDirect() && listener.hasListeningEntity(event.recipientEntityId())) {
+
                 listener.onEvent(event);
                 return;
             } else {
                 if (listener.isListeningFor(event.eventType())) {
+                    listener.onEvent(event);
+                }
+            }
+        }
+    }
+
+    public void emitEventToSystem(SystemType system, Event<?> event) {
+        List<SystemListener> listeners = systemMap.get(system);
+        if (listeners == null) {
+            //todo log
+            return;
+        }
+
+        for (int i = 0; i < listeners.size(); i++) {
+            var listener = listeners.get(i);
+            if (event.isDirect() && listener.hasListeningEntity(event.recipientEntityId())) {
+
+                listener.onEvent(event);
+                return;
+            } else {
+                ;
+                if (listener.isListeningFor(event.eventType())) {
+
                     listener.onEvent(event);
                 }
             }
@@ -118,9 +146,10 @@ public class EntityManager {
         }
     }
 
-    public AreaEntity newAreaEntity(AreaId areaId, ChunkEntity[][] chunkMap, IRect2 areaSize, IVector2 chunkSize) {
+    public AreaEntity newAreaEntity(AreaId areaId, ChunkEntity[][] chunkMap, IRect2 areaSize, IVector2 chunkSize,
+            List<LocationEntity> initLocations) {
         int id = entityCache.getAndReserveNextIndex();
-        AreaEntity areaEntity = new AreaEntity(id, areaId, chunkMap, areaSize, chunkSize);
+        AreaEntity areaEntity = new AreaEntity(id, areaId, chunkMap, areaSize, chunkSize, initLocations);
         long stamp = lock.writeLock();
         try {
             entityMap.computeIfAbsent(EntityType.AREA_ENTITY, val -> new IntList()).add(id);

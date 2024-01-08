@@ -16,14 +16,14 @@ import java.util.stream.Collectors;
 
 
 // TODO FIXME NOTE need to pass through inner component queries
-public class SubSystem extends Component<SubSystem> {
+public class ComponentSystem extends Component<ComponentSystem> {
     protected final Component<?>[] componentList;
     protected final BitSet listeningFor = new BitSet(EventType.values().length);
     protected Consumer<Event<?>> onEventConsumer;
-    protected BiConsumer<SubSystem, Tick> onTickConsumer;
+    protected BiConsumer<ComponentSystem, Tick> onTickConsumer;
     protected EventProcMode currentMode;
 
-    public SubSystem(Entity parentEntity, List<Component<?>> components, EventProcMode mode) {
+    public ComponentSystem(Entity parentEntity, List<Component<?>> components, EventProcMode mode) {
         super(
                 parentEntity,
                 ComponentType.SUB_SYSTEM,
@@ -39,7 +39,7 @@ public class SubSystem extends Component<SubSystem> {
         }
         componentList = components.toArray(Component<?>[]::new);
         switchMode(mode);
-        setOnTickConsumer(SubSystem::doTick);
+        setOnTickConsumer(ComponentSystem::doTick);
     }
 
     @Override
@@ -50,14 +50,6 @@ public class SubSystem extends Component<SubSystem> {
     private void doTick(Tick tick) {
         for (int i = 0; i < componentList.length; ++i) {
             componentList[i].onTick(tick);
-        }
-    }
-
-    public void passThroughHandler(Event<?> event) {
-        for (int i = 0; i < componentList.length; i++) {
-            if (componentList[i].isListenerFor(event.eventType())) {
-                componentList[i].onEvent(event);
-            }
         }
     }
 
@@ -113,6 +105,14 @@ public class SubSystem extends Component<SubSystem> {
 
     public void interceptHandler(Event<?> event) {
         handleEvent(this, event);
+    }
+
+    public void passThroughHandler(Event<?> event) {
+        for (int i = 0; i < componentList.length; i++) {
+            if (componentList[i].isListenerFor(event.eventType())) {
+                componentList[i].onEvent(event);
+            }
+        }
     }
 
     public void interceptOrPassHandler(Event<?> event) {

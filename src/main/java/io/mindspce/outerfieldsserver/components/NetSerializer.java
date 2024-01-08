@@ -10,7 +10,6 @@ import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 
 public class NetSerializer extends Component<NetSerializer> {
@@ -25,8 +24,8 @@ public class NetSerializer extends Component<NetSerializer> {
         ));
     }
 
-    public void onSerializationRequest(Event<Object> event) {
-        Event.responseEvent(this, event, EventType.SERIALIZED_ENTITY_RESPONSE, serializeToBytes());
+    public void onSerializationRequest(Event<Integer> event) {
+        Event.responseEvent(this, event, EventType.SERIALIZED_ENTITY_RESP, serializeToBytes());
     }
 
     public void serializeToBuffer(ByteBuffer buffer) {
@@ -40,7 +39,7 @@ public class NetSerializer extends Component<NetSerializer> {
         var buffer = NetSerializable.getEmptyBuffer(serializable.stream()
                 .mapToInt(NetSerializable::byteSize).sum());
         serializable.forEach(s -> s.addBytesToBuffer(buffer));
-        return buffer.array();
+        return NetSerializable.trimBufferToBytes(buffer);
     }
 
 }

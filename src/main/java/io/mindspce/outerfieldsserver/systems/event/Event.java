@@ -2,6 +2,7 @@ package io.mindspce.outerfieldsserver.systems.event;
 
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
+import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.*;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspice.mindlib.data.geometry.IRect2;
@@ -10,6 +11,7 @@ import io.mindspice.mindlib.data.tuples.Pair;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 
 public record Event<T>(
@@ -87,6 +89,20 @@ public record Event<T>(
                 data);
     }
 
+    public Event(EventType eventType, AreaId eventArea, Component<?> component, ComponentType recCompType, T data) {
+        this(
+                eventType,
+                eventArea,
+                component.entityId(),
+                component.componentId(),
+                component.componentType(),
+                component.entityType(),
+                -1,
+                -1,
+                recCompType,
+                data);
+    }
+
     public boolean isDirect() {
         return recipientEntityId != -1 || recipientComponentId != -1;
     }
@@ -118,8 +134,8 @@ public record Event<T>(
         );
     }
 
-    public static <T, U> Event<EventData.CompletableEvent<T, U>> completableEvent(Component<?> component,
-            Event<T> mainEvent, Event<U> completionEvent) {
+    public static <E, V> Event<EventData.CompletableEvent<E, V>> completableEvent(Component<?> component,
+            Event<E> mainEvent, Event<V> completionEvent) {
         return new Event<>(
                 EventType.COMPLETABLE_EVENT, AreaId.GLOBAL, component, new EventData.CompletableEvent<>(mainEvent, completionEvent)
         );
@@ -202,12 +218,17 @@ public record Event<T>(
 
     public static Event<Object> serializedEntityResponse(Component<?> component, AreaId areaId, int recEntityId,
             long recCompId, byte[] data) {
-        return new Event<>(EventType.SERIALIZED_ENTITY_RESPONSE, areaId, component, recEntityId, recCompId, data);
+        return new Event<>(EventType.SERIALIZED_ENTITY_RESP, areaId, component, recEntityId, recCompId, data);
     }
 
     public static Event<IRect2> entityGridQuery(Component<?> component, AreaId areaId,
             int entityId, IRect2 queryRect) {
         return new Event<>(EventType.ENTITY_GRID_QUERY, areaId, component, entityId, -1, ComponentType.ACTIVE_ENTITIES, queryRect);
+    }
+
+    public static <E extends Entity> Event<Predicate<E>> serializedEntitiesReq(Component<?> component,
+            AreaId areaId, Predicate<E> predicate) {
+        return new Event<>(EventType.SERIALIZED_ENTITIES_REQUEST, areaId, component, predicate);
     }
 
     public static Event<NetInPlayerPosition> netInPlayerPosition(int recipientId, NetInPlayerPosition data) {
@@ -240,10 +261,8 @@ public record Event<T>(
         return new Event<>(EventType.AREA_MONITOR_QUERY, queryArea, component, -1, componentId, componentType, queryData);
     }
 
+
     //public static Event<Object>
-
-
-
 
 
     public static class Builder<T> {

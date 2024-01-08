@@ -1,8 +1,8 @@
-package io.mindspce.outerfieldsserver.components.logic;
+package io.mindspce.outerfieldsserver.components;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import io.mindspce.outerfieldsserver.components.Component;
+import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.entities.LocationEntity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
