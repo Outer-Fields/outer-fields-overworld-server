@@ -1,23 +1,26 @@
-package io.mindspce.outerfieldsserver.ai.logic;
+package io.mindspce.outerfieldsserver.components.ai;
 
+import io.mindspce.outerfieldsserver.ai.decisiongraph.DecisionEventGraph;
+import io.mindspce.outerfieldsserver.ai.decisiongraph.RootNode;
+import io.mindspce.outerfieldsserver.ai.task.Task;
 import io.mindspce.outerfieldsserver.components.Component;
+import io.mindspce.outerfieldsserver.components.DecisionTree;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
-import io.mindspce.outerfieldsserver.systems.Task;
+import io.mindspce.outerfieldsserver.systems.event.EventType;
+import io.mindspice.mindlib.data.tuples.Pair;
+import io.mindspice.mindlib.functional.consumers.TriConsumer;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-// TODO ad a way to suspend task for another and return with an interuptible flag
 
-
-public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>> extends Component<ThoughtModule<T, U>> {
+public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>, V> extends Component<ThoughtModule<T, U, V>> {
     public Task<T, U> currentTask;
     public T lastTask;
 
@@ -26,12 +29,32 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>> extends Comp
     public List<Thought<T, U>> randomTasks = new ArrayList<>(2);
     public PriorityQueue<Task<T, U>> queuedTasks = new PriorityQueue<>(
             (Task<T, U> o1, Task<T, U> o2) -> Float.compare(o2.taskWeight, o1.taskWeight));
+
     public List<T> canDo = new ArrayList<>(6);
+    public DecisionEventGraph<V, T> decisionGraph;
+    public V graphFocusState;
+    public int graphQueryRate;
+    private int currQueryTick;
+
     public Consumer<Task<T, U>> taskConsumer;
 
-    public ThoughtModule(Entity parentEntity, Consumer<Task<T, U>> taskConsumer) {
+    public ThoughtModule(Entity parentEntity, DecisionEventGraph<V, T> decisionGraph, V graphFocusState, int queryRate) {
+        super(parentEntity, ComponentType.THOUGHT_MODULE, List.of());
+        this.decisionGraph = decisionGraph;
+        this.graphFocusState = graphFocusState;
+        this.graphQueryRate = queryRate;
+        decisionGraph.getActionEvents().forEach(ae -> ae.linkEventConsumer(this::onEventNodeResponse));
+        setOnTickConsumer(ThoughtModule::tickProcess);
+    }
+
+    public ThoughtModule(Entity parentEntity, DecisionEventGraph<V, T> decisionGraph, V graphFocusState, int queryRate,
+            Consumer<Task<T, U>> taskConsumer) {
         super(parentEntity, ComponentType.THOUGHT_MODULE, List.of());
         this.taskConsumer = taskConsumer;
+        this.decisionGraph = decisionGraph;
+        this.graphFocusState = graphFocusState;
+        this.graphQueryRate = queryRate;
+        decisionGraph.getActionEvents().forEach(ae -> ae.linkEventConsumer(this::onEventNodeResponse));
         setOnTickConsumer(ThoughtModule::tickProcess);
     }
 
@@ -40,7 +63,17 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>> extends Comp
         setOnTickConsumer(ThoughtModule::tickProcess);
     }
 
+    private void onEventNodeResponse(T eventKey) {
+        canDo.add(eventKey);
+    }
+
     public void tickProcess(Tick tick) {
+        if (--currQueryTick == 0) {
+            canDo.clear();
+            decisionGraph.getRoot().travel(graphFocusState);
+            currQueryTick = graphQueryRate;
+        }
+
         if (!currentTask.isCompleted() && !currentTask.isSuspendable()) {
             return;
         }
@@ -50,11 +83,14 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>> extends Comp
             if (queuedTask != null) {
                 currentTask = queuedTask;
                 currentTask.resume();
+                return;
             }
         }
 
-        if (calculateSuspendable(tryingToDo, tick)) { return; }
-        if (calculateSuspendable(wantingToDo, tick)) { return; }
+        if (currentTask.isSuspendable()) {
+            if (calculateSuspendable(tryingToDo, tick)) { return; }
+            if (calculateSuspendable(wantingToDo, tick)) { return; }
+        }
 
         if (!canDo.isEmpty()) {
             if (calculateTask(tryingToDo, tick)) { return; }
@@ -83,6 +119,7 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>> extends Comp
             if (thought.tickPredicate.test(tick)) {
                 if (thought.weight() > currentTask.taskWeight) {
                     queuedTasks.add(currentTask);
+                    currentTask.suspend();
                     currentTask = thought.task;
                     if (taskConsumer != null) { taskConsumer.accept(thought.task); }
                     if (thought.oneShot) { taskList.remove(thought); }
@@ -91,6 +128,10 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>> extends Comp
             }
         }
         return false;
+    }
+
+    public Pair<TriConsumer<EventType, Consumer<?>, Boolean>, Consumer<EventType>> getEventHooks() {
+        return Pair.of(this::registerInputHook, this::clearInputHooksFor);
     }
 
     public boolean calculateTask(List<Thought<T, U>> taskList, Tick tick) {
@@ -122,4 +163,5 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>> extends Comp
             return task.taskWeight;
         }
     }
+
 }

@@ -1,7 +1,5 @@
 package io.mindspce.outerfieldsserver;
 
-import io.mindspce.outerfieldsserver.ai.decisiongraph.RootNode;
-import io.mindspce.outerfieldsserver.ai.decisiongraph.DecisionGraphBuilder;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.entities.LocationEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;

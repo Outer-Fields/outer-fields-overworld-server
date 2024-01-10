@@ -1,12 +1,9 @@
 package io.mindspce.outerfieldsserver.ai.task;
 
 import io.mindspce.outerfieldsserver.core.Tick;
-import io.mindspce.outerfieldsserver.entities.Entity;
-import io.mindspce.outerfieldsserver.systems.Task;
 import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.wrappers.MutableBoolean;
-import io.mindspice.mindlib.data.wrappers.MutableValue;
 import io.mindspice.mindlib.functional.consumers.TriConsumer;
 import io.mindspice.mindlib.functional.predicates.BiPredicateFlag;
 
@@ -37,6 +34,14 @@ public record SubTask<T>(
         if (onStartConsumer() != null) {
             onStartConsumer.accept(data());
         }
+    }
+
+    public void suspend(){
+        suspended.setTrue();
+    }
+
+    public void unsuspend(){
+        suspended.setFalse();
     }
 
     public static <T> SubTask<T> ofOnEvent(

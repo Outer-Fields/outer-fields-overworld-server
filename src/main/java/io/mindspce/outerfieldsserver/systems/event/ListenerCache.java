@@ -100,6 +100,7 @@ public abstract class ListenerCache<T> {
     public void clearInputHooksFor(EventType eventType) {
         inputEventHooks.getOrDefault(eventType, List.of()).forEach(e -> decListenEvent(eventType));
         inputHooksFor.set(eventType.ordinal(), false);
+        decListenEvent(eventType);
         inputEventHooks.remove(eventType);
     }
 

@@ -368,6 +368,10 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     }
 
     private void removeListeningEvent(EventType eventType) {
-        listeningFor.decrementAndGet(eventType.ordinal());
+       var val = listeningFor.decrementAndGet(eventType.ordinal());
+       if (val < 0) {
+           System.out.println("Decremented listeners below zero, this shouldnt happen.");
+           // TODO log this
+       }
     }
 }

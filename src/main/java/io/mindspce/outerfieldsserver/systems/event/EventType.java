@@ -6,7 +6,7 @@ import io.mindspce.outerfieldsserver.entities.LocationEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ClothingItem;
 import io.mindspce.outerfieldsserver.systems.EventData;
-import io.mindspce.outerfieldsserver.systems.Task;
+import io.mindspce.outerfieldsserver.ai.task.Task;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.tuples.Pair;
 import jakarta.annotation.Nullable;

@@ -1,9 +1,9 @@
-package io.mindspce.outerfieldsserver.systems;
+package io.mindspce.outerfieldsserver.ai.task;
 
-import io.mindspce.outerfieldsserver.ai.task.SubTask;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
+import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.mindlib.functional.consumers.TriConsumer;
 
 import java.util.ArrayList;
@@ -52,13 +52,36 @@ public class Task<T extends Enum<T>, U> {
         return subTasks;
     }
 
+    public void suspend() {
+        if (subTasks.isEmpty()) { return; }
+        if (concurrentSubTasks) {
+            subTasks.forEach(SubTask::suspend);
+        } else {
+            subTasks.getFirst().suspend();
+        }
+    }
+
+    public void unsuspend() {
+        if (subTasks.isEmpty()) { return; }
+        if (concurrentSubTasks) {
+            subTasks.forEach(SubTask::unsuspend);
+        } else {
+            subTasks.getFirst().unsuspend();
+        }
+    }
+
     public boolean isCompleted() {
         return isCompleted;
     }
 
     public void resume() {
         if (subTasks.isEmpty()) { return; }
-        subTasks.getFirst().onStart();
+        unsuspend();
+        if (concurrentSubTasks) {
+            subTasks.forEach(SubTask::onStart);
+        } else {
+            subTasks.getFirst().onStart();
+        }
     }
 
     public boolean isSuspendable() {
@@ -142,6 +165,12 @@ public class Task<T extends Enum<T>, U> {
                 Consumer<EventType> unlinkConsumer) {
             this.enableListener = linkConsumer;
             this.disableListener = unlinkConsumer;
+            return this;
+        }
+
+        public Builder<T, U> setListenerLinks(Pair<TriConsumer<EventType, Consumer<?>, Boolean>, Consumer<EventType>> links) {
+            this.enableListener = links.first();
+            this.disableListener = links.second();
             return this;
         }
 

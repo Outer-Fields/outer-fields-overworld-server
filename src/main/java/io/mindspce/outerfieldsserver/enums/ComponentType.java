@@ -1,10 +1,9 @@
 package io.mindspce.outerfieldsserver.enums;
 
-import io.mindspce.outerfieldsserver.ai.logic.ThoughtModule;
+import io.mindspce.outerfieldsserver.components.ai.ThoughtModule;
 import io.mindspce.outerfieldsserver.components.*;
 import io.mindspce.outerfieldsserver.components.ChunkMap;
 import io.mindspce.outerfieldsserver.components.LocationEntities;
-import io.mindspce.outerfieldsserver.components.ai.BehaviorModule;
 import jakarta.annotation.Nullable;
 
 import java.util.Objects;
@@ -35,9 +34,8 @@ public enum ComponentType {
     NET_SERIALIZER(NetSerializer.class, x -> x instanceof NetSerializer),
     LOCATION_ENTITIES(LocationEntities.class, x -> x instanceof LocationEntities),
     TRACKED_ENTITIES(TrackedEntities.class, x -> x instanceof TrackedEntities),
-    BEHAVIOR_MODULE(BehaviorModule.class, x -> x instanceof BehaviorModule),
-    THOUGHT_MODULE(ThoughtModule.class, x -> x instanceof ThoughtModule<?,?>),
-    DECISION_TREE(DecisionTree.class, x -> x instanceof DecisionTree );
+    THOUGHT_MODULE(ThoughtModule.class, x -> x instanceof ThoughtModule<?, ?, ?>),
+    DECISION_TREE(DecisionTree.class, x -> x instanceof DecisionTree);
 
     public final Class<?> componentClass;
     private final Predicate<Object> validator;
