@@ -1,15 +1,19 @@
 package io.mindspce.outerfieldsserver.components;
 
 import io.mindspce.outerfieldsserver.area.ChunkEntity;
+import io.mindspce.outerfieldsserver.components.entity.EntityStateComp;
+import io.mindspce.outerfieldsserver.components.entity.GlobalPosition;
+import io.mindspce.outerfieldsserver.components.player.*;
+import io.mindspce.outerfieldsserver.components.primatives.ComponentSystem;
+import io.mindspce.outerfieldsserver.components.primatives.SimpleEmitter;
+import io.mindspce.outerfieldsserver.components.primatives.SimpleListener;
+import io.mindspce.outerfieldsserver.components.serialization.NetSerializer;
+import io.mindspce.outerfieldsserver.components.world.*;
 import io.mindspce.outerfieldsserver.core.GameSettings;
-import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.entities.PositionalEntity;
 import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
-import io.mindspce.outerfieldsserver.enums.ClothingItem;
-import io.mindspce.outerfieldsserver.enums.ComponentType;
-import io.mindspce.outerfieldsserver.enums.EntityState;
-import io.mindspce.outerfieldsserver.enums.EventProcMode;
+import io.mindspce.outerfieldsserver.enums.*;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.geometry.IConcurrentPQuadTree;
 import io.mindspice.mindlib.data.geometry.IPolygon2;
@@ -69,8 +73,14 @@ public class ComponentFactory {
         return grid;
     }
 
-    public static <T extends Entity> TrackedEntities<T> addTrackedEntities(Entity entity, List<T> trackedEntities) {
-        var tracker = new TrackedEntities<>(entity, trackedEntities);
+    public static TrackedEntities addTrackedEntities(Entity entity, List<Entity> trackedEntities) {
+        var tracker = new TrackedEntities(entity, trackedEntities);
+        entity.addComponent(tracker);
+        return tracker;
+    }
+
+    public static TrackedEntities addTrackedEntities(Entity entity) {
+        var tracker = new TrackedEntities(entity);
         entity.addComponent(tracker);
         return tracker;
     }
@@ -90,7 +100,7 @@ public class ComponentFactory {
 
     public static class System {
 
-        public static void initPlayerEntityComponents(PlayerEntity entity, IVector2 currPosition,
+        public static void initPlayerEntityComponents(PlayerEntity entity, IVector2 currPosition, AreaId currArea,
                 List<EntityState> initStates, ClothingItem[] initOutFit, WebSocketSession webSocketSession) {
             GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castOrNull(
                     entity.getComponent(ComponentType.GLOBAL_POSITION).getFirst()
@@ -101,7 +111,7 @@ public class ComponentFactory {
             ViewRect viewRect = new ViewRect(entity, GameSettings.GET().playerViewWithBuffer(), currPosition, true);
 
             // PlayerMovement requires a reference to local tile grid
-            LocalTileGrid localTileGrid = new LocalTileGrid(entity, 5);
+            LocalTileGrid localTileGrid = new LocalTileGrid(entity, 5, currArea);
 
             // Net Movement In
             // TODO network in should be a module that accepts all possible input packets and performs validation on them
@@ -115,9 +125,7 @@ public class ComponentFactory {
             globalPosition.registerOutputHook(EventType.ENTITY_AREA_CHANGED, localTileGrid::onSelfAreaChanged, false);
 
             // Net Out
-            PlayerSession playerSession = new PlayerSession(
-                    entity, webSocketSession, EntityManager.GET().socketService().networkOutHandler()
-            );
+            PlayerSession playerSession = new PlayerSession(entity, webSocketSession);
             KnownEntities knownEntities = new KnownEntities(entity);
 
             // Couples this with multiple inner components to avoid using the event system and overhead

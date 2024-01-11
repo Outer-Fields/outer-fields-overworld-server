@@ -1,5 +1,6 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.serialization;
 
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
@@ -13,7 +14,8 @@ import java.util.List;
 
 
 public class NetSerializer extends Component<NetSerializer> {
-    List<NetSerializable> serializable;
+    public List<NetSerializable> serializable;
+    public final int byteSize;
 
     public NetSerializer(Entity parentEntity, List<NetSerializable> serializable) {
         super(parentEntity, ComponentType.NET_SERIALIZER, List.of());
@@ -22,6 +24,7 @@ public class NetSerializer extends Component<NetSerializer> {
                 PredicateLib::isRecEntitySame,
                 NetSerializer::onSerializationRequest
         ));
+        byteSize = serializable.stream().mapToInt(NetSerializable::byteSize).sum();
     }
 
     public void onSerializationRequest(Event<Integer> event) {

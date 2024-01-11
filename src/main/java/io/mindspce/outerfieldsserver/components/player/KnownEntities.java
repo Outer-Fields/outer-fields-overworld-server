@@ -1,6 +1,8 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.player;
 
 import io.mindspce.outerfieldsserver.area.AreaEntity;
+import io.mindspce.outerfieldsserver.components.world.ActiveEntities;
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
@@ -56,7 +58,7 @@ public class KnownEntities extends Component<KnownEntities> {
 
         for (int i = 0; i < 4; ++i) {
             if (!newChunkContain(chunkList[i].start())) {
-                emitEvent(Event.directComponentCallback(this, areaId(), ComponentType.ACTIVE_ENTITIES, parentEntity.areaEntity().entityId(), activeEntitiesId,
+                emitEvent(Event.directComponentCallback(this, areaId(), ComponentType.ACTIVE_ENTITIES, currArea.entityId(), activeEntitiesId,
                         (ActiveEntities ae) -> {
                             int[] activeEntities = ae.activeEntities.toArray();
                             emitEvent(Event.directComponentCallback(ae, ae.areaId(), ComponentType.KNOWN_ENTITIES, event.issuerEntityId(), event.issuerComponentId(),

@@ -59,7 +59,6 @@ public interface NetSerializable {
 
     int byteSize();
 
-    byte[] getBytes();
 
     void addBytesToBuffer(ByteBuffer buffer);
 

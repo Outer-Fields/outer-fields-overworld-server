@@ -1,6 +1,6 @@
 package io.mindspce.outerfieldsserver.core.networking;
 
-import io.mindspce.outerfieldsserver.components.PlayerSession;
+import io.mindspce.outerfieldsserver.components.player.PlayerSession;
 import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
 import io.mindspce.outerfieldsserver.networking.NetMessageHandlers;
 import io.mindspce.outerfieldsserver.networking.incoming.NetMessageIn;
@@ -17,7 +17,6 @@ import java.util.function.BiConsumer;
 public class SocketService implements NetMessageHandlers {
     private final MpscArrayQueue<NetMessageIn> networkInQueue = new MpscArrayQueue<>(10000);
     private final ExecutorService networkInExec = Executors.newSingleThreadExecutor();
-    private final ExecutorService networkOutExec = Executors.newVirtualThreadPerTaskExecutor();
     private volatile boolean running = true;
     NonBlockingHashMapLong<PlayerEntity> playerTable;
 
@@ -34,10 +33,6 @@ public class SocketService implements NetMessageHandlers {
         }
     }
 
-    public BiConsumer<PlayerSession, BinaryMessage> networkOutHandler() {
-        return (session, packet) -> networkOutExec.execute(() -> session.send(packet));
-    }
-
     public Runnable networkInProcessor() {
         return () -> {
             while (running) {
@@ -45,22 +40,16 @@ public class SocketService implements NetMessageHandlers {
                 Thread.onSpinWait();
                 LockSupport.parkNanos(10000);
 
-
             }
         };
     }
 
     private void handleMsgIn(NetMessageIn msg) {
         switch (msg.type()) {
-            case CLIENT_POSITION -> {
-                PlayerEntity player = playerTable.get(msg.pid());
-                if (player != null) {
-                    handleClientPosition(msg);
-                }
+            case CLIENT_POSITION -> handleClientPosition(msg);
 
-            }
         }
     }
-
-
 }
+
+

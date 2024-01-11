@@ -1,10 +1,8 @@
 package io.mindspce.outerfieldsserver.components.ai;
 
 import io.mindspce.outerfieldsserver.ai.decisiongraph.DecisionEventGraph;
-import io.mindspce.outerfieldsserver.ai.decisiongraph.RootNode;
 import io.mindspce.outerfieldsserver.ai.task.Task;
 import io.mindspce.outerfieldsserver.components.Component;
-import io.mindspce.outerfieldsserver.components.DecisionTree;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;

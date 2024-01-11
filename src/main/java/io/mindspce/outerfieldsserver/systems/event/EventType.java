@@ -32,34 +32,39 @@ public enum EventType {
 
     //NETWORK OUT EVENTS
     NETWORK_OUT_ENTITY_UPDATE(byte[].class, x -> x instanceof byte[]),
+    NETWORK_PLAYER_RECONNECT(WebSocketSession.class, x -> x instanceof WebSocketSession),
 
     // ENTITY CHANGE EVENTS
     ENTITY_POSITION_CHANGED(EventData.EntityPositionChanged.class, x -> x instanceof EventData.EntityPositionChanged),
-    ENTITY_VIEW_RECT_ENTERED(EventData.AreaEntered.class, x -> x instanceof EventData.AreaEntered),
+    ENTITY_VIEW_RECT_ENTERED(Integer.class, x -> x instanceof Integer),
+    Entity_VIEW_RECT_EXITED(Integer.class, x -> x instanceof Integer),
     NEW_ENTITY(EventData.NewEntity.class, x -> x instanceof EventData.NewEntity),
     ENTITY_VIEW_RECT_CHANGED(IRect2.class, x -> x instanceof IRect2),
     ENTITY_CHUNK_CHANGED(EventData.EntityChunkChanged.class, x -> x instanceof EventData.EntityChunkChanged),
     ENTITY_AREA_CHANGED(EventData.EntityAreaChanged.class, x -> x instanceof EventData.EntityAreaChanged),
+    ENTITY_STATE_CHANGED(List.class, x -> x instanceof List<?>),
+    ENTITY_PROPERTY_CHANGE(Pair.class, x -> x instanceof Pair),
+    ENTITY_PROPERTY_UPDATE(Pair.class, x -> x instanceof Pair),
 
     // ENTITY UPDATE EVENTS
     ENTITY_AREA_UPDATE(AreaId.class, x -> x instanceof AreaId),
+    ENTITY_NAME_UPDATE(String.class, x -> x instanceof String),
+    ENTITY_STATE_UPDATE(EventData.EntityStateUpdate.class, x -> x instanceof EventData.EntityStateUpdate),
 
     // PLAYER SUBSYSTEM EVENTS
     PLAYER_VALID_MOVEMENT(EventData.EntityPositionChanged.class, x -> x instanceof EventData.EntityPositionChanged),
     PLAYER_INVALID_MOVEMENT(EventData.EntityPositionChanged.class, x -> x instanceof EventData.EntityPositionChanged),
-    PLAYER_RECONNECT(WebSocketSession.class, x -> x instanceof WebSocketSession),
 
     // OTHER COMPONENT SPECIFIC EVENTS
     AREA_MONITOR_ENTERED(EventData.AreaEntered.class, x -> x instanceof EventData.AreaEntered),
     TILE_DATA_UPDATE(EventData.TileDataUpdate.class, x -> x instanceof EventData.TileDataUpdate),
     COLLISION_CHANGE(EventData.CollisionData.class, x -> x instanceof EventData.CollisionData),
     COLLISION_UPDATE(EventData.CollisionData.class, x -> x instanceof EventData.CollisionData),
-    ENTITY_STATE_CHANGED(List.class, x -> x instanceof List<?>),
-    ENTITY_STATE_UPDATE(EventData.EntityStateUpdate.class, x -> x instanceof EventData.EntityStateUpdate),
-    ENTITY_NAME_CHANGE(String.class, x -> x instanceof String),
-    ENTITY_NAME_UPDATE(String.class, x -> x instanceof String),
+
     ENTITY_GRID_QUERY(IRect2.class, x -> x instanceof IRect2),
     ENTITY_GRID_RESPONSE(int[].class, x -> x instanceof int[]),
+
+    // Serialization
     SERIALIZED_ENTITY_REQUEST(Integer.class, x -> x instanceof int[]),
     SERIALIZED_ENTITY_RESP(byte[].class, x -> x instanceof byte[]),
     SERIALIZED_ENTITIES_REQUEST(Predicate.class, x -> x instanceof Predicate<?>),
@@ -74,7 +79,10 @@ public enum EventType {
     SYSTEM_ENTITIES_QUERY(Predicate.class, x -> x instanceof Predicate<?>),
     SYSTEM_ENTITIES_RESP(List.class, x -> x instanceof List<?>),
     KEY_VALUE_EVENT(Pair.class, x -> x instanceof Pair),
-    DO_TASK(Task.class, x -> x instanceof Task);
+    DO_TASK(Task.class, x -> x instanceof Task),
+
+    //SYSTEM EVENTS
+    SYSTEM_REGISTER_ENTITY(Pair.class, x -> x instanceof Pair);
 
     public final Class<?> dataClass;
     private final Predicate<Object> validator;

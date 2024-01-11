@@ -1,5 +1,6 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.primatives;
 
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.systems.event.Event;

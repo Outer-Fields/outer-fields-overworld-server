@@ -1,5 +1,6 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.monitors;
 
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
@@ -34,7 +35,7 @@ public class AreaMonitor extends Component<AreaMonitor> {
     public void onEntityPositionChanged(Event<EventData.EntityPositionChanged> event) {
         if (monitoredArea.contains(event.data().newPosition())) {
             emitEvent(Event.areaEntered(
-                    this, new EventData.AreaEntered(event.issuerEntityType() == EntityType.PLAYER, event.issuerEntityId())
+                    this, new EventData.AreaEntered(event.issuerEntityType() == EntityType.PLAYER_ENTITY, event.issuerEntityId())
             ));
         }
     }
@@ -42,7 +43,7 @@ public class AreaMonitor extends Component<AreaMonitor> {
     public void onNewEntity(Event<EventData.NewEntity> event) {
         if (monitoredArea.contains(event.data().position())) {
             emitEvent(Event.areaEntered(
-                    this, new EventData.AreaEntered(event.issuerEntityType() == EntityType.PLAYER, event.issuerEntityId())
+                    this, new EventData.AreaEntered(event.issuerEntityType() == EntityType.PLAYER_ENTITY, event.issuerEntityId())
             ));
         }
     }

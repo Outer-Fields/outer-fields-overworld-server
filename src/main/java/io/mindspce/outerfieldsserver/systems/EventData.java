@@ -44,7 +44,7 @@ public class EventData {
     public record LocalAreaChanged(boolean isPlayer, Set<IVector2> localChunks) { }
 
 
-    public record NewEntity(boolean isPlayer, AreaId area, IVector2 chunkIndex, IVector2 position, Entity entity) { }
+    public record NewEntity(boolean isPlayer, AreaId area, IVector2 position, Entity entity) { }
 
 
     public record TileDataUpdate(AreaId areaId, IVector2 chunkIndex, List<Pair<IVector2, TileData>> tileData, boolean isRemoval) { }

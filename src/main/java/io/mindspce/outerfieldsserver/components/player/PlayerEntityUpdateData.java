@@ -1,16 +1,11 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.player;
 
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.entities.Entity;
 
 import io.mindspce.outerfieldsserver.enums.ComponentType;
-import io.mindspce.outerfieldsserver.enums.EntityType;
-import io.mindspce.outerfieldsserver.networking.NetMsgOut;
-import io.mindspce.outerfieldsserver.networking.NetSerializer;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 
 

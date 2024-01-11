@@ -1,9 +1,18 @@
 package io.mindspce.outerfieldsserver.enums;
 
+import io.mindspce.outerfieldsserver.components.ai.DecisionTree;
 import io.mindspce.outerfieldsserver.components.ai.ThoughtModule;
 import io.mindspce.outerfieldsserver.components.*;
-import io.mindspce.outerfieldsserver.components.ChunkMap;
-import io.mindspce.outerfieldsserver.components.LocationEntities;
+import io.mindspce.outerfieldsserver.components.monitors.AreaMonitor;
+import io.mindspce.outerfieldsserver.components.primatives.ComponentSystem;
+import io.mindspce.outerfieldsserver.components.primatives.SimpleEmitter;
+import io.mindspce.outerfieldsserver.components.primatives.SimpleListener;
+import io.mindspce.outerfieldsserver.components.serialization.NetSerializer;
+import io.mindspce.outerfieldsserver.components.world.*;
+import io.mindspce.outerfieldsserver.components.entity.EntityProperties;
+import io.mindspce.outerfieldsserver.components.entity.EntityStateComp;
+import io.mindspce.outerfieldsserver.components.entity.GlobalPosition;
+import io.mindspce.outerfieldsserver.components.player.*;
 import jakarta.annotation.Nullable;
 
 import java.util.Objects;
@@ -30,13 +39,12 @@ public enum ComponentType {
     PLAYER_NET_OUT(PlayerNetOut.class, x -> x instanceof PlayerNetOut),
     ENTITY_STATE(EntityStateComp.class, x -> x instanceof EntityStateComp),
     OUTFIT(CharacterOutfit.class, x -> x instanceof CharacterOutfit),
-    EntityProperties(EntityProperties.class, x -> x instanceof EntityProperties),
+    EntityProperties(io.mindspce.outerfieldsserver.components.entity.EntityProperties.class, x -> x instanceof EntityProperties),
     NET_SERIALIZER(NetSerializer.class, x -> x instanceof NetSerializer),
     LOCATION_ENTITIES(LocationEntities.class, x -> x instanceof LocationEntities),
     TRACKED_ENTITIES(TrackedEntities.class, x -> x instanceof TrackedEntities),
     THOUGHT_MODULE(ThoughtModule.class, x -> x instanceof ThoughtModule<?, ?, ?>),
     DECISION_TREE(DecisionTree.class, x -> x instanceof DecisionTree);
-
     public final Class<?> componentClass;
     private final Predicate<Object> validator;
 

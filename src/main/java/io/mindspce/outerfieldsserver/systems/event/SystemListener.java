@@ -4,17 +4,17 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import io.micrometer.observation.Observation;
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
+import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.enums.SystemType;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspice.mindlib.data.collections.sets.AtomicBitSet;
-import io.mindspice.mindlib.data.collections.sets.AtomicByteSet;
+import io.mindspice.mindlib.data.tuples.Pair;
 import org.jctools.queues.MpscUnboundedXaddArrayQueue;
 
 import java.util.*;
@@ -152,7 +152,13 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         }
     }
 
+    public void onRegisterComponent(Event<Pair<SystemType, Entity>> event) {
+        Entity entity = event.data().second();
+        entity.registerComponents(this);
+    }
+
     public void registerComponent(Component<?> component) {
+        component.setRegisteredWith(systemType);
         List<Component<?>> existingListeners = entityRegistry.get(component.entityId());
         if (existingListeners == null) {
             existingListeners = new ArrayList<>(4);
@@ -178,6 +184,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         }
         existingEntity.add(component);
         component.linkSystemUpdates(this::addListeningEvent, this::removeListeningEvent);
+
     }
 
     public void registerComponents(List<Component<?>> components) {
@@ -368,10 +375,10 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     }
 
     private void removeListeningEvent(EventType eventType) {
-       var val = listeningFor.decrementAndGet(eventType.ordinal());
-       if (val < 0) {
-           System.out.println("Decremented listeners below zero, this shouldnt happen.");
-           // TODO log this
-       }
+        var val = listeningFor.decrementAndGet(eventType.ordinal());
+        if (val < 0) {
+            System.out.println("Decremented listeners below zero, this shouldnt happen.");
+            // TODO log this
+        }
     }
 }

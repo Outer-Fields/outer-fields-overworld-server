@@ -1,6 +1,7 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.player;
 
 import io.mindspce.outerfieldsserver.area.AreaEntity;
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.data.wrappers.DynamicTileRef;
 import io.mindspce.outerfieldsserver.entities.Entity;
@@ -18,12 +19,12 @@ import java.util.List;
 public class LocalTileGrid extends Component<LocalTileGrid> {
     private final GridArray<DynamicTileRef> localTileGrid;
 
-    public LocalTileGrid(Entity parentEntity, int size) {
+    public LocalTileGrid(Entity parentEntity, int size, AreaId areaId) {
         super(parentEntity, ComponentType.LOCAL_TILE_GRID, List.of());
         this.localTileGrid = new GridArray<>(size, size);
-        for(int x = 0; x < size; ++x) {
-            for(int y = 0; y < size; ++y) {
-                localTileGrid.set(x,y,new DynamicTileRef(parentEntity.areaEntity(),IVector2.of(-x,-y)));
+        for (int x = 0; x < size; ++x) {
+            for (int y = 0; y < size; ++y) {
+                localTileGrid.set(x, y, new DynamicTileRef(areaId.entity, IVector2.of(-x, -y)));
             }
         }
         registerListener(EventType.ENTITY_POSITION_CHANGED, LocalTileGrid::onSelfPositionChanged);
@@ -55,7 +56,6 @@ public class LocalTileGrid extends Component<LocalTileGrid> {
             }
         }
     }
-
 
     // Note provides direct access can change, should only be used internally for controllers
     public GridArray<DynamicTileRef> tileGrid() {

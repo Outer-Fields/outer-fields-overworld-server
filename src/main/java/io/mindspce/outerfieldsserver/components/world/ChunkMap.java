@@ -1,15 +1,15 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.world;
 
-import gnu.trove.set.TIntSet;
 import io.mindspce.outerfieldsserver.area.ChunkEntity;
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
-import io.mindspce.outerfieldsserver.enums.QueryType;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
+import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 import jakarta.annotation.Nullable;
@@ -26,8 +26,6 @@ public class ChunkMap extends Component<ChunkMap> {
         registerListener(EventType.ENTITY_CHUNK_CHANGED, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, ChunkMap::onEntityChunkChanged));
         registerListener(EventType.TILE_DATA_UPDATE, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, ChunkMap::onTileDataUpdate));
     }
-
-
 
     private void onTileDataUpdate(Event<EventData.TileDataUpdate> event) {
         EventData.TileDataUpdate data = event.data();
@@ -55,14 +53,13 @@ public class ChunkMap extends Component<ChunkMap> {
     }
 
     private void onNewEntityEnteredChunk(Event<EventData.NewEntity> event) {
-        ChunkEntity chunk = getChunkByIndex(event.data().chunkIndex());
+        ChunkEntity chunk = getChunkByIndex(GridUtils.globalToChunk(event.data().position()));
         if (chunk == null) {
             // TODO log this
             return;
         }
         chunk.addActivePlayer(event.issuerEntityId());
     }
-
 
     @Nullable
     public ChunkEntity getChunkByGlobalPos(IVector2 pos) {

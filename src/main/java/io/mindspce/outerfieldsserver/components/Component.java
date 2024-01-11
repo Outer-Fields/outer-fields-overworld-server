@@ -4,6 +4,7 @@ import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
+import io.mindspce.outerfieldsserver.enums.SystemType;
 import io.mindspce.outerfieldsserver.systems.event.*;
 import io.mindspce.outerfieldsserver.systems.event.EventListener;
 
@@ -12,9 +13,10 @@ import java.util.*;
 
 public abstract class Component<T extends Component<T>> extends ListenerCache<T> implements EventListener<T> {
     protected final Entity parentEntity;
-    protected final ComponentType componentType;
+    public final ComponentType componentType;
     protected final long id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
     protected String componentName;
+    protected SystemType registeredWith = SystemType.NONE;
 
     public Component(Entity parentEntity, ComponentType componentType,
             List<EventType> emittedEvents) {
@@ -68,6 +70,17 @@ public abstract class Component<T extends Component<T>> extends ListenerCache<T>
         return parentEntity.entityType();
     }
 
+    public void setRegisteredWith(SystemType systemType) {
+        if (registeredWith != SystemType.NONE) {
+            throw new IllegalStateException("Attempted to register component twice");
+        }
+        registeredWith = systemType;
+    }
+
+    public SystemType registeredWith() {
+        return registeredWith;
+    }
+
 //    @Override
 //    public void onTick(Tick tickEvent) {
 //        try {
@@ -95,11 +108,6 @@ public abstract class Component<T extends Component<T>> extends ListenerCache<T>
 //            //TODO log this
 //        }
 //    }
-
-
-    public interface callback {
-        void accept();
-    }
 
 
 }

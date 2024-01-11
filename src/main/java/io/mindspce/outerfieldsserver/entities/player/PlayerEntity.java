@@ -10,7 +10,6 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 
 public class PlayerEntity extends PositionalEntity {
@@ -19,12 +18,12 @@ public class PlayerEntity extends PositionalEntity {
     public PlayerEntity(int entityId, int playerId, String playerName, List<EntityState> initStates,
             ClothingItem[] initOutfit, AreaId currArea,
             IVector2 currPosition, WebSocketSession webSocketSession) {
-        super(entityId, EntityType.PLAYER, currArea, currPosition);
+        super(entityId, EntityType.PLAYER_ENTITY, currArea, currPosition);
         super.name = playerName;
         this.playerId = playerId;
 
         ComponentFactory.System.initPlayerEntityComponents(
-                this, currPosition, initStates, initOutfit, webSocketSession
+                this, currPosition, currArea, initStates, initOutfit, webSocketSession
         );
     }
 

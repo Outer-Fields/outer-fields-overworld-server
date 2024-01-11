@@ -1,7 +1,7 @@
 package io.mindspce.outerfieldsserver.entities;
 
 import io.mindspce.outerfieldsserver.components.ComponentFactory;
-import io.mindspce.outerfieldsserver.components.GlobalPosition;
+import io.mindspce.outerfieldsserver.components.entity.GlobalPosition;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EntityType;
@@ -35,6 +35,6 @@ public class PositionalEntity extends Entity {
 
     private void onAreaChanged(EventData.EntityAreaChanged entityAreaChanged) {
         this.areaId = entityAreaChanged.newArea();
-        this.areaEntity = EntityManager.GET().areaById(areaId);
+//        this.areaEntity = EntityManager.GET().areaById(areaId);
     }
 }

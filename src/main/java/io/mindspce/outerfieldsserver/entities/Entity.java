@@ -6,15 +6,18 @@ import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
+import io.mindspce.outerfieldsserver.enums.SystemType;
 import io.mindspce.outerfieldsserver.systems.event.SystemListener;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.collections.sets.AtomicBitSet;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
+import io.mindspice.mindlib.data.wrappers.LazyFinalValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -27,7 +30,6 @@ public abstract class Entity {
     protected volatile String name = "";
     protected volatile AreaId areaId = null;
     protected volatile IVector2 chunkIndex = IVector2.of(-1, -1);
-    protected AreaEntity areaEntity;
     private List<Component<?>> componentList;
     protected final AtomicBitSet attachedComponents = new AtomicBitSet(ComponentType.values().length);
     protected final AtomicBitSet listeningFor = new AtomicBitSet(EventType.values().length);
@@ -36,9 +38,8 @@ public abstract class Entity {
         this.id = id;
         this.entityType = entityType;
         this.areaId = areaId;
-        componentList = new ArrayList<>();
+        componentList = new CopyOnWriteArrayList<>();
         componentList.addAll(components);
-        areaEntity = EntityManager.GET().areaById(areaId);
     }
 
     public Entity(int id, EntityType entityType, AreaId areaId) {
@@ -46,7 +47,6 @@ public abstract class Entity {
         this.entityType = entityType;
         this.areaId = areaId;
         componentList = null;
-        areaEntity = EntityManager.GET().areaById(areaId);
     }
 
     public Entity(int id, EntityType entityType, AreaId areaId, IVector2 chunkIndex, List<Component<?>> components) {
@@ -54,9 +54,8 @@ public abstract class Entity {
         this.entityType = entityType;
         this.areaId = areaId;
         this.chunkIndex = chunkIndex;
-        componentList = new ArrayList<>();
+        componentList = new CopyOnWriteArrayList<>();
         componentList.addAll(components);
-        areaEntity = EntityManager.GET().areaById(areaId);
     }
 
     public Entity(int id, EntityType entityType, AreaId areaId, IVector2 chunkIndex) {
@@ -65,12 +64,11 @@ public abstract class Entity {
         this.areaId = areaId;
         this.chunkIndex = chunkIndex;
         componentList = null;
-        areaEntity = EntityManager.GET().areaById(areaId);
     }
 
     public void addComponent(Component<?> component) {
         if (componentList == null) {
-            componentList = new ArrayList<>();
+            componentList = new CopyOnWriteArrayList<>();
         }
         componentList.add(component);
         attachedComponents.set(component.componentType().ordinal());
@@ -79,7 +77,7 @@ public abstract class Entity {
 
     public void addComponents(List<Component<?>> components) {
         if (componentList == null) {
-            componentList = new ArrayList<>();
+            componentList = new CopyOnWriteArrayList<>();
         }
         components.forEach(this::addComponent);
     }
@@ -100,10 +98,6 @@ public abstract class Entity {
         return areaId;
     }
 
-    public AreaEntity areaEntity() {
-        return areaEntity;
-    }
-
     public IVector2 chunkIndex() {
         return chunkIndex;
     }
@@ -120,8 +114,12 @@ public abstract class Entity {
         return Arrays.stream(EventType.values()).filter(e -> listeningFor.get(e.ordinal())).toList();
     }
 
-    public List<ComponentType> getAttachedComponents() {
+    public List<ComponentType> getAttachedComponentTypes() {
         return Arrays.stream(ComponentType.values()).filter(e -> attachedComponents.get(e.ordinal())).toList();
+    }
+
+    public List<Component<?>> getAttachedComponents() {
+        return List.copyOf(componentList);
     }
 
     public List<Component<?>> getComponent(ComponentType componentType) {
@@ -144,6 +142,12 @@ public abstract class Entity {
         final StringBuilder sb = new StringBuilder("Entity: ");
         sb.append("\n  entityType: ").append(entityType);
         sb.append(",\n  id: ").append(id);
+        sb.append(",\n  name: \"").append(name).append('\"');
+        sb.append(",\n  areaId: ").append(areaId);
+        sb.append(",\n  chunkIndex: ").append(chunkIndex);
+        sb.append(",\n  componentList: ").append(componentList);
+        sb.append(",\n  attachedComponents: ").append(attachedComponents);
+        sb.append(",\n  listeningFor: ").append(listeningFor);
         sb.append("\n");
         return sb.toString();
     }

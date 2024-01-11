@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 
 public enum EntityType{
     ANY((byte) -1, Object.class, Objects::nonNull),
-    PLAYER((byte) 0, Object.class, x -> x instanceof PlayerEntity),
+    PLAYER_ENTITY((byte) 0, Object.class, x -> x instanceof PlayerEntity),
     NON_PLAYER((byte) 1, Object.class, Objects::nonNull),
     AREA_ENTITY((byte) 2, AreaEntity.class, x -> x instanceof AreaEntity),
     LOCATION_ENTITY((byte) 3, LocationEntity.class, x -> x instanceof LocationEntity),

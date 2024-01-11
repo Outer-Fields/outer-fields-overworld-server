@@ -1,5 +1,6 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.entity;
 
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
@@ -71,16 +72,16 @@ public class EntityStateComp extends Component<EntityStateComp> implements NetSe
 
     @Override
     public int byteSize() {
-        return 1 + (states == null ? 0 : states.size());
+        return  states == null ? 0 : states.size();
     }
-
-    @Override
-    public byte[] getBytes() {
-        ByteBuffer buffer = NetSerializable.getEmptyBuffer(byteSize());
-        buffer.put((byte) byteSize());
-        states.forEach(s -> buffer.put(s.value));
-        return buffer.array();
-    }
+//
+//    @Override
+//    public byte[] getBytes() {
+//        ByteBuffer buffer = NetSerializable.getEmptyBuffer(byteSize());
+//        buffer.put((byte) byteSize());
+//        states.forEach(s -> buffer.put(s.value));
+//        return buffer.array();
+//    }
 
     @Override
     public void addBytesToBuffer(ByteBuffer buffer) {

@@ -1,6 +1,15 @@
 package io.mindspce.outerfieldsserver.core.networking.websockets;
 
+import io.mindspce.outerfieldsserver.core.networking.SocketService;
+import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
+import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
+import io.mindspce.outerfieldsserver.enums.*;
 import io.mindspce.outerfieldsserver.networking.NetMsgIn;
+import io.mindspce.outerfieldsserver.networking.incoming.NetMessageIn;
+import io.mindspce.outerfieldsserver.systems.event.Event;
+import io.mindspce.outerfieldsserver.systems.event.EventType;
+import io.mindspice.mindlib.data.geometry.IVector2;
+import org.jctools.maps.NonBlockingHashMapLong;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.BinaryMessage;
@@ -10,17 +19,18 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 
 @Controller
 public class GameServerSocketHandler extends AbstractWebSocketHandler {
-//    private final SocketService socketService;
-//    private final NonBlockingHashMapLong<PlayerState> playerTable;
+    private final SocketService socketService;
+    private final NonBlockingHashMapLong<PlayerEntity> playerTable;
 
-    public GameServerSocketHandler(/*SocketService socketService,
-//            NonBlockingHashMapLong<PlayerState> playerTableInstance*/) {
-//        this.socketService = socketService;
-//        playerTable = playerTableInstance;
+    public GameServerSocketHandler(SocketService socketService,
+            NonBlockingHashMapLong<PlayerEntity> playerTable) {
+        this.socketService = socketService;
+        this.playerTable = playerTable;
     }
 
     @Override
@@ -31,11 +41,10 @@ public class GameServerSocketHandler extends AbstractWebSocketHandler {
             NetMsgIn messageType = NetMsgIn.convert(messageTypeByte);
 
             int pid = (int) session.getAttributes().get("pid");
+            int eid = (int) session.getAttributes().get("eid");
 
-           // NetMessageIn netMessageIn = new NetMessageIn(System.currentTimeMillis(), pid, messageType, byteBuffer);
-
-        //    socketService.handOffMessageIn(netMessageIn);
-
+            NetMessageIn netMessageIn = new NetMessageIn(System.currentTimeMillis(), pid, eid, messageType, byteBuffer);
+            socketService.handOffMessageIn(netMessageIn);
         } catch (Exception e) {
             //todo logging
             session.close();
@@ -45,7 +54,20 @@ public class GameServerSocketHandler extends AbstractWebSocketHandler {
     volatile int count = 1;
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) {
+    public void afterConnectionEstablished(@NonNull WebSocketSession session) {
+        System.out.println("connection");
+
+        var player = EntityManager.GET().newPlayerEntity(
+                1, "test_1", List.of(EntityState.TEST),
+                new ClothingItem[6], AreaId.TEST, IVector2.of(0, 0), session
+        );
+
+        session.getAttributes().put("pid", count);
+        session.getAttributes().put("eid", player.entityId());
+
+        playerTable.put(player.getPlayerId(), player);
+
+        count++;
 
 //        var ps = EntityManager.GET().newPlayerState(count);
 //        playerTable.put(ps.entityId(), ps);
@@ -59,7 +81,7 @@ public class GameServerSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) {
-        System.out.println("Connection closed");
+        System.out.println("Connection closed:" + status);
     }
 
     // Implement other necessary methods like handleTextMessage if needed

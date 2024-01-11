@@ -1,5 +1,6 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.entity;
 
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
@@ -46,7 +47,7 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
 
     public void updateArea(AreaId newArea) {
         var eventData = new EventData.EntityAreaChanged(
-                parentEntity.entityType() == EntityType.PLAYER,
+                parentEntity.entityType() == EntityType.PLAYER_ENTITY,
                 currArea,
                 newArea,
                 IVector2.of(currPosition())
@@ -74,7 +75,7 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
         if (chunkX != currChunkIndex.x() || chunkY != currChunkIndex.y()) {
             var newChunkIndex = IVector2.of(chunkX, chunkY);
             var eventData = new EventData.EntityChunkChanged(
-                    parentEntity.entityType() == EntityType.PLAYER,
+                    parentEntity.entityType() == EntityType.PLAYER_ENTITY,
                     currChunkIndex,
                     newChunkIndex
             );
@@ -85,7 +86,7 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
         if (currPosition().x() != x || currPosition().y() != y) {
             mVector.shiftLine(x, y);
             var eventData = new EventData.EntityPositionChanged(
-                    parentEntity.entityType() == EntityType.PLAYER,
+                    parentEntity.entityType() == EntityType.PLAYER_ENTITY,
                     IVector2.of(IVector2.of(lastPosition())),
                     IVector2.of(IVector2.of(currPosition()))
             );
@@ -126,13 +127,13 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
         return 8;
     }
 
-    @Override
-    public byte[] getBytes() {
-        ByteBuffer buffer = NetSerializable.getEmptyBuffer(8);
-        buffer.putInt(currPosition().x());
-        buffer.putInt(currPosition().y());
-        return buffer.array();
-    }
+//    @Override
+//    public byte[] getBytes() {
+//        ByteBuffer buffer = NetSerializable.getEmptyBuffer(8);
+//        buffer.putInt(currPosition().x());
+//        buffer.putInt(currPosition().y());
+//        return buffer.array();
+//    }
 
     @Override
     public void addBytesToBuffer(ByteBuffer buffer) {

@@ -1,7 +1,7 @@
 package io.mindspce.outerfieldsserver;
 
 import io.mindspce.outerfieldsserver.components.Component;
-import io.mindspce.outerfieldsserver.components.SimpleListener;
+import io.mindspce.outerfieldsserver.components.primatives.SimpleListener;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
@@ -16,10 +16,8 @@ import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -61,7 +59,7 @@ public class EventSystemTests {
     public void parameterGetterTests() {
         EntityManager.GET().eventListeners().clear();
         var system = new TestSystem(SystemType.WORLD, true);
-        var entity = new TestEntity(42, EntityType.PLAYER, AreaId.TEST);
+        var entity = new TestEntity(42, EntityType.PLAYER_ENTITY, AreaId.TEST);
         var testComp = new TestComponent(entity, ComponentType.SIMPLE_OBJECT, List.of(EventType.PONG));
         var testComp2 = new TestComponent(entity, ComponentType.SIMPLE_OBJECT, List.of(EventType.PONG));
         testComp.registerListener(EventType.PING, null);
@@ -114,8 +112,8 @@ public class EventSystemTests {
         EntityManager.GET().eventListeners().clear();
         var system = new TestSystem(SystemType.TEST1, true);
         var system2 = new TestSystem(SystemType.TEST2, true);
-        var entity = new TestEntity(42, EntityType.PLAYER, AreaId.TEST);
-        var entity2 = new TestEntity(422, EntityType.PLAYER, AreaId.TEST);
+        var entity = new TestEntity(42, EntityType.PLAYER_ENTITY, AreaId.TEST);
+        var entity2 = new TestEntity(422, EntityType.PLAYER_ENTITY, AreaId.TEST);
         var testComp = new TestComponent(entity, ComponentType.SIMPLE_OBJECT, List.of(EventType.PING));
         var testComp2 = new TestComponent(entity2, ComponentType.SIMPLE_OBJECT, List.of(EventType.PONG));
 
@@ -165,8 +163,8 @@ public class EventSystemTests {
         EntityManager.GET().eventListeners().clear();
         var system = new TestSystem(SystemType.TEST1, true);
         var system2 = new TestSystem(SystemType.TEST2, true);
-        var entity = new TestEntity(42, EntityType.PLAYER, AreaId.TEST);
-        var entity2 = new TestEntity(422, EntityType.PLAYER, AreaId.TEST);
+        var entity = new TestEntity(42, EntityType.PLAYER_ENTITY, AreaId.TEST);
+        var entity2 = new TestEntity(422, EntityType.PLAYER_ENTITY, AreaId.TEST);
         var testComp = new TestComponent(entity, ComponentType.SIMPLE_OBJECT, List.of(EventType.PING));
         var testComp2 = new TestComponent(entity2, ComponentType.SIMPLE_OBJECT, List.of(EventType.PONG));
 
@@ -222,9 +220,9 @@ public class EventSystemTests {
         EntityManager.GET().eventListeners().clear();
         var system = new TestSystem(SystemType.TEST1, true);
         var system2 = new TestSystem(SystemType.TEST2, true);
-        var entity = new TestEntity(42, EntityType.PLAYER, AreaId.TEST);
-        var entity2 = new TestEntity(422, EntityType.PLAYER, AreaId.TEST);
-        var entity3 = new TestEntity(1, EntityType.PLAYER, AreaId.TEST);
+        var entity = new TestEntity(42, EntityType.PLAYER_ENTITY, AreaId.TEST);
+        var entity2 = new TestEntity(422, EntityType.PLAYER_ENTITY, AreaId.TEST);
+        var entity3 = new TestEntity(1, EntityType.PLAYER_ENTITY, AreaId.TEST);
         var testComp = new TestComponent(entity, ComponentType.SIMPLE_OBJECT, List.of(EventType.PING));
         var testComp3 = new TestComponent(entity3, ComponentType.SIMPLE_OBJECT, List.of(EventType.PING));
         var testComp2 = new TestComponent(entity2, ComponentType.SIMPLE_OBJECT, List.of(EventType.PONG));
@@ -294,6 +292,7 @@ public class EventSystemTests {
         assertEquals(testComp.entityId() + testComp3.entityId(), tc.get());
         tc.set(0);
     }
+
 
 //    @Test
 //    public void threadTest() throws InterruptedException {

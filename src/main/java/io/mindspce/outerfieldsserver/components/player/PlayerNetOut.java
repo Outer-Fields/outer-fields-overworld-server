@@ -1,8 +1,11 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.player;
 
+import io.mindspce.outerfieldsserver.area.AreaEntity;
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.core.Tick;
+import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
@@ -81,14 +84,16 @@ public class PlayerNetOut extends Component<PlayerNetOut> {
     }
 
     public void onEntityGridResponse(Event<int[]> event) {
-        IntList unknownEntities = new IntList(Arrays.stream(event.data()).filter(id -> !knownEntities.knownEntities.get(id)).toArray());
-        emitEvent(Event.serializedEntitiesReq(this, this.areaId(), (Entity entity) -> unknownEntities.contains(entity.entityId())));
+        IntList unknownEntities = new IntList(
+                Arrays.stream(event.data()).filter(id -> !knownEntities.knownEntities.get(id) && id != entityId()).toArray()
+        );
+        emitEvent(Event.serializedEntitiesReq(this, this.areaId(), unknownEntities::contains));
     }
 
     public void onTickMethod(Tick tick) {
         if (fullUpdateTick == 0) {
             fullUpdateTick = GameSettings.GET().tickRate() / 2;
-            emitEvent(Event.entityGridQuery(this, areaId(), parentEntity.areaEntity().entityId(), viewrect.viewRect));
+            emitEvent(Event.entityGridQuery(this, areaId(), areaId().entityId, viewrect.viewRect));
         }
         if (unknownEntityData != null) {
             byte[] positionBytes = getPositionBytes();
@@ -98,10 +103,11 @@ public class PlayerNetOut extends Component<PlayerNetOut> {
             combinedBuffer.putInt(unknownLength);
             unknownEntityData.forEach(combinedBuffer::put);
             combinedBuffer.put(positionBytes);
-            playerSession.send(new BinaryMessage(combinedBuffer.array()));
+            playerSession.send(combinedBuffer.array());
             unknownEntityData = null;
         } else {
-            playerSession.send(new BinaryMessage(getPositionBytes()));
+            if (positionData.isEmpty()) { return; }
+            playerSession.send(getPositionBytes());
         }
     }
 

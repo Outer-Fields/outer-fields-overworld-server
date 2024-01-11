@@ -1,6 +1,6 @@
 package io.mindspce.outerfieldsserver.networking;
 
-import io.mindspce.outerfieldsserver.components.PlayerSession;
+import io.mindspce.outerfieldsserver.components.player.PlayerSession;
 import io.mindspce.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.networking.incoming.NetMessageIn;

@@ -1,6 +1,6 @@
 package io.mindspce.outerfieldsserver.entities;
 
-import io.mindspce.outerfieldsserver.components.AreaMonitor;
+import io.mindspce.outerfieldsserver.components.monitors.AreaMonitor;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspice.mindlib.data.geometry.IRect2;

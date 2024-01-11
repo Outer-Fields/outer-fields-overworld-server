@@ -11,7 +11,7 @@ import io.mindspice.mindlib.data.tuples.Pair;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.function.IntPredicate;
 
 
 public record Event<T>(
@@ -27,8 +27,10 @@ public record Event<T>(
         T data
 ) {
 
-    public Event {
-        assert (eventType.validate(data));
+    public Event { // TODO FIXME remove this for prod
+        if (!eventType.validate(data)) {
+            throw new RuntimeException("invalid data, expected: " + eventType.dataClass + " got: " + data.getClass());
+        }
     }
 
     public Event(EventType eventType, AreaId eventArea, Component<?> component, T data) {
@@ -147,8 +149,12 @@ public record Event<T>(
         return new Event<>(EventType.AREA_MONITOR_ENTERED, component.areaId(), component, data);
     }
 
-    public static Event<EventData.AreaEntered> entityViewRectEntered(Component<?> component, EventData.AreaEntered data) {
+    public static Event<Integer> entityViewRectEntered(Component<?> component, Integer data) {
         return new Event<>(EventType.ENTITY_VIEW_RECT_ENTERED, component.areaId(), component, data);
+    }
+
+    public static Event<Integer> entityViewRectExited(Component<?> component, Integer data) {
+        return new Event<>(EventType.Entity_VIEW_RECT_EXITED, component.areaId(), component, data);
     }
 
     public static Event<EventData.EntityPositionChanged> entityPosition(Component<?> component,
@@ -209,7 +215,7 @@ public record Event<T>(
     }
 
     public static Event<String> entityNameChange(Component<?> component, String name) {
-        return new Event<>(EventType.ENTITY_NAME_CHANGE, component.areaId(), component, name);
+        return new Event<>(EventType.ENTITY_PROPERTY_CHANGE, component.areaId(), component, name);
     }
 
     public static Event<Object> serializedEntityRequest(Component<?> component, AreaId areaId, int entityId) {
@@ -226,8 +232,8 @@ public record Event<T>(
         return new Event<>(EventType.ENTITY_GRID_QUERY, areaId, component, entityId, -1, ComponentType.ACTIVE_ENTITIES, queryRect);
     }
 
-    public static <E extends Entity> Event<Predicate<E>> serializedEntitiesReq(Component<?> component,
-            AreaId areaId, Predicate<E> predicate) {
+    public static Event<IntPredicate> serializedEntitiesReq(Component<?> component,
+            AreaId areaId, IntPredicate predicate) {
         return new Event<>(EventType.SERIALIZED_ENTITIES_REQUEST, areaId, component, predicate);
     }
 
@@ -261,6 +267,19 @@ public record Event<T>(
         return new Event<>(EventType.AREA_MONITOR_QUERY, queryArea, component, -1, componentId, componentType, queryData);
     }
 
+    public static Event<Pair<String, String>> entityPropertyUpdate(Component<?> component, AreaId areaId, int entityId,
+            Pair<String, String> data) {
+        return new Event<>(EventType.ENTITY_PROPERTY_UPDATE, areaId, component, entityId, data);
+    }
+
+    public static Event<Pair<String, String>> entityPropertyChanged(Component<?> component, AreaId areaId, Pair<String, String> data) {
+        return new Event<>(EventType.ENTITY_PROPERTY_CHANGE, areaId, component, data);
+    }
+
+    public static Event<Pair<SystemType, Entity>> systemRegisterEntity(SystemType system, Entity entity) {
+        return new Event<>(EventType.SYSTEM_REGISTER_ENTITY, AreaId.NONE, -1, -1, ComponentType.ANY,
+                EntityType.ANY, -1, -1, ComponentType.ANY, Pair.of(system, entity));
+    }
 
     //public static Event<Object>
 
@@ -270,8 +289,8 @@ public record Event<T>(
         AreaId eventArea;
         int issuerEntityId;
         long issuerComponentId;
-        ComponentType issuerCompType;
-        EntityType issuerEntityType;
+        ComponentType issuerCompType = ComponentType.ANY;
+        EntityType issuerEntityType = EntityType.ANY;
         int recipientEntityId = -1;
         long recipientComponentId = -1;
         ComponentType recipientCompType = ComponentType.ANY;

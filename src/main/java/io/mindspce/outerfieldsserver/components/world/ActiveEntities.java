@@ -1,7 +1,9 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.world;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import io.mindspce.outerfieldsserver.components.Component;
+import io.mindspce.outerfieldsserver.components.ComponentFactory;
 import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
@@ -15,6 +17,7 @@ import io.mindspice.mindlib.data.geometry.IVectorQuadTree;
 import io.mindspice.mindlib.data.geometry.QuadItemId;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -39,7 +42,8 @@ public class ActiveEntities extends Component<ActiveEntities> {
     }
 
     public void onNewEntityEvent(Event<EventData.NewEntity> event) {
-        addActiveEntity(EntityManager.GET().entityById(event.issuerEntityId()), event.data().position());
+
+        addActiveEntity(event.data().entity(), event.data().position());
     }
 
     public void onEntityAreaChanged(Event<EventData.EntityAreaChanged> event) {
@@ -57,15 +61,18 @@ public class ActiveEntities extends Component<ActiveEntities> {
 
     public void addActiveEntity(Entity entity, IVector2 position) {
         if (activeEntities.contains(entity.entityId())) {
+
             // TODO log this important error
             // this will trigger on if a new player event is sent and then a new area event for the same player-area
             return;
         }
         activeEntities.add(entity.entityId());
-        entityGrid.insert(entityId(), position, entity);
+        entityGrid.insert(entity.entityId(), position, entity);
+
     }
 
     public void onEntityGridQuery(Event<IRect2> event) {
+        System.out.println(Arrays.toString(entityGrid.query(event.data()).stream().mapToInt(QuadItemId::id).toArray()));
         emitEvent(Event.responseEvent(
                 this,
                 event,

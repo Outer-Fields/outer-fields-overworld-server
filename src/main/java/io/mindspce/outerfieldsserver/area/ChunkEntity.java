@@ -2,17 +2,12 @@ package io.mindspce.outerfieldsserver.area;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import io.mindspce.outerfieldsserver.components.ComponentFactory;
-import io.mindspce.outerfieldsserver.components.SimpleListener;
-import io.mindspce.outerfieldsserver.components.SimpleObject;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.systems.EventData;
-import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.*;
-import io.mindspice.mindlib.data.tuples.Pair;
 import jakarta.annotation.Nullable;
 
 import java.util.*;

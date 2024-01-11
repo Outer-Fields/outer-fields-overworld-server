@@ -1,6 +1,7 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.player;
 
 import io.mindspce.outerfieldsserver.area.AreaEntity;
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.authority.PlayerAuthority;
 import io.mindspce.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
 import io.mindspce.outerfieldsserver.data.wrappers.DynamicTileRef;

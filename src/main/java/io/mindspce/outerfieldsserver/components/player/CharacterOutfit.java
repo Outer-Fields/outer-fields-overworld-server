@@ -1,5 +1,6 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.components.player;
 
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ClothingItem;
@@ -41,16 +42,18 @@ public class CharacterOutfit extends Component<CharacterOutfit> implements NetSe
 
     @Override
     public int byteSize() {
-        return 0;
+        return 6;
     }
-
-    @Override
-    public byte[] getBytes() {
-        return new byte[0];
-    }
+//
+//    @Override
+//    public byte[] getBytes() {
+//        return new byte[0];
+//    }
 
     @Override
     public void addBytesToBuffer(ByteBuffer buffer) {
-
+        for(int i = 0; i < outfit.length; ++i) {
+            buffer.put(outfit[i].value);
+        }
     }
 }
