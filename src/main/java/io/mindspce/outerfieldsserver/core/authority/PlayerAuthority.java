@@ -28,7 +28,9 @@ public class PlayerAuthority {
                     IVector2 direction = Direction.getDirectionOf(mVector.start(), mVector.end()).asVec2();
 //                    System.out.println(Direction.getDirectionOf(mVector.start(), mVector.end()));
 //                    System.out.println(direction);
-                    mVector.setEnd(mVector.start().x() + (direction.x() * 32), mVector.start().y() + (direction.y() * 32));
+                    mVector.setEnd(mVector.start().x() + (direction.x() ), mVector.start().y() + (direction.y() ));
+                    mVector.setStart(mVector.start().x() + (direction.x() ), mVector.start().y() + (direction.y() ));
+                    //mVector.setEnd(mVector.start());
                     return false;
                 }
             }
@@ -184,7 +186,6 @@ public class PlayerAuthority {
                 int adjX = mVector.start().x() + moveX;
                 int adjY = mVector.start().y() + moveY;
                 mVector.shiftLine(adjX, adjY);
-                //System.out.println("invalid speed");
                 return false;
             }
         }

@@ -13,6 +13,7 @@ import io.mindspice.mindlib.data.collections.sets.AtomicBitSet;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.mindlib.data.wrappers.LazyFinalValue;
+import io.mindspice.mindlib.util.DebugUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,6 +68,7 @@ public abstract class Entity {
     }
 
     public void addComponent(Component<?> component) {
+
         if (componentList == null) {
             componentList = new CopyOnWriteArrayList<>();
         }

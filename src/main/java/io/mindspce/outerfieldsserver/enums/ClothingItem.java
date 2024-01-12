@@ -1,38 +1,33 @@
 package io.mindspce.outerfieldsserver.enums;
 
 public enum ClothingItem {
-    ;
+    EMPTY(Slot.ALL, 0);
 
-    public final byte value;
     public final Slot slot;
+    public final int value;
 
-    ClothingItem(byte value, Slot slot) {
-        this.value = value;
+    ClothingItem(Slot slot, int value) {
         this.slot = slot;
 
+        this.value = value;
     }
 
-    public static ClothingItem fromValue(byte value) {
-        for (ClothingItem clothingItem : ClothingItem.values()) {
-            if (clothingItem.value == value) {
-                return clothingItem;
-            }
-        }
-        return null;
-
+    public int value() {
+        return value;
     }
 
     public enum Slot {
-        HEAD((byte) 0),
-        FACE((byte) 1),
-        BODY((byte) 2),
-        LEGS((byte) 3),
-        HANDS((byte) 4),
-        FEET((byte) 5);
+        ALL(-1),
+        HEAD(0),
+        FACE(1),
+        BODY(2),
+        LEGS(3),
+        HANDS(4),
+        FEET(5);
 
-        public final byte value;
+        public final int value;
 
-        Slot(byte value) { this.value = value; }
+        Slot(int value) { this.value = value; }
 
 
     }

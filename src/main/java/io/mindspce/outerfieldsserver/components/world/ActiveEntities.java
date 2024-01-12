@@ -72,7 +72,6 @@ public class ActiveEntities extends Component<ActiveEntities> {
     }
 
     public void onEntityGridQuery(Event<IRect2> event) {
-        System.out.println(Arrays.toString(entityGrid.query(event.data()).stream().mapToInt(QuadItemId::id).toArray()));
         emitEvent(Event.responseEvent(
                 this,
                 event,

@@ -162,6 +162,10 @@ public record Event<T>(
         return new Event<>(EventType.ENTITY_POSITION_CHANGED, component.areaId(), component, position);
     }
 
+    public static Event<IVector2> playerValidMovement(Component<?> component, IVector2 position) {
+        return new Event<>(EventType.PLAYER_VALID_MOVEMENT, component.areaId(), component, position);
+    }
+
     public static List<Event<?>> entityAreaChanged(Component<?> component, EventData.EntityAreaChanged data) {
         return List.of(
                 new Event<>(EventType.ENTITY_AREA_CHANGED, data.oldArea(), component, data),
@@ -218,14 +222,14 @@ public record Event<T>(
         return new Event<>(EventType.ENTITY_PROPERTY_CHANGE, component.areaId(), component, name);
     }
 
-    public static Event<Object> serializedEntityRequest(Component<?> component, AreaId areaId, int entityId) {
-        return new Event<>(EventType.SERIALIZED_ENTITY_REQUEST, areaId, component, entityId, -1, ComponentType.NET_SERIALIZER, new Object());
+    public static Event<Integer> serializedEntityRequest(Component<?> component, AreaId areaId, int entityId) {
+        return new Event<>(EventType.SERIALIZED_ENTITY_REQUEST, areaId, component, entityId, -1, ComponentType.NET_SERIALIZER, entityId);
     }
 
-    public static Event<Object> serializedEntityResponse(Component<?> component, AreaId areaId, int recEntityId,
-            long recCompId, byte[] data) {
-        return new Event<>(EventType.SERIALIZED_ENTITY_RESP, areaId, component, recEntityId, recCompId, data);
-    }
+//    public static Event<Object> serializedEntityResponse(Component<?> component, AreaId areaId, int recEntityId,
+//            long recCompId, byte[] data) {
+//        return new Event<>(EventType.SERIALIZED_ENTITY_RESP, areaId, component, recEntityId, recCompId, data);
+//    }
 
     public static Event<IRect2> entityGridQuery(Component<?> component, AreaId areaId,
             int entityId, IRect2 queryRect) {

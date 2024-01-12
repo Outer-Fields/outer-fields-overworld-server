@@ -36,14 +36,13 @@ public class PlayerSession extends Component<PlayerSession> {
             // TODO do something
             return;
         }
-//        Thread.ofVirtual().start(() -> {
+        Thread.ofVirtual().start(() -> {
             try {
                 session.sendMessage(new BinaryMessage(data));
             } catch (IOException e) {
                 // TODO log
                 System.out.println("error sending message");
             }
-       // });
-
+        });
     }
 }

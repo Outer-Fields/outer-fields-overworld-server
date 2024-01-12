@@ -32,7 +32,7 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
         this.currArea = currArea;
         this.currChunkIndex = IVector2.of(currChunkIndex);
         this.mVector = ILine2.ofMutable(mVector, mVector);
-        registerListener(ENTITY_POSITION_CHANGED, GlobalPosition::onSelfPositionUpdate);
+      //  registerListener(ENTITY_POSITION_CHANGED, GlobalPosition::onSelfPositionUpdate);
         registerListener(ENTITY_AREA_UPDATE, GlobalPosition::onSelfAreaUpdate);
     }
 
@@ -58,9 +58,11 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
     }
 
     public void onSelfPositionUpdate(Event<IVector2> positionUpdate) {
-        if (positionUpdate.recipientEntityId() == entityId()) {
             updatePosition(positionUpdate.data().x(), positionUpdate.data().y());
-        }
+    }
+
+    public void onSelfPositionUpdate(IVector2 pos) {
+        updatePosition(pos.x(), pos.y());
     }
 
     public void onSelfAreaUpdate(Event<AreaId> areaUpdate) {
@@ -118,9 +120,7 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
         return this::mVector;
     }
 
-    public void addConsumer(Consumer<GlobalPosition> consumer) {
 
-    }
 
     @Override
     public int byteSize() {

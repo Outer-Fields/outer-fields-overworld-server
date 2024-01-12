@@ -15,6 +15,7 @@ import io.mindspce.outerfieldsserver.enums.SystemType;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspice.mindlib.data.collections.sets.AtomicBitSet;
 import io.mindspice.mindlib.data.tuples.Pair;
+import io.mindspice.mindlib.util.DebugUtils;
 import org.jctools.queues.MpscUnboundedXaddArrayQueue;
 
 import java.util.*;
@@ -23,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.stream.Collectors;
 
 
 public abstract class SystemListener implements EventListener<SystemListener> {
@@ -107,6 +109,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
 
     private Runnable process() {
         return (() -> {
+
             while (running) {
                 Event<?> nextEvent;
                 while ((nextEvent = eventQueue.relaxedPoll()) == null) {
@@ -159,23 +162,15 @@ public abstract class SystemListener implements EventListener<SystemListener> {
 
     public void registerComponent(Component<?> component) {
         component.setRegisteredWith(systemType);
-        List<Component<?>> existingListeners = entityRegistry.get(component.entityId());
-        if (existingListeners == null) {
-            existingListeners = new ArrayList<>(4);
-        }
-
-        existingListeners.add(component);
         componentRegistry.put(component.componentId(), component);
         componentTypeRegistry.computeIfAbsent(component.componentType(), v -> new ArrayList<>()).add(component);
 
         for (var event : component.getAllListeningFor()) {
-            listenerRegistry.computeIfAbsent(event, v -> new ArrayList<>()).add(component);
+            listenerRegistry.computeIfAbsent(event, v -> new ArrayList<>(2)).add(component);
             listeningFor.incrementAndGet(event.ordinal());
         }
 
-        if (component.isOnTick()) {
-            tickListeners.add(component);
-        }
+        if (component.isOnTick()) { tickListeners.add(component); }
         listeningEntities.set(component.entityId());
         var existingEntity = entityRegistry.get(component.entityId());
         if (existingEntity == null) {
@@ -184,7 +179,6 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         }
         existingEntity.add(component);
         component.linkSystemUpdates(this::addListeningEvent, this::removeListeningEvent);
-
     }
 
     public void registerComponents(List<Component<?>> components) {
@@ -380,5 +374,33 @@ public abstract class SystemListener implements EventListener<SystemListener> {
             System.out.println("Decremented listeners below zero, this shouldnt happen.");
             // TODO log this
         }
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("SystemListener:\n");
+        sb.append("  systemType: ").append(systemType);
+        sb.append("\n");
+        sb.append("  listenerRegistry: ").append(listenerRegistry);
+        sb.append("\n");
+        sb.append("  entityRegistry: ").append(entityRegistry);
+        sb.append("\n");
+        sb.append("  componentTypeRegistry: ").append(componentTypeRegistry);
+        sb.append("\n");
+        sb.append("  componentRegistry: ").append(componentRegistry);
+        sb.append("\n");
+        sb.append("  tickListeners: ").append(tickListeners);
+        sb.append("\n");
+        sb.append("  listeningFor: ").append(listeningFor);
+        sb.append("\n");
+        sb.append("  listeningEntities: ").append(listeningEntities);
+        sb.append("\n");
+        sb.append("  executorService: ").append(executorService);
+        sb.append("\n");
+        sb.append("  running: ").append(running);
+        sb.append("\n");
+        sb.append("  eventQueue: ").append(eventQueue);
+        sb.append("\n");
+        return sb.toString();
     }
 }

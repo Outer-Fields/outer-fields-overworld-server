@@ -65,7 +65,7 @@ public class Initialization {
 
         Map<IVector2, TileData> chunkData = ChunkEntity.loadFromJson(chunkJson);
         ChunkEntity[][] chunkMap = new ChunkEntity[1][1];
-        chunkMap[0][0] = EntityManager.GET().newChunkEntity(AreaId.TEST, IVector2.of(1, 1), chunkJson);
+        chunkMap[0][0] = EntityManager.GET().newChunkEntity(AreaId.TEST, IVector2.of(0, 0), chunkJson);
         area.setChunkMap(chunkMap);
 
 

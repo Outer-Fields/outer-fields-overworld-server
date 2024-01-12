@@ -7,6 +7,7 @@ import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.enums.SystemType;
 import io.mindspce.outerfieldsserver.systems.event.*;
 import io.mindspce.outerfieldsserver.systems.event.EventListener;
+import io.mindspice.mindlib.util.DebugUtils;
 
 import java.util.*;
 
@@ -72,7 +73,9 @@ public abstract class Component<T extends Component<T>> extends ListenerCache<T>
 
     public void setRegisteredWith(SystemType systemType) {
         if (registeredWith != SystemType.NONE) {
-            throw new IllegalStateException("Attempted to register component twice");
+            System.out.println("attempted to register component twice");
+            DebugUtils.printStackTrace();
+            throw new RuntimeException("Attempted to register component twice");
         }
         registeredWith = systemType;
     }

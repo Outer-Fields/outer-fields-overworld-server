@@ -121,7 +121,9 @@ public class EntityManager {
     }
 
     public void emitEvent(Event<?> event) {
-        System.out.println(event);
+//        if (List.of(EventType.ENTITY_POSITION_CHANGED, EventType.SERIALIZED_CHARACTER_RESP).contains(event.eventType())) {
+//            System.out.println(event);
+//        }
         for (int i = 0; i < systemListeners.size(); ++i) {
             var listener = systemListeners.get(i);
             if (event.isDirect() && listener.hasListeningEntity(event.recipientEntityId())) {

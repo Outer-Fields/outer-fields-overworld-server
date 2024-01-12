@@ -7,6 +7,7 @@ import io.mindspce.outerfieldsserver.components.monitors.AreaMonitor;
 import io.mindspce.outerfieldsserver.components.primatives.ComponentSystem;
 import io.mindspce.outerfieldsserver.components.primatives.SimpleEmitter;
 import io.mindspce.outerfieldsserver.components.primatives.SimpleListener;
+import io.mindspce.outerfieldsserver.components.serialization.CharacterSerializer;
 import io.mindspce.outerfieldsserver.components.serialization.NetSerializer;
 import io.mindspce.outerfieldsserver.components.world.*;
 import io.mindspce.outerfieldsserver.components.entity.EntityProperties;
@@ -44,7 +45,10 @@ public enum ComponentType {
     LOCATION_ENTITIES(LocationEntities.class, x -> x instanceof LocationEntities),
     TRACKED_ENTITIES(TrackedEntities.class, x -> x instanceof TrackedEntities),
     THOUGHT_MODULE(ThoughtModule.class, x -> x instanceof ThoughtModule<?, ?, ?>),
-    DECISION_TREE(DecisionTree.class, x -> x instanceof DecisionTree);
+    DECISION_TREE(DecisionTree.class, x -> x instanceof DecisionTree),
+    CHARACTER_SERIALIZER(CharacterSerializer.class, x -> x instanceof CharacterSerializer );
+
+
     public final Class<?> componentClass;
     private final Predicate<Object> validator;
 

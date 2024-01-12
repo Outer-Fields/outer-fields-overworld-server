@@ -60,6 +60,10 @@ public class EntityStateComp extends Component<EntityStateComp> implements NetSe
         broadcastState();
     }
 
+    public int[] stateSupplier() {
+        return states.stream().mapToInt(EntityState::value).toArray();
+    }
+
     public void removeState(boolean clear, EntityState state) {
         if (clear) { this.states.clear(); }
         states.remove(state);
@@ -72,7 +76,7 @@ public class EntityStateComp extends Component<EntityStateComp> implements NetSe
 
     @Override
     public int byteSize() {
-        return  states == null ? 0 : states.size();
+        return states == null ? 0 : states.size();
     }
 //
 //    @Override
@@ -85,7 +89,7 @@ public class EntityStateComp extends Component<EntityStateComp> implements NetSe
 
     @Override
     public void addBytesToBuffer(ByteBuffer buffer) {
-        buffer.put((byte) byteSize());
-        states.forEach(s -> buffer.put(s.value));
+//        buffer.put((byte) byteSize());
+//        states.forEach(s -> buffer.put(s.value));
     }
 }

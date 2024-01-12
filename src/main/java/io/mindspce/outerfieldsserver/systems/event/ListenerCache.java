@@ -61,18 +61,13 @@ public abstract class ListenerCache<T> {
     public <E> void registerOutputHook(EventType eventType, Consumer<E> callback, boolean intercept) {
         if (outputEventHooks == null) {
             outputEventHooks = new EnumMap<>(EventType.class);
-            outputEventHooks.put(eventType, new ArrayList<>(1));
             outputHooksFor = new BitSet(EventType.values().length);
         }
         @SuppressWarnings("unchecked")
         Consumer<Event<?>> castedHandler = (Consumer<Event<?>>) callback;
-
-        var hookList = outputEventHooks.get(eventType);
-        if (hookList == null) {
-            hookList = new ArrayList<>(1);
-        }
+        outputEventHooks.computeIfAbsent(eventType, v ->  new ArrayList<>(1))
+                .add(Pair.of(intercept, castedHandler));
         outputHooksFor.set(eventType.ordinal());
-        hookList.add(Pair.of(intercept, castedHandler));
     }
 
     public <E> void registerInputHook(EventType eventType, Consumer<E> callback, boolean intercept) {

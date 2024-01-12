@@ -28,10 +28,9 @@ public class DynamicTileRef {
         chunkRef = areaRef.getChunkByGlobalPos(pos);
         if (chunkRef == null) {
             tileRef = null;
-            if (tileRef != null) {
-            }
             return;
         }
+
         tileRef = chunkRef.getTileByGlobalPos(pos);
     }
 

@@ -7,6 +7,7 @@ import io.mindspce.outerfieldsserver.components.player.*;
 import io.mindspce.outerfieldsserver.components.primatives.ComponentSystem;
 import io.mindspce.outerfieldsserver.components.primatives.SimpleEmitter;
 import io.mindspce.outerfieldsserver.components.primatives.SimpleListener;
+import io.mindspce.outerfieldsserver.components.serialization.CharacterSerializer;
 import io.mindspce.outerfieldsserver.components.serialization.NetSerializer;
 import io.mindspce.outerfieldsserver.components.world.*;
 import io.mindspce.outerfieldsserver.core.GameSettings;
@@ -115,14 +116,6 @@ public class ComponentFactory {
 
             // Net Movement In
             // TODO network in should be a module that accepts all possible input packets and performs validation on them
-            PlayerMovement playerMovement = new PlayerMovement(entity, localTileGrid.tileGrid(), viewRect.getRect());
-            // Intercept and hook the valid movement event from PlayerMovement to GlobalPosition
-            playerMovement.registerOutputHook(EventType.PLAYER_VALID_MOVEMENT, globalPosition::onSelfPositionUpdate, true);
-
-            // Hook into the position and area changed events from global position to the view rect and local tile grid to sync directly
-            globalPosition.registerOutputHook(EventType.ENTITY_POSITION_CHANGED, viewRect::onSelfPositionChanged, false);
-            globalPosition.registerOutputHook(EventType.ENTITY_POSITION_CHANGED, localTileGrid::onSelfPositionChanged, false);
-            globalPosition.registerOutputHook(EventType.ENTITY_AREA_CHANGED, localTileGrid::onSelfAreaChanged, false);
 
             // Net Out
             PlayerSession playerSession = new PlayerSession(entity, webSocketSession);
@@ -130,6 +123,17 @@ public class ComponentFactory {
 
             // Couples this with multiple inner components to avoid using the event system and overhead
             PlayerNetOut playerNetOut = new PlayerNetOut(entity, playerSession, viewRect, knownEntities);
+
+            PlayerMovement playerMovement = new PlayerMovement(entity, currPosition, localTileGrid.tileGrid(),
+                    viewRect.getRect(), playerNetOut::authCorrection, globalPosition::onSelfPositionUpdate
+            );
+            // Intercept and hook the valid movement event from PlayerMovement to GlobalPosition
+          //  playerMovement.registerOutputHook(EventType.PLAYER_VALID_MOVEMENT, globalPosition::onSelfPositionUpdate, true);
+
+            // Hook into the position and area changed events from global position to the view rect and local tile grid to sync directly
+            globalPosition.registerOutputHook(EventType.ENTITY_POSITION_CHANGED, viewRect::onSelfPositionChanged, false);
+            globalPosition.registerOutputHook(EventType.ENTITY_POSITION_CHANGED, localTileGrid::onSelfPositionChanged, false);
+            globalPosition.registerOutputHook(EventType.ENTITY_AREA_CHANGED, localTileGrid::onSelfAreaChanged, false);
 
             // Hook into area and view rect changes to keep know entities state synced
             globalPosition.registerOutputHook(EventType.ENTITY_AREA_CHANGED, knownEntities::onPlayerAreaChanged, false);
@@ -146,10 +150,15 @@ public class ComponentFactory {
             // TODO these will need to be linked to network in
             EntityStateComp stateComp = new EntityStateComp(entity, initStates);
             CharacterOutfit outfit = new CharacterOutfit(entity, initOutFit);
+            CharacterSerializer characterSerializer = new CharacterSerializer(
+                    entity,
+                    globalPosition.currPositionSupplier(),
+                    stateComp::stateSupplier,
+                    outfit::outfitSupplier
+            );
 
             // Module for serializing info on request
-            NetSerializer serializer = new NetSerializer(entity, List.of(stateComp, outfit));
-            entity.addComponents(List.of(stateComp, outfit, serializer));
+            entity.addComponents(List.of(stateComp, outfit, characterSerializer, playerNetOut));
         }
 
 

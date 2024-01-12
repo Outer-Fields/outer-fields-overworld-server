@@ -28,6 +28,7 @@ public class ChunkEntity extends Entity {
     public ChunkEntity(int entityId, AreaId areaId, IVector2 index, ChunkJson chunkJson) {
         super(entityId, EntityType.CHUNK_ENTITY, areaId, index);
         activeTiles = loadFromJson(chunkJson);
+        this.chunkIndex = chunkIndex;
     }
 
     public void updateChunkData(EventData.TileDataUpdate data) {

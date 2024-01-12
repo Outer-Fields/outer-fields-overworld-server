@@ -2,12 +2,14 @@ package io.mindspce.outerfieldsserver.systems.event;
 
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
+import io.mindspce.outerfieldsserver.core.networking.proto.EntityProto;
 import io.mindspce.outerfieldsserver.entities.LocationEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ClothingItem;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.ai.task.Task;
 import io.mindspice.mindlib.data.geometry.IRect2;
+import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
 import jakarta.annotation.Nullable;
 import org.springframework.web.socket.WebSocketSession;
@@ -52,7 +54,7 @@ public enum EventType {
     ENTITY_STATE_UPDATE(EventData.EntityStateUpdate.class, x -> x instanceof EventData.EntityStateUpdate),
 
     // PLAYER SUBSYSTEM EVENTS
-    PLAYER_VALID_MOVEMENT(EventData.EntityPositionChanged.class, x -> x instanceof EventData.EntityPositionChanged),
+    PLAYER_VALID_MOVEMENT(IVector2.class, x -> x instanceof IVector2),
     PLAYER_INVALID_MOVEMENT(EventData.EntityPositionChanged.class, x -> x instanceof EventData.EntityPositionChanged),
 
     // OTHER COMPONENT SPECIFIC EVENTS
@@ -65,10 +67,12 @@ public enum EventType {
     ENTITY_GRID_RESPONSE(int[].class, x -> x instanceof int[]),
 
     // Serialization
-    SERIALIZED_ENTITY_REQUEST(Integer.class, x -> x instanceof int[]),
+    SERIALIZED_ENTITY_REQUEST(Integer.class, x -> x instanceof Integer),
     SERIALIZED_ENTITY_RESP(byte[].class, x -> x instanceof byte[]),
     SERIALIZED_ENTITIES_REQUEST(Predicate.class, x -> x instanceof Predicate<?>),
     SERIALIZED_ENTITIES_RESP(Pair.class, x -> x instanceof Pair<?, ?>),
+    SERIALIZED_CHARACTER_RESP(EntityProto.CharacterEntity.class, x -> x instanceof EntityProto.CharacterEntity),
+    SERIALIZED_LOC_ITEM_RESP(EntityProto.LocationItemEntity.class, x -> x instanceof EntityProto.LocationItemEntity),
 
     CHARACTER_OUTFIT_CHANGED(ClothingItem.class, x -> x instanceof ClothingItem[]),
     CHARACTER_OUTFIT_UPDATE(byte[].class, x -> x instanceof byte[]),

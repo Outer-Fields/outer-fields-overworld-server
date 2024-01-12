@@ -1,26 +1,22 @@
 package io.mindspce.outerfieldsserver.components.player;
 
-import io.mindspce.outerfieldsserver.area.AreaEntity;
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.core.Tick;
-import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
+import io.mindspce.outerfieldsserver.core.networking.proto.EntityProto;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
-import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.networking.DataType;
 import io.mindspce.outerfieldsserver.networking.NetSerializable;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.collections.lists.primative.IntList;
-import io.mindspice.mindlib.data.tuples.Pair;
+import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
-import org.springframework.web.socket.BinaryMessage;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,8 +26,9 @@ public class PlayerNetOut extends Component<PlayerNetOut> {
     private final PlayerSession playerSession;
     private final ViewRect viewrect;
     private final KnownEntities knownEntities;
-    private List<byte[]> unknownEntityData = new ArrayList<>(EntityType.values().length);
-    IntList positionData = new IntList(50 * 3);
+    private final IntList positionData = new IntList(50 * 3);
+    private EntityProto.GamePacket.Builder gamePacket = EntityProto.GamePacket.newBuilder();
+    private boolean haveData = false;
 
     public PlayerNetOut(Entity parentEntity, PlayerSession playerSession, ViewRect viewRect, KnownEntities knownEntities) {
         super(parentEntity, ComponentType.PLAYER_NET_OUT, List.of());
@@ -41,19 +38,18 @@ public class PlayerNetOut extends Component<PlayerNetOut> {
         this.knownEntities = knownEntities;
         setOnTickConsumer(PlayerNetOut::onTickMethod);
 
-        registerListener(EventType.ENTITY_GRID_RESPONSE, PlayerNetOut::onEntityGridResponse);
-//        registerListener(EventType.ENTITY_POSITION_CHANGED, BiPredicatedBiConsumer.of(
-//                PredicateLib::isSameAreaEvent, PlayerNetOut::onEntityPositionChanged)
-//        );
         registerListener(EventType.ENTITY_POSITION_CHANGED, BiPredicatedBiConsumer.of(
                 (PlayerNetOut self, Event<EventData.EntityPositionChanged> event) ->
                         PredicateLib.isSameAreaEvent(self, event) && viewRect.viewRect.contains(event.data().newPosition()),
                 PlayerNetOut::onEntityPositionChanged
         ));
-        registerListener(EventType.SERIALIZED_ENTITIES_RESP, PlayerNetOut::onSerializedEntitiesResp);
+        registerListener(EventType.SERIALIZED_CHARACTER_RESP, PlayerNetOut::onSerializedCharacterResp);
+        registerListener(EventType.SERIALIZED_LOC_ITEM_RESP, PlayerNetOut::onSerializedLocItemResp);
+        registerListener(EventType.ENTITY_GRID_RESPONSE, PlayerNetOut::onEntityGridResponse);
     }
 
     public void onEntityPositionChanged(Event<EventData.EntityPositionChanged> event) {
+        haveData = true;
         if (viewrect.viewRect.contains(event.data().newPosition())) {
             int id = event.issuerEntityId();
             int x = event.data().newPosition().x();
@@ -78,48 +74,59 @@ public class PlayerNetOut extends Component<PlayerNetOut> {
         return false;
     }
 
-    public void onSerializedEntitiesResp(Event<Pair<IntList, byte[]>> event) {
-        unknownEntityData.add(event.data().second());
-        event.data().first().forEach(id -> knownEntities.knownEntities.set(id, false));
+    public void authCorrection(IVector2 pos) {
+        haveData = true;
+        var correction = EntityProto.AuthCorrection.newBuilder()
+                .setPosX(pos.x())
+                .setPosY(pos.y())
+                .build();
+        gamePacket.setAuthCorrection(correction);
+    }
+
+    public void onSerializedCharacterResp(Event<EntityProto.CharacterEntity> event) {
+        haveData = true;
+        EntityProto.GameEntity entity = EntityProto.GameEntity.newBuilder()
+                .setCharacter(event.data())
+                .build();
+        gamePacket.addEntities(entity);
+        knownEntities.knownEntities.set(event.issuerEntityId());
+    }
+
+    public void onSerializedLocItemResp(Event<EntityProto.LocationItemEntity> event) {
+        haveData = true;
+        EntityProto.GameEntity entity = EntityProto.GameEntity.newBuilder()
+                .setLocationItem(event.data())
+                .build();
+        gamePacket.addEntities(entity);
+        knownEntities.knownEntities.set(event.issuerEntityId());
     }
 
     public void onEntityGridResponse(Event<int[]> event) {
         IntList unknownEntities = new IntList(
                 Arrays.stream(event.data()).filter(id -> !knownEntities.knownEntities.get(id) && id != entityId()).toArray()
         );
-        emitEvent(Event.serializedEntitiesReq(this, this.areaId(), unknownEntities::contains));
+        unknownEntities.forEach(e -> emitEvent(Event.serializedEntityRequest(this, areaId(), e)));
     }
 
     public void onTickMethod(Tick tick) {
-        if (fullUpdateTick == 0) {
-            fullUpdateTick = GameSettings.GET().tickRate() / 2;
+        if (--fullUpdateTick < 0) {
+            fullUpdateTick = GameSettings.GET().tickRate();
             emitEvent(Event.entityGridQuery(this, areaId(), areaId().entityId, viewrect.viewRect));
         }
-        if (unknownEntityData != null) {
-            byte[] positionBytes = getPositionBytes();
-            int unknownLength = unknownEntityData.stream().mapToInt(b -> b.length).sum() + positionBytes.length + 1 + 4;
-            ByteBuffer combinedBuffer = NetSerializable.getEmptyBuffer(unknownLength);
-            combinedBuffer.put(DataType.NEW_ENTITY.value);
-            combinedBuffer.putInt(unknownLength);
-            unknownEntityData.forEach(combinedBuffer::put);
-            combinedBuffer.put(positionBytes);
-            playerSession.send(combinedBuffer.array());
-            unknownEntityData = null;
-        } else {
-            if (positionData.isEmpty()) { return; }
-            playerSession.send(getPositionBytes());
+        if (!haveData) { return; }
+        for (int i = 0; i < positionData.size(); i += 3) {
+            EntityProto.PositionUpdate posUpdate = EntityProto.PositionUpdate.newBuilder()
+                    .setId(positionData.get(i))
+                    .setPosX(positionData.get(i + 1))
+                    .setPosY(positionData.get(i + 2))
+                    .build();
+            gamePacket.addPositionUpdates(posUpdate);
         }
-    }
-
-    public byte[] getPositionBytes() {
-        // TODO later implement the int trim to save on packet size
-        ByteBuffer buffer = NetSerializable.getEmptyBuffer((positionData.size() * 4) + 1 + 4);
-        buffer.put(DataType.ENTITY_POSITION.value);
-        buffer.putInt(positionData.size() * 4);
-        positionData.forEach(buffer::putInt);
+        System.out.println(gamePacket);
+        playerSession.send(gamePacket.build().toByteArray());
+        gamePacket = EntityProto.GamePacket.newBuilder();
         positionData.clear();
-        return buffer.array();
+        haveData = false;
+
     }
-
-
 }

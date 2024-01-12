@@ -3,6 +3,7 @@ package io.mindspce.outerfieldsserver.components.serialization;
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.networking.proto.EntityProto;
 import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.entities.LocationEntity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.systems.event.Event;
@@ -15,15 +16,15 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 
-public class LocationItemSerializier extends Component<LocationItemSerializier> {
+public class LocationItemSerializer extends Component<LocationItemSerializer> {
     private final Supplier<IVector2> position;
     private final Supplier<int[]> states;
-    private final LongSupplier key;
-    private EntityProto.CharacterEntity lastSerialization;
+    private final long key;
+    private EntityProto.LocationItemEntity lastSerialization;
     private long lastSerializationTime;
 
-    public LocationItemSerializier(Entity parentEntity, Supplier<IVector2> position,
-            Supplier<int[]> states, LongSupplier key) {
+    public LocationItemSerializer(Entity parentEntity, long key, Supplier<IVector2> position,
+            Supplier<int[]> states) {
         super(parentEntity, ComponentType.CHARACTER_SERIALIZER,
                 List.of(EventType.SERIALIZED_ENTITY_REQUEST, EventType.SERIALIZED_ENTITIES_REQUEST)
         );
@@ -32,30 +33,31 @@ public class LocationItemSerializier extends Component<LocationItemSerializier> 
         this.key = key;
 
         registerListener(EventType.SERIALIZED_ENTITY_REQUEST, BiPredicatedBiConsumer.of(
-                (LocationItemSerializier cs, Event<Integer> ev) -> ev.eventArea() == areaId() && ev.recipientEntityId() == entityId(),
-                LocationItemSerializier::onSerializedEntityRequest
+                (LocationItemSerializer cs, Event<Integer> ev) -> ev.eventArea() == areaId() && ev.recipientEntityId() == entityId(),
+                LocationItemSerializer::onSerializedEntityRequest
         ));
     }
 
     public void onSerializedEntityRequest(Event<Integer> event) {
         if (lastSerialization == null || System.currentTimeMillis() - lastSerializationTime > 20) {
             var pos = position.get();
-            var builder = EntityProto.CharacterEntity.newBuilder()
-                    .setIsPlayer(parentEntity.entityType() == EntityType.PLAYER_ENTITY)
+            var builder = EntityProto.LocationItemEntity.newBuilder()
+                    .setIsLocation(parentEntity.entityType() == EntityType.LOCATION_ENTITY)
                     .setId(entityId())
                     .setName(parentEntity.name())
                     .setPosX(pos.x())
                     .setPosY(pos.x())
-                    .setK;
+                    .setKey(key);
             for (int i : states.get()) { builder.addStates(i); }
+
             lastSerialization = builder.build();
             lastSerializationTime = System.currentTimeMillis();
         }
         emitSerialization(event, lastSerialization);
     }
 
-    public void emitSerialization(Event<Integer> respEvent, EntityProto.CharacterEntity data) {
-        Event.responseEvent(this, respEvent, EventType.SERIALIZED_CHARACTER_RESP, data);
+    public void emitSerialization(Event<Integer> respEvent, EntityProto.LocationItemEntity data) {
+        Event.responseEvent(this, respEvent, EventType.SERIALIZED_LOC_ITEM_RESP, data);
     }
 
 }

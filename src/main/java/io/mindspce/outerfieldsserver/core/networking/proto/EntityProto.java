@@ -42,38 +42,50 @@ public final class EntityProto {
         getNameBytes();
 
     /**
-     * <code>repeated int32 states = 4;</code>
+     * <code>int32 posX = 4;</code>
+     * @return The posX.
+     */
+    int getPosX();
+
+    /**
+     * <code>int32 posY = 5;</code>
+     * @return The posY.
+     */
+    int getPosY();
+
+    /**
+     * <code>repeated int32 states = 6;</code>
      * @return A list containing the states.
      */
     java.util.List<Integer> getStatesList();
     /**
-     * <code>repeated int32 states = 4;</code>
+     * <code>repeated int32 states = 6;</code>
      * @return The count of states.
      */
     int getStatesCount();
     /**
-     * <code>repeated int32 states = 4;</code>
+     * <code>repeated int32 states = 6;</code>
      * @param index The index of the element to return.
      * @return The states at the given index.
      */
     int getStates(int index);
 
     /**
-     * <code>repeated int32 outFix = 5;</code>
-     * @return A list containing the outFix.
+     * <code>repeated int32 outfit = 7;</code>
+     * @return A list containing the outfit.
      */
-    java.util.List<Integer> getOutFixList();
+    java.util.List<Integer> getOutfitList();
     /**
-     * <code>repeated int32 outFix = 5;</code>
-     * @return The count of outFix.
+     * <code>repeated int32 outfit = 7;</code>
+     * @return The count of outfit.
      */
-    int getOutFixCount();
+    int getOutfitCount();
     /**
-     * <code>repeated int32 outFix = 5;</code>
+     * <code>repeated int32 outfit = 7;</code>
      * @param index The index of the element to return.
-     * @return The outFix at the given index.
+     * @return The outfit at the given index.
      */
-    int getOutFix(int index);
+    int getOutfit(int index);
   }
   /**
    * Protobuf type {@code CharacterEntity}
@@ -90,7 +102,7 @@ public final class EntityProto {
     private CharacterEntity() {
       name_ = "";
       states_ = emptyIntList();
-      outFix_ = emptyIntList();
+      outfit_ = emptyIntList();
     }
 
     @Override
@@ -106,7 +118,7 @@ public final class EntityProto {
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
       return EntityProto.internal_static_CharacterEntity_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -174,12 +186,34 @@ public final class EntityProto {
       }
     }
 
-    public static final int STATES_FIELD_NUMBER = 4;
+    public static final int POSX_FIELD_NUMBER = 4;
+    private int posX_ = 0;
+    /**
+     * <code>int32 posX = 4;</code>
+     * @return The posX.
+     */
+    @Override
+    public int getPosX() {
+      return posX_;
+    }
+
+    public static final int POSY_FIELD_NUMBER = 5;
+    private int posY_ = 0;
+    /**
+     * <code>int32 posY = 5;</code>
+     * @return The posY.
+     */
+    @Override
+    public int getPosY() {
+      return posY_;
+    }
+
+    public static final int STATES_FIELD_NUMBER = 6;
     @SuppressWarnings("serial")
     private com.google.protobuf.Internal.IntList states_ =
         emptyIntList();
     /**
-     * <code>repeated int32 states = 4;</code>
+     * <code>repeated int32 states = 6;</code>
      * @return A list containing the states.
      */
     @Override
@@ -188,14 +222,14 @@ public final class EntityProto {
       return states_;
     }
     /**
-     * <code>repeated int32 states = 4;</code>
+     * <code>repeated int32 states = 6;</code>
      * @return The count of states.
      */
     public int getStatesCount() {
       return states_.size();
     }
     /**
-     * <code>repeated int32 states = 4;</code>
+     * <code>repeated int32 states = 6;</code>
      * @param index The index of the element to return.
      * @return The states at the given index.
      */
@@ -204,35 +238,35 @@ public final class EntityProto {
     }
     private int statesMemoizedSerializedSize = -1;
 
-    public static final int OUTFIX_FIELD_NUMBER = 5;
+    public static final int OUTFIT_FIELD_NUMBER = 7;
     @SuppressWarnings("serial")
-    private com.google.protobuf.Internal.IntList outFix_ =
+    private com.google.protobuf.Internal.IntList outfit_ =
         emptyIntList();
     /**
-     * <code>repeated int32 outFix = 5;</code>
-     * @return A list containing the outFix.
+     * <code>repeated int32 outfit = 7;</code>
+     * @return A list containing the outfit.
      */
     @Override
     public java.util.List<Integer>
-        getOutFixList() {
-      return outFix_;
+        getOutfitList() {
+      return outfit_;
     }
     /**
-     * <code>repeated int32 outFix = 5;</code>
-     * @return The count of outFix.
+     * <code>repeated int32 outfit = 7;</code>
+     * @return The count of outfit.
      */
-    public int getOutFixCount() {
-      return outFix_.size();
+    public int getOutfitCount() {
+      return outfit_.size();
     }
     /**
-     * <code>repeated int32 outFix = 5;</code>
+     * <code>repeated int32 outfit = 7;</code>
      * @param index The index of the element to return.
-     * @return The outFix at the given index.
+     * @return The outfit at the given index.
      */
-    public int getOutFix(int index) {
-      return outFix_.getInt(index);
+    public int getOutfit(int index) {
+      return outfit_.getInt(index);
     }
-    private int outFixMemoizedSerializedSize = -1;
+    private int outfitMemoizedSerializedSize = -1;
 
     private byte memoizedIsInitialized = -1;
     @Override
@@ -258,19 +292,25 @@ public final class EntityProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, name_);
       }
+      if (posX_ != 0) {
+        output.writeInt32(4, posX_);
+      }
+      if (posY_ != 0) {
+        output.writeInt32(5, posY_);
+      }
       if (getStatesList().size() > 0) {
-        output.writeUInt32NoTag(34);
+        output.writeUInt32NoTag(50);
         output.writeUInt32NoTag(statesMemoizedSerializedSize);
       }
       for (int i = 0; i < states_.size(); i++) {
         output.writeInt32NoTag(states_.getInt(i));
       }
-      if (getOutFixList().size() > 0) {
-        output.writeUInt32NoTag(42);
-        output.writeUInt32NoTag(outFixMemoizedSerializedSize);
+      if (getOutfitList().size() > 0) {
+        output.writeUInt32NoTag(58);
+        output.writeUInt32NoTag(outfitMemoizedSerializedSize);
       }
-      for (int i = 0; i < outFix_.size(); i++) {
-        output.writeInt32NoTag(outFix_.getInt(i));
+      for (int i = 0; i < outfit_.size(); i++) {
+        output.writeInt32NoTag(outfit_.getInt(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -292,6 +332,14 @@ public final class EntityProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, name_);
       }
+      if (posX_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, posX_);
+      }
+      if (posY_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, posY_);
+      }
       {
         int dataSize = 0;
         for (int i = 0; i < states_.size(); i++) {
@@ -308,17 +356,17 @@ public final class EntityProto {
       }
       {
         int dataSize = 0;
-        for (int i = 0; i < outFix_.size(); i++) {
+        for (int i = 0; i < outfit_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-            .computeInt32SizeNoTag(outFix_.getInt(i));
+            .computeInt32SizeNoTag(outfit_.getInt(i));
         }
         size += dataSize;
-        if (!getOutFixList().isEmpty()) {
+        if (!getOutfitList().isEmpty()) {
           size += 1;
           size += com.google.protobuf.CodedOutputStream
               .computeInt32SizeNoTag(dataSize);
         }
-        outFixMemoizedSerializedSize = dataSize;
+        outfitMemoizedSerializedSize = dataSize;
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -341,10 +389,14 @@ public final class EntityProto {
           != other.getIsPlayer()) return false;
       if (!getName()
           .equals(other.getName())) return false;
+      if (getPosX()
+          != other.getPosX()) return false;
+      if (getPosY()
+          != other.getPosY()) return false;
       if (!getStatesList()
           .equals(other.getStatesList())) return false;
-      if (!getOutFixList()
-          .equals(other.getOutFixList())) return false;
+      if (!getOutfitList()
+          .equals(other.getOutfitList())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -363,13 +415,17 @@ public final class EntityProto {
           getIsPlayer());
       hash = (37 * hash) + NAME_FIELD_NUMBER;
       hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + POSX_FIELD_NUMBER;
+      hash = (53 * hash) + getPosX();
+      hash = (37 * hash) + POSY_FIELD_NUMBER;
+      hash = (53 * hash) + getPosY();
       if (getStatesCount() > 0) {
         hash = (37 * hash) + STATES_FIELD_NUMBER;
         hash = (53 * hash) + getStatesList().hashCode();
       }
-      if (getOutFixCount() > 0) {
-        hash = (37 * hash) + OUTFIX_FIELD_NUMBER;
-        hash = (53 * hash) + getOutFixList().hashCode();
+      if (getOutfitCount() > 0) {
+        hash = (37 * hash) + OUTFIT_FIELD_NUMBER;
+        hash = (53 * hash) + getOutfitList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -464,7 +520,7 @@ public final class EntityProto {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -481,7 +537,7 @@ public final class EntityProto {
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
         return EntityProto.internal_static_CharacterEntity_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -494,7 +550,7 @@ public final class EntityProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
 
       }
@@ -505,8 +561,10 @@ public final class EntityProto {
         id_ = 0;
         isPlayer_ = false;
         name_ = "";
+        posX_ = 0;
+        posY_ = 0;
         states_ = emptyIntList();
-        outFix_ = emptyIntList();
+        outfit_ = emptyIntList();
         return this;
       }
 
@@ -550,12 +608,18 @@ public final class EntityProto {
           result.name_ = name_;
         }
         if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.posX_ = posX_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.posY_ = posY_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
           states_.makeImmutable();
           result.states_ = states_;
         }
-        if (((from_bitField0_ & 0x00000010) != 0)) {
-          outFix_.makeImmutable();
-          result.outFix_ = outFix_;
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          outfit_.makeImmutable();
+          result.outfit_ = outfit_;
         }
       }
 
@@ -614,25 +678,31 @@ public final class EntityProto {
           bitField0_ |= 0x00000004;
           onChanged();
         }
+        if (other.getPosX() != 0) {
+          setPosX(other.getPosX());
+        }
+        if (other.getPosY() != 0) {
+          setPosY(other.getPosY());
+        }
         if (!other.states_.isEmpty()) {
           if (states_.isEmpty()) {
             states_ = other.states_;
             states_.makeImmutable();
-            bitField0_ |= 0x00000008;
+            bitField0_ |= 0x00000020;
           } else {
             ensureStatesIsMutable();
             states_.addAll(other.states_);
           }
           onChanged();
         }
-        if (!other.outFix_.isEmpty()) {
-          if (outFix_.isEmpty()) {
-            outFix_ = other.outFix_;
-            outFix_.makeImmutable();
-            bitField0_ |= 0x00000010;
+        if (!other.outfit_.isEmpty()) {
+          if (outfit_.isEmpty()) {
+            outfit_ = other.outfit_;
+            outfit_.makeImmutable();
+            bitField0_ |= 0x00000040;
           } else {
-            ensureOutFixIsMutable();
-            outFix_.addAll(other.outFix_);
+            ensureOutfitIsMutable();
+            outfit_.addAll(other.outfit_);
           }
           onChanged();
         }
@@ -678,12 +748,22 @@ public final class EntityProto {
                 break;
               } // case 26
               case 32: {
+                posX_ = input.readInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              case 40: {
+                posY_ = input.readInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              case 48: {
                 int v = input.readInt32();
                 ensureStatesIsMutable();
                 states_.addInt(v);
                 break;
-              } // case 32
-              case 34: {
+              } // case 48
+              case 50: {
                 int length = input.readRawVarint32();
                 int limit = input.pushLimit(length);
                 ensureStatesIsMutable();
@@ -692,23 +772,23 @@ public final class EntityProto {
                 }
                 input.popLimit(limit);
                 break;
-              } // case 34
-              case 40: {
+              } // case 50
+              case 56: {
                 int v = input.readInt32();
-                ensureOutFixIsMutable();
-                outFix_.addInt(v);
+                ensureOutfitIsMutable();
+                outfit_.addInt(v);
                 break;
-              } // case 40
-              case 42: {
+              } // case 56
+              case 58: {
                 int length = input.readRawVarint32();
                 int limit = input.pushLimit(length);
-                ensureOutFixIsMutable();
+                ensureOutfitIsMutable();
                 while (input.getBytesUntilLimit() > 0) {
-                  outFix_.addInt(input.readInt32());
+                  outfit_.addInt(input.readInt32());
                 }
                 input.popLimit(limit);
                 break;
-              } // case 42
+              } // case 58
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -862,15 +942,79 @@ public final class EntityProto {
         return this;
       }
 
+      private int posX_ ;
+      /**
+       * <code>int32 posX = 4;</code>
+       * @return The posX.
+       */
+      @Override
+      public int getPosX() {
+        return posX_;
+      }
+      /**
+       * <code>int32 posX = 4;</code>
+       * @param value The posX to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPosX(int value) {
+
+        posX_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 posX = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPosX() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        posX_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int posY_ ;
+      /**
+       * <code>int32 posY = 5;</code>
+       * @return The posY.
+       */
+      @Override
+      public int getPosY() {
+        return posY_;
+      }
+      /**
+       * <code>int32 posY = 5;</code>
+       * @param value The posY to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPosY(int value) {
+
+        posY_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 posY = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPosY() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        posY_ = 0;
+        onChanged();
+        return this;
+      }
+
       private com.google.protobuf.Internal.IntList states_ = emptyIntList();
       private void ensureStatesIsMutable() {
         if (!states_.isModifiable()) {
           states_ = makeMutableCopy(states_);
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @return A list containing the states.
        */
       public java.util.List<Integer>
@@ -879,14 +1023,14 @@ public final class EntityProto {
         return states_;
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @return The count of states.
        */
       public int getStatesCount() {
         return states_.size();
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @param index The index of the element to return.
        * @return The states at the given index.
        */
@@ -894,7 +1038,7 @@ public final class EntityProto {
         return states_.getInt(index);
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @param index The index to set the value at.
        * @param value The states to set.
        * @return This builder for chaining.
@@ -904,12 +1048,12 @@ public final class EntityProto {
 
         ensureStatesIsMutable();
         states_.setInt(index, value);
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @param value The states to add.
        * @return This builder for chaining.
        */
@@ -917,12 +1061,12 @@ public final class EntityProto {
 
         ensureStatesIsMutable();
         states_.addInt(value);
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @param values The states to add.
        * @return This builder for chaining.
        */
@@ -931,101 +1075,101 @@ public final class EntityProto {
         ensureStatesIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
             values, states_);
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @return This builder for chaining.
        */
       public Builder clearStates() {
         states_ = emptyIntList();
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000020);
         onChanged();
         return this;
       }
 
-      private com.google.protobuf.Internal.IntList outFix_ = emptyIntList();
-      private void ensureOutFixIsMutable() {
-        if (!outFix_.isModifiable()) {
-          outFix_ = makeMutableCopy(outFix_);
+      private com.google.protobuf.Internal.IntList outfit_ = emptyIntList();
+      private void ensureOutfitIsMutable() {
+        if (!outfit_.isModifiable()) {
+          outfit_ = makeMutableCopy(outfit_);
         }
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000040;
       }
       /**
-       * <code>repeated int32 outFix = 5;</code>
-       * @return A list containing the outFix.
+       * <code>repeated int32 outfit = 7;</code>
+       * @return A list containing the outfit.
        */
       public java.util.List<Integer>
-          getOutFixList() {
-        outFix_.makeImmutable();
-        return outFix_;
+          getOutfitList() {
+        outfit_.makeImmutable();
+        return outfit_;
       }
       /**
-       * <code>repeated int32 outFix = 5;</code>
-       * @return The count of outFix.
+       * <code>repeated int32 outfit = 7;</code>
+       * @return The count of outfit.
        */
-      public int getOutFixCount() {
-        return outFix_.size();
+      public int getOutfitCount() {
+        return outfit_.size();
       }
       /**
-       * <code>repeated int32 outFix = 5;</code>
+       * <code>repeated int32 outfit = 7;</code>
        * @param index The index of the element to return.
-       * @return The outFix at the given index.
+       * @return The outfit at the given index.
        */
-      public int getOutFix(int index) {
-        return outFix_.getInt(index);
+      public int getOutfit(int index) {
+        return outfit_.getInt(index);
       }
       /**
-       * <code>repeated int32 outFix = 5;</code>
+       * <code>repeated int32 outfit = 7;</code>
        * @param index The index to set the value at.
-       * @param value The outFix to set.
+       * @param value The outfit to set.
        * @return This builder for chaining.
        */
-      public Builder setOutFix(
+      public Builder setOutfit(
           int index, int value) {
 
-        ensureOutFixIsMutable();
-        outFix_.setInt(index, value);
-        bitField0_ |= 0x00000010;
+        ensureOutfitIsMutable();
+        outfit_.setInt(index, value);
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int32 outFix = 5;</code>
-       * @param value The outFix to add.
+       * <code>repeated int32 outfit = 7;</code>
+       * @param value The outfit to add.
        * @return This builder for chaining.
        */
-      public Builder addOutFix(int value) {
+      public Builder addOutfit(int value) {
 
-        ensureOutFixIsMutable();
-        outFix_.addInt(value);
-        bitField0_ |= 0x00000010;
+        ensureOutfitIsMutable();
+        outfit_.addInt(value);
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int32 outFix = 5;</code>
-       * @param values The outFix to add.
+       * <code>repeated int32 outfit = 7;</code>
+       * @param values The outfit to add.
        * @return This builder for chaining.
        */
-      public Builder addAllOutFix(
+      public Builder addAllOutfit(
           Iterable<? extends Integer> values) {
-        ensureOutFixIsMutable();
+        ensureOutfitIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, outFix_);
-        bitField0_ |= 0x00000010;
+            values, outfit_);
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int32 outFix = 5;</code>
+       * <code>repeated int32 outfit = 7;</code>
        * @return This builder for chaining.
        */
-      public Builder clearOutFix() {
-        outFix_ = emptyIntList();
-        bitField0_ = (bitField0_ & ~0x00000010);
+      public Builder clearOutfit() {
+        outfit_ = emptyIntList();
+        bitField0_ = (bitField0_ & ~0x00000040);
         onChanged();
         return this;
       }
@@ -1122,24 +1266,36 @@ public final class EntityProto {
         getNameBytes();
 
     /**
-     * <code>repeated int32 states = 4;</code>
+     * <code>int32 posX = 4;</code>
+     * @return The posX.
+     */
+    int getPosX();
+
+    /**
+     * <code>int32 posY = 5;</code>
+     * @return The posY.
+     */
+    int getPosY();
+
+    /**
+     * <code>repeated int32 states = 6;</code>
      * @return A list containing the states.
      */
     java.util.List<Integer> getStatesList();
     /**
-     * <code>repeated int32 states = 4;</code>
+     * <code>repeated int32 states = 6;</code>
      * @return The count of states.
      */
     int getStatesCount();
     /**
-     * <code>repeated int32 states = 4;</code>
+     * <code>repeated int32 states = 6;</code>
      * @param index The index of the element to return.
      * @return The states at the given index.
      */
     int getStates(int index);
 
     /**
-     * <code>int64 key = 5;</code>
+     * <code>int64 key = 7;</code>
      * @return The key.
      */
     long getKey();
@@ -1174,7 +1330,7 @@ public final class EntityProto {
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
       return EntityProto.internal_static_LocationItemEntity_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -1242,12 +1398,34 @@ public final class EntityProto {
       }
     }
 
-    public static final int STATES_FIELD_NUMBER = 4;
+    public static final int POSX_FIELD_NUMBER = 4;
+    private int posX_ = 0;
+    /**
+     * <code>int32 posX = 4;</code>
+     * @return The posX.
+     */
+    @Override
+    public int getPosX() {
+      return posX_;
+    }
+
+    public static final int POSY_FIELD_NUMBER = 5;
+    private int posY_ = 0;
+    /**
+     * <code>int32 posY = 5;</code>
+     * @return The posY.
+     */
+    @Override
+    public int getPosY() {
+      return posY_;
+    }
+
+    public static final int STATES_FIELD_NUMBER = 6;
     @SuppressWarnings("serial")
     private com.google.protobuf.Internal.IntList states_ =
         emptyIntList();
     /**
-     * <code>repeated int32 states = 4;</code>
+     * <code>repeated int32 states = 6;</code>
      * @return A list containing the states.
      */
     @Override
@@ -1256,14 +1434,14 @@ public final class EntityProto {
       return states_;
     }
     /**
-     * <code>repeated int32 states = 4;</code>
+     * <code>repeated int32 states = 6;</code>
      * @return The count of states.
      */
     public int getStatesCount() {
       return states_.size();
     }
     /**
-     * <code>repeated int32 states = 4;</code>
+     * <code>repeated int32 states = 6;</code>
      * @param index The index of the element to return.
      * @return The states at the given index.
      */
@@ -1272,10 +1450,10 @@ public final class EntityProto {
     }
     private int statesMemoizedSerializedSize = -1;
 
-    public static final int KEY_FIELD_NUMBER = 5;
+    public static final int KEY_FIELD_NUMBER = 7;
     private long key_ = 0L;
     /**
-     * <code>int64 key = 5;</code>
+     * <code>int64 key = 7;</code>
      * @return The key.
      */
     @Override
@@ -1307,15 +1485,21 @@ public final class EntityProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, name_);
       }
+      if (posX_ != 0) {
+        output.writeInt32(4, posX_);
+      }
+      if (posY_ != 0) {
+        output.writeInt32(5, posY_);
+      }
       if (getStatesList().size() > 0) {
-        output.writeUInt32NoTag(34);
+        output.writeUInt32NoTag(50);
         output.writeUInt32NoTag(statesMemoizedSerializedSize);
       }
       for (int i = 0; i < states_.size(); i++) {
         output.writeInt32NoTag(states_.getInt(i));
       }
       if (key_ != 0L) {
-        output.writeInt64(5, key_);
+        output.writeInt64(7, key_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1337,6 +1521,14 @@ public final class EntityProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, name_);
       }
+      if (posX_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, posX_);
+      }
+      if (posY_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, posY_);
+      }
       {
         int dataSize = 0;
         for (int i = 0; i < states_.size(); i++) {
@@ -1353,7 +1545,7 @@ public final class EntityProto {
       }
       if (key_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(5, key_);
+          .computeInt64Size(7, key_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -1376,6 +1568,10 @@ public final class EntityProto {
           != other.getIsLocation()) return false;
       if (!getName()
           .equals(other.getName())) return false;
+      if (getPosX()
+          != other.getPosX()) return false;
+      if (getPosY()
+          != other.getPosY()) return false;
       if (!getStatesList()
           .equals(other.getStatesList())) return false;
       if (getKey()
@@ -1398,6 +1594,10 @@ public final class EntityProto {
           getIsLocation());
       hash = (37 * hash) + NAME_FIELD_NUMBER;
       hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + POSX_FIELD_NUMBER;
+      hash = (53 * hash) + getPosX();
+      hash = (37 * hash) + POSY_FIELD_NUMBER;
+      hash = (53 * hash) + getPosY();
       if (getStatesCount() > 0) {
         hash = (37 * hash) + STATES_FIELD_NUMBER;
         hash = (53 * hash) + getStatesList().hashCode();
@@ -1498,7 +1698,7 @@ public final class EntityProto {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -1515,7 +1715,7 @@ public final class EntityProto {
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
         return EntityProto.internal_static_LocationItemEntity_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -1528,7 +1728,7 @@ public final class EntityProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
 
       }
@@ -1539,6 +1739,8 @@ public final class EntityProto {
         id_ = 0;
         isLocation_ = false;
         name_ = "";
+        posX_ = 0;
+        posY_ = 0;
         states_ = emptyIntList();
         key_ = 0L;
         return this;
@@ -1584,10 +1786,16 @@ public final class EntityProto {
           result.name_ = name_;
         }
         if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.posX_ = posX_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.posY_ = posY_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
           states_.makeImmutable();
           result.states_ = states_;
         }
-        if (((from_bitField0_ & 0x00000010) != 0)) {
+        if (((from_bitField0_ & 0x00000040) != 0)) {
           result.key_ = key_;
         }
       }
@@ -1647,11 +1855,17 @@ public final class EntityProto {
           bitField0_ |= 0x00000004;
           onChanged();
         }
+        if (other.getPosX() != 0) {
+          setPosX(other.getPosX());
+        }
+        if (other.getPosY() != 0) {
+          setPosY(other.getPosY());
+        }
         if (!other.states_.isEmpty()) {
           if (states_.isEmpty()) {
             states_ = other.states_;
             states_.makeImmutable();
-            bitField0_ |= 0x00000008;
+            bitField0_ |= 0x00000020;
           } else {
             ensureStatesIsMutable();
             states_.addAll(other.states_);
@@ -1703,12 +1917,22 @@ public final class EntityProto {
                 break;
               } // case 26
               case 32: {
+                posX_ = input.readInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              case 40: {
+                posY_ = input.readInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              case 48: {
                 int v = input.readInt32();
                 ensureStatesIsMutable();
                 states_.addInt(v);
                 break;
-              } // case 32
-              case 34: {
+              } // case 48
+              case 50: {
                 int length = input.readRawVarint32();
                 int limit = input.pushLimit(length);
                 ensureStatesIsMutable();
@@ -1717,12 +1941,12 @@ public final class EntityProto {
                 }
                 input.popLimit(limit);
                 break;
-              } // case 34
-              case 40: {
+              } // case 50
+              case 56: {
                 key_ = input.readInt64();
-                bitField0_ |= 0x00000010;
+                bitField0_ |= 0x00000040;
                 break;
-              } // case 40
+              } // case 56
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -1876,15 +2100,79 @@ public final class EntityProto {
         return this;
       }
 
+      private int posX_ ;
+      /**
+       * <code>int32 posX = 4;</code>
+       * @return The posX.
+       */
+      @Override
+      public int getPosX() {
+        return posX_;
+      }
+      /**
+       * <code>int32 posX = 4;</code>
+       * @param value The posX to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPosX(int value) {
+
+        posX_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 posX = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPosX() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        posX_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int posY_ ;
+      /**
+       * <code>int32 posY = 5;</code>
+       * @return The posY.
+       */
+      @Override
+      public int getPosY() {
+        return posY_;
+      }
+      /**
+       * <code>int32 posY = 5;</code>
+       * @param value The posY to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPosY(int value) {
+
+        posY_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 posY = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPosY() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        posY_ = 0;
+        onChanged();
+        return this;
+      }
+
       private com.google.protobuf.Internal.IntList states_ = emptyIntList();
       private void ensureStatesIsMutable() {
         if (!states_.isModifiable()) {
           states_ = makeMutableCopy(states_);
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @return A list containing the states.
        */
       public java.util.List<Integer>
@@ -1893,14 +2181,14 @@ public final class EntityProto {
         return states_;
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @return The count of states.
        */
       public int getStatesCount() {
         return states_.size();
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @param index The index of the element to return.
        * @return The states at the given index.
        */
@@ -1908,7 +2196,7 @@ public final class EntityProto {
         return states_.getInt(index);
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @param index The index to set the value at.
        * @param value The states to set.
        * @return This builder for chaining.
@@ -1918,12 +2206,12 @@ public final class EntityProto {
 
         ensureStatesIsMutable();
         states_.setInt(index, value);
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @param value The states to add.
        * @return This builder for chaining.
        */
@@ -1931,12 +2219,12 @@ public final class EntityProto {
 
         ensureStatesIsMutable();
         states_.addInt(value);
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @param values The states to add.
        * @return This builder for chaining.
        */
@@ -1945,24 +2233,24 @@ public final class EntityProto {
         ensureStatesIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
             values, states_);
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int32 states = 4;</code>
+       * <code>repeated int32 states = 6;</code>
        * @return This builder for chaining.
        */
       public Builder clearStates() {
         states_ = emptyIntList();
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000020);
         onChanged();
         return this;
       }
 
       private long key_ ;
       /**
-       * <code>int64 key = 5;</code>
+       * <code>int64 key = 7;</code>
        * @return The key.
        */
       @Override
@@ -1970,23 +2258,23 @@ public final class EntityProto {
         return key_;
       }
       /**
-       * <code>int64 key = 5;</code>
+       * <code>int64 key = 7;</code>
        * @param value The key to set.
        * @return This builder for chaining.
        */
       public Builder setKey(long value) {
 
         key_ = value;
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
       /**
-       * <code>int64 key = 5;</code>
+       * <code>int64 key = 7;</code>
        * @return This builder for chaining.
        */
       public Builder clearKey() {
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000040);
         key_ = 0L;
         onChanged();
         return this;
@@ -2060,10 +2348,10 @@ public final class EntityProto {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>int32 entityId = 1;</code>
-     * @return The entityId.
+     * <code>int32 id = 1;</code>
+     * @return The id.
      */
-    int getEntityId();
+    int getId();
 
     /**
      * <code>int32 posX = 2;</code>
@@ -2105,22 +2393,22 @@ public final class EntityProto {
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
       return EntityProto.internal_static_PositionUpdate_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               PositionUpdate.class, Builder.class);
     }
 
-    public static final int ENTITYID_FIELD_NUMBER = 1;
-    private int entityId_ = 0;
+    public static final int ID_FIELD_NUMBER = 1;
+    private int id_ = 0;
     /**
-     * <code>int32 entityId = 1;</code>
-     * @return The entityId.
+     * <code>int32 id = 1;</code>
+     * @return The id.
      */
     @Override
-    public int getEntityId() {
-      return entityId_;
+    public int getId() {
+      return id_;
     }
 
     public static final int POSX_FIELD_NUMBER = 2;
@@ -2159,8 +2447,8 @@ public final class EntityProto {
     @Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (entityId_ != 0) {
-        output.writeInt32(1, entityId_);
+      if (id_ != 0) {
+        output.writeInt32(1, id_);
       }
       if (posX_ != 0) {
         output.writeInt32(2, posX_);
@@ -2177,9 +2465,9 @@ public final class EntityProto {
       if (size != -1) return size;
 
       size = 0;
-      if (entityId_ != 0) {
+      if (id_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, entityId_);
+          .computeInt32Size(1, id_);
       }
       if (posX_ != 0) {
         size += com.google.protobuf.CodedOutputStream
@@ -2204,8 +2492,8 @@ public final class EntityProto {
       }
       PositionUpdate other = (PositionUpdate) obj;
 
-      if (getEntityId()
-          != other.getEntityId()) return false;
+      if (getId()
+          != other.getId()) return false;
       if (getPosX()
           != other.getPosX()) return false;
       if (getPosY()
@@ -2221,8 +2509,8 @@ public final class EntityProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ENTITYID_FIELD_NUMBER;
-      hash = (53 * hash) + getEntityId();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId();
       hash = (37 * hash) + POSX_FIELD_NUMBER;
       hash = (53 * hash) + getPosX();
       hash = (37 * hash) + POSY_FIELD_NUMBER;
@@ -2320,7 +2608,7 @@ public final class EntityProto {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -2337,7 +2625,7 @@ public final class EntityProto {
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
         return EntityProto.internal_static_PositionUpdate_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -2350,7 +2638,7 @@ public final class EntityProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
 
       }
@@ -2358,7 +2646,7 @@ public final class EntityProto {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        entityId_ = 0;
+        id_ = 0;
         posX_ = 0;
         posY_ = 0;
         return this;
@@ -2395,7 +2683,7 @@ public final class EntityProto {
       private void buildPartial0(PositionUpdate result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.entityId_ = entityId_;
+          result.id_ = id_;
         }
         if (((from_bitField0_ & 0x00000002) != 0)) {
           result.posX_ = posX_;
@@ -2449,8 +2737,8 @@ public final class EntityProto {
 
       public Builder mergeFrom(PositionUpdate other) {
         if (other == PositionUpdate.getDefaultInstance()) return this;
-        if (other.getEntityId() != 0) {
-          setEntityId(other.getEntityId());
+        if (other.getId() != 0) {
+          setId(other.getId());
         }
         if (other.getPosX() != 0) {
           setPosX(other.getPosX());
@@ -2485,7 +2773,7 @@ public final class EntityProto {
                 done = true;
                 break;
               case 8: {
-                entityId_ = input.readInt32();
+                id_ = input.readInt32();
                 bitField0_ |= 0x00000001;
                 break;
               } // case 8
@@ -2516,34 +2804,34 @@ public final class EntityProto {
       }
       private int bitField0_;
 
-      private int entityId_ ;
+      private int id_ ;
       /**
-       * <code>int32 entityId = 1;</code>
-       * @return The entityId.
+       * <code>int32 id = 1;</code>
+       * @return The id.
        */
       @Override
-      public int getEntityId() {
-        return entityId_;
+      public int getId() {
+        return id_;
       }
       /**
-       * <code>int32 entityId = 1;</code>
-       * @param value The entityId to set.
+       * <code>int32 id = 1;</code>
+       * @param value The id to set.
        * @return This builder for chaining.
        */
-      public Builder setEntityId(int value) {
+      public Builder setId(int value) {
 
-        entityId_ = value;
+        id_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 entityId = 1;</code>
+       * <code>int32 id = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearEntityId() {
+      public Builder clearId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        entityId_ = 0;
+        id_ = 0;
         onChanged();
         return this;
       }
@@ -2675,6 +2963,2876 @@ public final class EntityProto {
 
   }
 
+  public interface AuthCorrectionOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:AuthCorrection)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int32 posX = 1;</code>
+     * @return The posX.
+     */
+    int getPosX();
+
+    /**
+     * <code>int32 posY = 2;</code>
+     * @return The posY.
+     */
+    int getPosY();
+  }
+  /**
+   * Protobuf type {@code AuthCorrection}
+   */
+  public static final class AuthCorrection extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:AuthCorrection)
+      AuthCorrectionOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AuthCorrection.newBuilder() to construct.
+    private AuthCorrection(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AuthCorrection() {
+    }
+
+    @Override
+    @SuppressWarnings({"unused"})
+    protected Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AuthCorrection();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return EntityProto.internal_static_AuthCorrection_descriptor;
+    }
+
+    @Override
+    protected FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return EntityProto.internal_static_AuthCorrection_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              AuthCorrection.class, Builder.class);
+    }
+
+    public static final int POSX_FIELD_NUMBER = 1;
+    private int posX_ = 0;
+    /**
+     * <code>int32 posX = 1;</code>
+     * @return The posX.
+     */
+    @Override
+    public int getPosX() {
+      return posX_;
+    }
+
+    public static final int POSY_FIELD_NUMBER = 2;
+    private int posY_ = 0;
+    /**
+     * <code>int32 posY = 2;</code>
+     * @return The posY.
+     */
+    @Override
+    public int getPosY() {
+      return posY_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (posX_ != 0) {
+        output.writeInt32(1, posX_);
+      }
+      if (posY_ != 0) {
+        output.writeInt32(2, posY_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (posX_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, posX_);
+      }
+      if (posY_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, posY_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof AuthCorrection)) {
+        return super.equals(obj);
+      }
+      AuthCorrection other = (AuthCorrection) obj;
+
+      if (getPosX()
+          != other.getPosX()) return false;
+      if (getPosY()
+          != other.getPosY()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + POSX_FIELD_NUMBER;
+      hash = (53 * hash) + getPosX();
+      hash = (37 * hash) + POSY_FIELD_NUMBER;
+      hash = (53 * hash) + getPosY();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static AuthCorrection parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static AuthCorrection parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static AuthCorrection parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static AuthCorrection parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static AuthCorrection parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static AuthCorrection parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static AuthCorrection parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static AuthCorrection parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static AuthCorrection parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static AuthCorrection parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static AuthCorrection parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static AuthCorrection parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(AuthCorrection prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @Override
+    protected Builder newBuilderForType(
+        BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code AuthCorrection}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:AuthCorrection)
+        AuthCorrectionOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return EntityProto.internal_static_AuthCorrection_descriptor;
+      }
+
+      @Override
+      protected FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return EntityProto.internal_static_AuthCorrection_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                AuthCorrection.class, Builder.class);
+      }
+
+      // Construct using EntityProto.AuthCorrection.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          BuilderParent parent) {
+        super(parent);
+
+      }
+      @Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        posX_ = 0;
+        posY_ = 0;
+        return this;
+      }
+
+      @Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return EntityProto.internal_static_AuthCorrection_descriptor;
+      }
+
+      @Override
+      public AuthCorrection getDefaultInstanceForType() {
+        return AuthCorrection.getDefaultInstance();
+      }
+
+      @Override
+      public AuthCorrection build() {
+        AuthCorrection result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @Override
+      public AuthCorrection buildPartial() {
+        AuthCorrection result = new AuthCorrection(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(AuthCorrection result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.posX_ = posX_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.posY_ = posY_;
+        }
+      }
+
+      @Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return super.setField(field, value);
+      }
+      @Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof AuthCorrection) {
+          return mergeFrom((AuthCorrection)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(AuthCorrection other) {
+        if (other == AuthCorrection.getDefaultInstance()) return this;
+        if (other.getPosX() != 0) {
+          setPosX(other.getPosX());
+        }
+        if (other.getPosY() != 0) {
+          setPosY(other.getPosY());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                posX_ = input.readInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                posY_ = input.readInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private int posX_ ;
+      /**
+       * <code>int32 posX = 1;</code>
+       * @return The posX.
+       */
+      @Override
+      public int getPosX() {
+        return posX_;
+      }
+      /**
+       * <code>int32 posX = 1;</code>
+       * @param value The posX to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPosX(int value) {
+
+        posX_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 posX = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPosX() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        posX_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int posY_ ;
+      /**
+       * <code>int32 posY = 2;</code>
+       * @return The posY.
+       */
+      @Override
+      public int getPosY() {
+        return posY_;
+      }
+      /**
+       * <code>int32 posY = 2;</code>
+       * @param value The posY to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPosY(int value) {
+
+        posY_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 posY = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPosY() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        posY_ = 0;
+        onChanged();
+        return this;
+      }
+      @Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:AuthCorrection)
+    }
+
+    // @@protoc_insertion_point(class_scope:AuthCorrection)
+    private static final AuthCorrection DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new AuthCorrection();
+    }
+
+    public static AuthCorrection getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AuthCorrection>
+        PARSER = new com.google.protobuf.AbstractParser<AuthCorrection>() {
+      @Override
+      public AuthCorrection parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<AuthCorrection> parser() {
+      return PARSER;
+    }
+
+    @Override
+    public com.google.protobuf.Parser<AuthCorrection> getParserForType() {
+      return PARSER;
+    }
+
+    @Override
+    public AuthCorrection getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface EntityChangeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:EntityChange)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int32 id = 1;</code>
+     * @return The id.
+     */
+    int getId();
+
+    /**
+     * <code>string name = 2;</code>
+     * @return The name.
+     */
+    String getName();
+    /**
+     * <code>string name = 2;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <code>repeated int32 outfit = 3;</code>
+     * @return A list containing the outfit.
+     */
+    java.util.List<Integer> getOutfitList();
+    /**
+     * <code>repeated int32 outfit = 3;</code>
+     * @return The count of outfit.
+     */
+    int getOutfitCount();
+    /**
+     * <code>repeated int32 outfit = 3;</code>
+     * @param index The index of the element to return.
+     * @return The outfit at the given index.
+     */
+    int getOutfit(int index);
+
+    /**
+     * <code>repeated int32 states = 4;</code>
+     * @return A list containing the states.
+     */
+    java.util.List<Integer> getStatesList();
+    /**
+     * <code>repeated int32 states = 4;</code>
+     * @return The count of states.
+     */
+    int getStatesCount();
+    /**
+     * <code>repeated int32 states = 4;</code>
+     * @param index The index of the element to return.
+     * @return The states at the given index.
+     */
+    int getStates(int index);
+  }
+  /**
+   * Protobuf type {@code EntityChange}
+   */
+  public static final class EntityChange extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:EntityChange)
+      EntityChangeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use EntityChange.newBuilder() to construct.
+    private EntityChange(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private EntityChange() {
+      name_ = "";
+      outfit_ = emptyIntList();
+      states_ = emptyIntList();
+    }
+
+    @Override
+    @SuppressWarnings({"unused"})
+    protected Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new EntityChange();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return EntityProto.internal_static_EntityChange_descriptor;
+    }
+
+    @Override
+    protected FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return EntityProto.internal_static_EntityChange_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              EntityChange.class, Builder.class);
+    }
+
+    public static final int ID_FIELD_NUMBER = 1;
+    private int id_ = 0;
+    /**
+     * <code>int32 id = 1;</code>
+     * @return The id.
+     */
+    @Override
+    public int getId() {
+      return id_;
+    }
+
+    public static final int NAME_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile Object name_ = "";
+    /**
+     * <code>string name = 2;</code>
+     * @return The name.
+     */
+    @Override
+    public String getName() {
+      Object ref = name_;
+      if (ref instanceof String) {
+        return (String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string name = 2;</code>
+     * @return The bytes for name.
+     */
+    @Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      Object ref = name_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int OUTFIT_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private com.google.protobuf.Internal.IntList outfit_ =
+        emptyIntList();
+    /**
+     * <code>repeated int32 outfit = 3;</code>
+     * @return A list containing the outfit.
+     */
+    @Override
+    public java.util.List<Integer>
+        getOutfitList() {
+      return outfit_;
+    }
+    /**
+     * <code>repeated int32 outfit = 3;</code>
+     * @return The count of outfit.
+     */
+    public int getOutfitCount() {
+      return outfit_.size();
+    }
+    /**
+     * <code>repeated int32 outfit = 3;</code>
+     * @param index The index of the element to return.
+     * @return The outfit at the given index.
+     */
+    public int getOutfit(int index) {
+      return outfit_.getInt(index);
+    }
+    private int outfitMemoizedSerializedSize = -1;
+
+    public static final int STATES_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private com.google.protobuf.Internal.IntList states_ =
+        emptyIntList();
+    /**
+     * <code>repeated int32 states = 4;</code>
+     * @return A list containing the states.
+     */
+    @Override
+    public java.util.List<Integer>
+        getStatesList() {
+      return states_;
+    }
+    /**
+     * <code>repeated int32 states = 4;</code>
+     * @return The count of states.
+     */
+    public int getStatesCount() {
+      return states_.size();
+    }
+    /**
+     * <code>repeated int32 states = 4;</code>
+     * @param index The index of the element to return.
+     * @return The states at the given index.
+     */
+    public int getStates(int index) {
+      return states_.getInt(index);
+    }
+    private int statesMemoizedSerializedSize = -1;
+
+    private byte memoizedIsInitialized = -1;
+    @Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (id_ != 0) {
+        output.writeInt32(1, id_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
+      }
+      if (getOutfitList().size() > 0) {
+        output.writeUInt32NoTag(26);
+        output.writeUInt32NoTag(outfitMemoizedSerializedSize);
+      }
+      for (int i = 0; i < outfit_.size(); i++) {
+        output.writeInt32NoTag(outfit_.getInt(i));
+      }
+      if (getStatesList().size() > 0) {
+        output.writeUInt32NoTag(34);
+        output.writeUInt32NoTag(statesMemoizedSerializedSize);
+      }
+      for (int i = 0; i < states_.size(); i++) {
+        output.writeInt32NoTag(states_.getInt(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (id_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, id_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < outfit_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(outfit_.getInt(i));
+        }
+        size += dataSize;
+        if (!getOutfitList().isEmpty()) {
+          size += 1;
+          size += com.google.protobuf.CodedOutputStream
+              .computeInt32SizeNoTag(dataSize);
+        }
+        outfitMemoizedSerializedSize = dataSize;
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < states_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(states_.getInt(i));
+        }
+        size += dataSize;
+        if (!getStatesList().isEmpty()) {
+          size += 1;
+          size += com.google.protobuf.CodedOutputStream
+              .computeInt32SizeNoTag(dataSize);
+        }
+        statesMemoizedSerializedSize = dataSize;
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof EntityChange)) {
+        return super.equals(obj);
+      }
+      EntityChange other = (EntityChange) obj;
+
+      if (getId()
+          != other.getId()) return false;
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getOutfitList()
+          .equals(other.getOutfitList())) return false;
+      if (!getStatesList()
+          .equals(other.getStatesList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      if (getOutfitCount() > 0) {
+        hash = (37 * hash) + OUTFIT_FIELD_NUMBER;
+        hash = (53 * hash) + getOutfitList().hashCode();
+      }
+      if (getStatesCount() > 0) {
+        hash = (37 * hash) + STATES_FIELD_NUMBER;
+        hash = (53 * hash) + getStatesList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static EntityChange parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static EntityChange parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static EntityChange parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static EntityChange parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static EntityChange parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static EntityChange parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static EntityChange parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static EntityChange parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static EntityChange parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static EntityChange parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static EntityChange parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static EntityChange parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(EntityChange prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @Override
+    protected Builder newBuilderForType(
+        BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code EntityChange}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:EntityChange)
+        EntityChangeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return EntityProto.internal_static_EntityChange_descriptor;
+      }
+
+      @Override
+      protected FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return EntityProto.internal_static_EntityChange_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                EntityChange.class, Builder.class);
+      }
+
+      // Construct using EntityProto.EntityChange.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          BuilderParent parent) {
+        super(parent);
+
+      }
+      @Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        id_ = 0;
+        name_ = "";
+        outfit_ = emptyIntList();
+        states_ = emptyIntList();
+        return this;
+      }
+
+      @Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return EntityProto.internal_static_EntityChange_descriptor;
+      }
+
+      @Override
+      public EntityChange getDefaultInstanceForType() {
+        return EntityChange.getDefaultInstance();
+      }
+
+      @Override
+      public EntityChange build() {
+        EntityChange result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @Override
+      public EntityChange buildPartial() {
+        EntityChange result = new EntityChange(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(EntityChange result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          outfit_.makeImmutable();
+          result.outfit_ = outfit_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          states_.makeImmutable();
+          result.states_ = states_;
+        }
+      }
+
+      @Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return super.setField(field, value);
+      }
+      @Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof EntityChange) {
+          return mergeFrom((EntityChange)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(EntityChange other) {
+        if (other == EntityChange.getDefaultInstance()) return this;
+        if (other.getId() != 0) {
+          setId(other.getId());
+        }
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.outfit_.isEmpty()) {
+          if (outfit_.isEmpty()) {
+            outfit_ = other.outfit_;
+            outfit_.makeImmutable();
+            bitField0_ |= 0x00000004;
+          } else {
+            ensureOutfitIsMutable();
+            outfit_.addAll(other.outfit_);
+          }
+          onChanged();
+        }
+        if (!other.states_.isEmpty()) {
+          if (states_.isEmpty()) {
+            states_ = other.states_;
+            states_.makeImmutable();
+            bitField0_ |= 0x00000008;
+          } else {
+            ensureStatesIsMutable();
+            states_.addAll(other.states_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                id_ = input.readInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 18: {
+                name_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 24: {
+                int v = input.readInt32();
+                ensureOutfitIsMutable();
+                outfit_.addInt(v);
+                break;
+              } // case 24
+              case 26: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureOutfitIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  outfit_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 26
+              case 32: {
+                int v = input.readInt32();
+                ensureStatesIsMutable();
+                states_.addInt(v);
+                break;
+              } // case 32
+              case 34: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureStatesIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  states_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 34
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private int id_ ;
+      /**
+       * <code>int32 id = 1;</code>
+       * @return The id.
+       */
+      @Override
+      public int getId() {
+        return id_;
+      }
+      /**
+       * <code>int32 id = 1;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setId(int value) {
+
+        id_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        id_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private Object name_ = "";
+      /**
+       * <code>string name = 2;</code>
+       * @return The name.
+       */
+      public String getName() {
+        Object ref = name_;
+        if (!(ref instanceof String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (String) ref;
+        }
+      }
+      /**
+       * <code>string name = 2;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string name = 2;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          String value) {
+        if (value == null) { throw new NullPointerException(); }
+        name_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string name = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string name = 2;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        name_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.Internal.IntList outfit_ = emptyIntList();
+      private void ensureOutfitIsMutable() {
+        if (!outfit_.isModifiable()) {
+          outfit_ = makeMutableCopy(outfit_);
+        }
+        bitField0_ |= 0x00000004;
+      }
+      /**
+       * <code>repeated int32 outfit = 3;</code>
+       * @return A list containing the outfit.
+       */
+      public java.util.List<Integer>
+          getOutfitList() {
+        outfit_.makeImmutable();
+        return outfit_;
+      }
+      /**
+       * <code>repeated int32 outfit = 3;</code>
+       * @return The count of outfit.
+       */
+      public int getOutfitCount() {
+        return outfit_.size();
+      }
+      /**
+       * <code>repeated int32 outfit = 3;</code>
+       * @param index The index of the element to return.
+       * @return The outfit at the given index.
+       */
+      public int getOutfit(int index) {
+        return outfit_.getInt(index);
+      }
+      /**
+       * <code>repeated int32 outfit = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The outfit to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOutfit(
+          int index, int value) {
+
+        ensureOutfitIsMutable();
+        outfit_.setInt(index, value);
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 outfit = 3;</code>
+       * @param value The outfit to add.
+       * @return This builder for chaining.
+       */
+      public Builder addOutfit(int value) {
+
+        ensureOutfitIsMutable();
+        outfit_.addInt(value);
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 outfit = 3;</code>
+       * @param values The outfit to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllOutfit(
+          Iterable<? extends Integer> values) {
+        ensureOutfitIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, outfit_);
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 outfit = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearOutfit() {
+        outfit_ = emptyIntList();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.Internal.IntList states_ = emptyIntList();
+      private void ensureStatesIsMutable() {
+        if (!states_.isModifiable()) {
+          states_ = makeMutableCopy(states_);
+        }
+        bitField0_ |= 0x00000008;
+      }
+      /**
+       * <code>repeated int32 states = 4;</code>
+       * @return A list containing the states.
+       */
+      public java.util.List<Integer>
+          getStatesList() {
+        states_.makeImmutable();
+        return states_;
+      }
+      /**
+       * <code>repeated int32 states = 4;</code>
+       * @return The count of states.
+       */
+      public int getStatesCount() {
+        return states_.size();
+      }
+      /**
+       * <code>repeated int32 states = 4;</code>
+       * @param index The index of the element to return.
+       * @return The states at the given index.
+       */
+      public int getStates(int index) {
+        return states_.getInt(index);
+      }
+      /**
+       * <code>repeated int32 states = 4;</code>
+       * @param index The index to set the value at.
+       * @param value The states to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStates(
+          int index, int value) {
+
+        ensureStatesIsMutable();
+        states_.setInt(index, value);
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 states = 4;</code>
+       * @param value The states to add.
+       * @return This builder for chaining.
+       */
+      public Builder addStates(int value) {
+
+        ensureStatesIsMutable();
+        states_.addInt(value);
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 states = 4;</code>
+       * @param values The states to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllStates(
+          Iterable<? extends Integer> values) {
+        ensureStatesIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, states_);
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 states = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStates() {
+        states_ = emptyIntList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      @Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:EntityChange)
+    }
+
+    // @@protoc_insertion_point(class_scope:EntityChange)
+    private static final EntityChange DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new EntityChange();
+    }
+
+    public static EntityChange getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<EntityChange>
+        PARSER = new com.google.protobuf.AbstractParser<EntityChange>() {
+      @Override
+      public EntityChange parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<EntityChange> parser() {
+      return PARSER;
+    }
+
+    @Override
+    public com.google.protobuf.Parser<EntityChange> getParserForType() {
+      return PARSER;
+    }
+
+    @Override
+    public EntityChange getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AuthResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:AuthResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int32 key = 1;</code>
+     * @return The key.
+     */
+    int getKey();
+
+    /**
+     * <code>bool valid = 2;</code>
+     * @return The valid.
+     */
+    boolean getValid();
+
+    /**
+     * <code>int64 value = 3;</code>
+     * @return The value.
+     */
+    long getValue();
+  }
+  /**
+   * Protobuf type {@code AuthResponse}
+   */
+  public static final class AuthResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:AuthResponse)
+      AuthResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AuthResponse.newBuilder() to construct.
+    private AuthResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AuthResponse() {
+    }
+
+    @Override
+    @SuppressWarnings({"unused"})
+    protected Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AuthResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return EntityProto.internal_static_AuthResponse_descriptor;
+    }
+
+    @Override
+    protected FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return EntityProto.internal_static_AuthResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              AuthResponse.class, Builder.class);
+    }
+
+    public static final int KEY_FIELD_NUMBER = 1;
+    private int key_ = 0;
+    /**
+     * <code>int32 key = 1;</code>
+     * @return The key.
+     */
+    @Override
+    public int getKey() {
+      return key_;
+    }
+
+    public static final int VALID_FIELD_NUMBER = 2;
+    private boolean valid_ = false;
+    /**
+     * <code>bool valid = 2;</code>
+     * @return The valid.
+     */
+    @Override
+    public boolean getValid() {
+      return valid_;
+    }
+
+    public static final int VALUE_FIELD_NUMBER = 3;
+    private long value_ = 0L;
+    /**
+     * <code>int64 value = 3;</code>
+     * @return The value.
+     */
+    @Override
+    public long getValue() {
+      return value_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (key_ != 0) {
+        output.writeInt32(1, key_);
+      }
+      if (valid_ != false) {
+        output.writeBool(2, valid_);
+      }
+      if (value_ != 0L) {
+        output.writeInt64(3, value_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (key_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, key_);
+      }
+      if (valid_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, valid_);
+      }
+      if (value_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, value_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof AuthResponse)) {
+        return super.equals(obj);
+      }
+      AuthResponse other = (AuthResponse) obj;
+
+      if (getKey()
+          != other.getKey()) return false;
+      if (getValid()
+          != other.getValid()) return false;
+      if (getValue()
+          != other.getValue()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + KEY_FIELD_NUMBER;
+      hash = (53 * hash) + getKey();
+      hash = (37 * hash) + VALID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getValid());
+      hash = (37 * hash) + VALUE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getValue());
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static AuthResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static AuthResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static AuthResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static AuthResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static AuthResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static AuthResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static AuthResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static AuthResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static AuthResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static AuthResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static AuthResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static AuthResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(AuthResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @Override
+    protected Builder newBuilderForType(
+        BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code AuthResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:AuthResponse)
+        AuthResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return EntityProto.internal_static_AuthResponse_descriptor;
+      }
+
+      @Override
+      protected FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return EntityProto.internal_static_AuthResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                AuthResponse.class, Builder.class);
+      }
+
+      // Construct using EntityProto.AuthResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          BuilderParent parent) {
+        super(parent);
+
+      }
+      @Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        key_ = 0;
+        valid_ = false;
+        value_ = 0L;
+        return this;
+      }
+
+      @Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return EntityProto.internal_static_AuthResponse_descriptor;
+      }
+
+      @Override
+      public AuthResponse getDefaultInstanceForType() {
+        return AuthResponse.getDefaultInstance();
+      }
+
+      @Override
+      public AuthResponse build() {
+        AuthResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @Override
+      public AuthResponse buildPartial() {
+        AuthResponse result = new AuthResponse(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(AuthResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.key_ = key_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.valid_ = valid_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.value_ = value_;
+        }
+      }
+
+      @Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return super.setField(field, value);
+      }
+      @Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof AuthResponse) {
+          return mergeFrom((AuthResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(AuthResponse other) {
+        if (other == AuthResponse.getDefaultInstance()) return this;
+        if (other.getKey() != 0) {
+          setKey(other.getKey());
+        }
+        if (other.getValid() != false) {
+          setValid(other.getValid());
+        }
+        if (other.getValue() != 0L) {
+          setValue(other.getValue());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                key_ = input.readInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                valid_ = input.readBool();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                value_ = input.readInt64();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private int key_ ;
+      /**
+       * <code>int32 key = 1;</code>
+       * @return The key.
+       */
+      @Override
+      public int getKey() {
+        return key_;
+      }
+      /**
+       * <code>int32 key = 1;</code>
+       * @param value The key to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKey(int value) {
+
+        key_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 key = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKey() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        key_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean valid_ ;
+      /**
+       * <code>bool valid = 2;</code>
+       * @return The valid.
+       */
+      @Override
+      public boolean getValid() {
+        return valid_;
+      }
+      /**
+       * <code>bool valid = 2;</code>
+       * @param value The valid to set.
+       * @return This builder for chaining.
+       */
+      public Builder setValid(boolean value) {
+
+        valid_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool valid = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearValid() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        valid_ = false;
+        onChanged();
+        return this;
+      }
+
+      private long value_ ;
+      /**
+       * <code>int64 value = 3;</code>
+       * @return The value.
+       */
+      @Override
+      public long getValue() {
+        return value_;
+      }
+      /**
+       * <code>int64 value = 3;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
+       */
+      public Builder setValue(long value) {
+
+        value_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 value = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearValue() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        value_ = 0L;
+        onChanged();
+        return this;
+      }
+      @Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:AuthResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:AuthResponse)
+    private static final AuthResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new AuthResponse();
+    }
+
+    public static AuthResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AuthResponse>
+        PARSER = new com.google.protobuf.AbstractParser<AuthResponse>() {
+      @Override
+      public AuthResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<AuthResponse> parser() {
+      return PARSER;
+    }
+
+    @Override
+    public com.google.protobuf.Parser<AuthResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @Override
+    public AuthResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ActionOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:Action)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int32 id = 1;</code>
+     * @return The id.
+     */
+    int getId();
+
+    /**
+     * <code>bool isPlayer = 2;</code>
+     * @return The isPlayer.
+     */
+    boolean getIsPlayer();
+
+    /**
+     * <code>int32 key = 3;</code>
+     * @return The key.
+     */
+    int getKey();
+
+    /**
+     * <code>int32 value = 4;</code>
+     * @return The value.
+     */
+    int getValue();
+  }
+  /**
+   * Protobuf type {@code Action}
+   */
+  public static final class Action extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:Action)
+      ActionOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use Action.newBuilder() to construct.
+    private Action(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private Action() {
+    }
+
+    @Override
+    @SuppressWarnings({"unused"})
+    protected Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new Action();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return EntityProto.internal_static_Action_descriptor;
+    }
+
+    @Override
+    protected FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return EntityProto.internal_static_Action_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              Action.class, Builder.class);
+    }
+
+    public static final int ID_FIELD_NUMBER = 1;
+    private int id_ = 0;
+    /**
+     * <code>int32 id = 1;</code>
+     * @return The id.
+     */
+    @Override
+    public int getId() {
+      return id_;
+    }
+
+    public static final int ISPLAYER_FIELD_NUMBER = 2;
+    private boolean isPlayer_ = false;
+    /**
+     * <code>bool isPlayer = 2;</code>
+     * @return The isPlayer.
+     */
+    @Override
+    public boolean getIsPlayer() {
+      return isPlayer_;
+    }
+
+    public static final int KEY_FIELD_NUMBER = 3;
+    private int key_ = 0;
+    /**
+     * <code>int32 key = 3;</code>
+     * @return The key.
+     */
+    @Override
+    public int getKey() {
+      return key_;
+    }
+
+    public static final int VALUE_FIELD_NUMBER = 4;
+    private int value_ = 0;
+    /**
+     * <code>int32 value = 4;</code>
+     * @return The value.
+     */
+    @Override
+    public int getValue() {
+      return value_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (id_ != 0) {
+        output.writeInt32(1, id_);
+      }
+      if (isPlayer_ != false) {
+        output.writeBool(2, isPlayer_);
+      }
+      if (key_ != 0) {
+        output.writeInt32(3, key_);
+      }
+      if (value_ != 0) {
+        output.writeInt32(4, value_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (id_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, id_);
+      }
+      if (isPlayer_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, isPlayer_);
+      }
+      if (key_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, key_);
+      }
+      if (value_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, value_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof Action)) {
+        return super.equals(obj);
+      }
+      Action other = (Action) obj;
+
+      if (getId()
+          != other.getId()) return false;
+      if (getIsPlayer()
+          != other.getIsPlayer()) return false;
+      if (getKey()
+          != other.getKey()) return false;
+      if (getValue()
+          != other.getValue()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId();
+      hash = (37 * hash) + ISPLAYER_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getIsPlayer());
+      hash = (37 * hash) + KEY_FIELD_NUMBER;
+      hash = (53 * hash) + getKey();
+      hash = (37 * hash) + VALUE_FIELD_NUMBER;
+      hash = (53 * hash) + getValue();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static Action parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static Action parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static Action parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static Action parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static Action parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static Action parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static Action parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static Action parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static Action parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static Action parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static Action parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static Action parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(Action prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @Override
+    protected Builder newBuilderForType(
+        BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code Action}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:Action)
+        ActionOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return EntityProto.internal_static_Action_descriptor;
+      }
+
+      @Override
+      protected FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return EntityProto.internal_static_Action_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                Action.class, Builder.class);
+      }
+
+      // Construct using EntityProto.Action.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          BuilderParent parent) {
+        super(parent);
+
+      }
+      @Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        id_ = 0;
+        isPlayer_ = false;
+        key_ = 0;
+        value_ = 0;
+        return this;
+      }
+
+      @Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return EntityProto.internal_static_Action_descriptor;
+      }
+
+      @Override
+      public Action getDefaultInstanceForType() {
+        return Action.getDefaultInstance();
+      }
+
+      @Override
+      public Action build() {
+        Action result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @Override
+      public Action buildPartial() {
+        Action result = new Action(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(Action result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.isPlayer_ = isPlayer_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.key_ = key_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.value_ = value_;
+        }
+      }
+
+      @Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return super.setField(field, value);
+      }
+      @Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof Action) {
+          return mergeFrom((Action)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(Action other) {
+        if (other == Action.getDefaultInstance()) return this;
+        if (other.getId() != 0) {
+          setId(other.getId());
+        }
+        if (other.getIsPlayer() != false) {
+          setIsPlayer(other.getIsPlayer());
+        }
+        if (other.getKey() != 0) {
+          setKey(other.getKey());
+        }
+        if (other.getValue() != 0) {
+          setValue(other.getValue());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                id_ = input.readInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                isPlayer_ = input.readBool();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                key_ = input.readInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 32: {
+                value_ = input.readInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private int id_ ;
+      /**
+       * <code>int32 id = 1;</code>
+       * @return The id.
+       */
+      @Override
+      public int getId() {
+        return id_;
+      }
+      /**
+       * <code>int32 id = 1;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setId(int value) {
+
+        id_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        id_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean isPlayer_ ;
+      /**
+       * <code>bool isPlayer = 2;</code>
+       * @return The isPlayer.
+       */
+      @Override
+      public boolean getIsPlayer() {
+        return isPlayer_;
+      }
+      /**
+       * <code>bool isPlayer = 2;</code>
+       * @param value The isPlayer to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIsPlayer(boolean value) {
+
+        isPlayer_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool isPlayer = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIsPlayer() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        isPlayer_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int key_ ;
+      /**
+       * <code>int32 key = 3;</code>
+       * @return The key.
+       */
+      @Override
+      public int getKey() {
+        return key_;
+      }
+      /**
+       * <code>int32 key = 3;</code>
+       * @param value The key to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKey(int value) {
+
+        key_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 key = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKey() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        key_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int value_ ;
+      /**
+       * <code>int32 value = 4;</code>
+       * @return The value.
+       */
+      @Override
+      public int getValue() {
+        return value_;
+      }
+      /**
+       * <code>int32 value = 4;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
+       */
+      public Builder setValue(int value) {
+
+        value_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 value = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearValue() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        value_ = 0;
+        onChanged();
+        return this;
+      }
+      @Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:Action)
+    }
+
+    // @@protoc_insertion_point(class_scope:Action)
+    private static final Action DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new Action();
+    }
+
+    public static Action getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Action>
+        PARSER = new com.google.protobuf.AbstractParser<Action>() {
+      @Override
+      public Action parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<Action> parser() {
+      return PARSER;
+    }
+
+    @Override
+    public com.google.protobuf.Parser<Action> getParserForType() {
+      return PARSER;
+    }
+
+    @Override
+    public Action getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface GameEntityOrBuilder extends
       // @@protoc_insertion_point(interface_extends:GameEntity)
       com.google.protobuf.MessageOrBuilder {
@@ -2739,7 +5897,7 @@ public final class EntityProto {
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
       return EntityProto.internal_static_GameEntity_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -2751,7 +5909,7 @@ public final class EntityProto {
     private Object entityType_;
     public enum EntityTypeCase
         implements com.google.protobuf.Internal.EnumLite,
-            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+            InternalOneOfEnum {
       CHARACTER(1),
       LOCATIONITEM(2),
       ENTITYTYPE_NOT_SET(0);
@@ -3031,7 +6189,7 @@ public final class EntityProto {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -3048,7 +6206,7 @@ public final class EntityProto {
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
         return EntityProto.internal_static_GameEntity_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -3061,7 +6219,7 @@ public final class EntityProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
 
       }
@@ -3653,6 +6811,93 @@ public final class EntityProto {
      */
     PositionUpdateOrBuilder getPositionUpdatesOrBuilder(
         int index);
+
+    /**
+     * <code>repeated .EntityChange entityChanges = 3;</code>
+     */
+    java.util.List<EntityChange>
+        getEntityChangesList();
+    /**
+     * <code>repeated .EntityChange entityChanges = 3;</code>
+     */
+    EntityChange getEntityChanges(int index);
+    /**
+     * <code>repeated .EntityChange entityChanges = 3;</code>
+     */
+    int getEntityChangesCount();
+    /**
+     * <code>repeated .EntityChange entityChanges = 3;</code>
+     */
+    java.util.List<? extends EntityChangeOrBuilder>
+        getEntityChangesOrBuilderList();
+    /**
+     * <code>repeated .EntityChange entityChanges = 3;</code>
+     */
+    EntityChangeOrBuilder getEntityChangesOrBuilder(
+        int index);
+
+    /**
+     * <code>repeated .AuthResponse authResponses = 4;</code>
+     */
+    java.util.List<AuthResponse>
+        getAuthResponsesList();
+    /**
+     * <code>repeated .AuthResponse authResponses = 4;</code>
+     */
+    AuthResponse getAuthResponses(int index);
+    /**
+     * <code>repeated .AuthResponse authResponses = 4;</code>
+     */
+    int getAuthResponsesCount();
+    /**
+     * <code>repeated .AuthResponse authResponses = 4;</code>
+     */
+    java.util.List<? extends AuthResponseOrBuilder>
+        getAuthResponsesOrBuilderList();
+    /**
+     * <code>repeated .AuthResponse authResponses = 4;</code>
+     */
+    AuthResponseOrBuilder getAuthResponsesOrBuilder(
+        int index);
+
+    /**
+     * <code>repeated .Action actions = 5;</code>
+     */
+    java.util.List<Action>
+        getActionsList();
+    /**
+     * <code>repeated .Action actions = 5;</code>
+     */
+    Action getActions(int index);
+    /**
+     * <code>repeated .Action actions = 5;</code>
+     */
+    int getActionsCount();
+    /**
+     * <code>repeated .Action actions = 5;</code>
+     */
+    java.util.List<? extends ActionOrBuilder>
+        getActionsOrBuilderList();
+    /**
+     * <code>repeated .Action actions = 5;</code>
+     */
+    ActionOrBuilder getActionsOrBuilder(
+        int index);
+
+    /**
+     * <code>.AuthCorrection authCorrection = 6;</code>
+     * @return Whether the authCorrection field is set.
+     */
+    boolean hasAuthCorrection();
+    /**
+     * <code>.AuthCorrection authCorrection = 6;</code>
+     * @return The authCorrection.
+     */
+    AuthCorrection getAuthCorrection();
+    /**
+     * <code>.AuthCorrection authCorrection = 6;</code>
+     */
+    AuthCorrectionOrBuilder getAuthCorrectionOrBuilder();
   }
   /**
    * Protobuf type {@code GamePacket}
@@ -3669,6 +6914,9 @@ public final class EntityProto {
     private GamePacket() {
       entities_ = java.util.Collections.emptyList();
       positionUpdates_ = java.util.Collections.emptyList();
+      entityChanges_ = java.util.Collections.emptyList();
+      authResponses_ = java.util.Collections.emptyList();
+      actions_ = java.util.Collections.emptyList();
     }
 
     @Override
@@ -3684,13 +6932,14 @@ public final class EntityProto {
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
       return EntityProto.internal_static_GamePacket_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               GamePacket.class, Builder.class);
     }
 
+    private int bitField0_;
     public static final int ENTITIES_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
     private java.util.List<GameEntity> entities_;
@@ -3773,6 +7022,155 @@ public final class EntityProto {
       return positionUpdates_.get(index);
     }
 
+    public static final int ENTITYCHANGES_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private java.util.List<EntityChange> entityChanges_;
+    /**
+     * <code>repeated .EntityChange entityChanges = 3;</code>
+     */
+    @Override
+    public java.util.List<EntityChange> getEntityChangesList() {
+      return entityChanges_;
+    }
+    /**
+     * <code>repeated .EntityChange entityChanges = 3;</code>
+     */
+    @Override
+    public java.util.List<? extends EntityChangeOrBuilder>
+        getEntityChangesOrBuilderList() {
+      return entityChanges_;
+    }
+    /**
+     * <code>repeated .EntityChange entityChanges = 3;</code>
+     */
+    @Override
+    public int getEntityChangesCount() {
+      return entityChanges_.size();
+    }
+    /**
+     * <code>repeated .EntityChange entityChanges = 3;</code>
+     */
+    @Override
+    public EntityChange getEntityChanges(int index) {
+      return entityChanges_.get(index);
+    }
+    /**
+     * <code>repeated .EntityChange entityChanges = 3;</code>
+     */
+    @Override
+    public EntityChangeOrBuilder getEntityChangesOrBuilder(
+        int index) {
+      return entityChanges_.get(index);
+    }
+
+    public static final int AUTHRESPONSES_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private java.util.List<AuthResponse> authResponses_;
+    /**
+     * <code>repeated .AuthResponse authResponses = 4;</code>
+     */
+    @Override
+    public java.util.List<AuthResponse> getAuthResponsesList() {
+      return authResponses_;
+    }
+    /**
+     * <code>repeated .AuthResponse authResponses = 4;</code>
+     */
+    @Override
+    public java.util.List<? extends AuthResponseOrBuilder>
+        getAuthResponsesOrBuilderList() {
+      return authResponses_;
+    }
+    /**
+     * <code>repeated .AuthResponse authResponses = 4;</code>
+     */
+    @Override
+    public int getAuthResponsesCount() {
+      return authResponses_.size();
+    }
+    /**
+     * <code>repeated .AuthResponse authResponses = 4;</code>
+     */
+    @Override
+    public AuthResponse getAuthResponses(int index) {
+      return authResponses_.get(index);
+    }
+    /**
+     * <code>repeated .AuthResponse authResponses = 4;</code>
+     */
+    @Override
+    public AuthResponseOrBuilder getAuthResponsesOrBuilder(
+        int index) {
+      return authResponses_.get(index);
+    }
+
+    public static final int ACTIONS_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private java.util.List<Action> actions_;
+    /**
+     * <code>repeated .Action actions = 5;</code>
+     */
+    @Override
+    public java.util.List<Action> getActionsList() {
+      return actions_;
+    }
+    /**
+     * <code>repeated .Action actions = 5;</code>
+     */
+    @Override
+    public java.util.List<? extends ActionOrBuilder>
+        getActionsOrBuilderList() {
+      return actions_;
+    }
+    /**
+     * <code>repeated .Action actions = 5;</code>
+     */
+    @Override
+    public int getActionsCount() {
+      return actions_.size();
+    }
+    /**
+     * <code>repeated .Action actions = 5;</code>
+     */
+    @Override
+    public Action getActions(int index) {
+      return actions_.get(index);
+    }
+    /**
+     * <code>repeated .Action actions = 5;</code>
+     */
+    @Override
+    public ActionOrBuilder getActionsOrBuilder(
+        int index) {
+      return actions_.get(index);
+    }
+
+    public static final int AUTHCORRECTION_FIELD_NUMBER = 6;
+    private AuthCorrection authCorrection_;
+    /**
+     * <code>.AuthCorrection authCorrection = 6;</code>
+     * @return Whether the authCorrection field is set.
+     */
+    @Override
+    public boolean hasAuthCorrection() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>.AuthCorrection authCorrection = 6;</code>
+     * @return The authCorrection.
+     */
+    @Override
+    public AuthCorrection getAuthCorrection() {
+      return authCorrection_ == null ? AuthCorrection.getDefaultInstance() : authCorrection_;
+    }
+    /**
+     * <code>.AuthCorrection authCorrection = 6;</code>
+     */
+    @Override
+    public AuthCorrectionOrBuilder getAuthCorrectionOrBuilder() {
+      return authCorrection_ == null ? AuthCorrection.getDefaultInstance() : authCorrection_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @Override
     public final boolean isInitialized() {
@@ -3793,6 +7191,18 @@ public final class EntityProto {
       for (int i = 0; i < positionUpdates_.size(); i++) {
         output.writeMessage(2, positionUpdates_.get(i));
       }
+      for (int i = 0; i < entityChanges_.size(); i++) {
+        output.writeMessage(3, entityChanges_.get(i));
+      }
+      for (int i = 0; i < authResponses_.size(); i++) {
+        output.writeMessage(4, authResponses_.get(i));
+      }
+      for (int i = 0; i < actions_.size(); i++) {
+        output.writeMessage(5, actions_.get(i));
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(6, getAuthCorrection());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -3809,6 +7219,22 @@ public final class EntityProto {
       for (int i = 0; i < positionUpdates_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, positionUpdates_.get(i));
+      }
+      for (int i = 0; i < entityChanges_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, entityChanges_.get(i));
+      }
+      for (int i = 0; i < authResponses_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, authResponses_.get(i));
+      }
+      for (int i = 0; i < actions_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, actions_.get(i));
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, getAuthCorrection());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -3829,6 +7255,17 @@ public final class EntityProto {
           .equals(other.getEntitiesList())) return false;
       if (!getPositionUpdatesList()
           .equals(other.getPositionUpdatesList())) return false;
+      if (!getEntityChangesList()
+          .equals(other.getEntityChangesList())) return false;
+      if (!getAuthResponsesList()
+          .equals(other.getAuthResponsesList())) return false;
+      if (!getActionsList()
+          .equals(other.getActionsList())) return false;
+      if (hasAuthCorrection() != other.hasAuthCorrection()) return false;
+      if (hasAuthCorrection()) {
+        if (!getAuthCorrection()
+            .equals(other.getAuthCorrection())) return false;
+      }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -3847,6 +7284,22 @@ public final class EntityProto {
       if (getPositionUpdatesCount() > 0) {
         hash = (37 * hash) + POSITIONUPDATES_FIELD_NUMBER;
         hash = (53 * hash) + getPositionUpdatesList().hashCode();
+      }
+      if (getEntityChangesCount() > 0) {
+        hash = (37 * hash) + ENTITYCHANGES_FIELD_NUMBER;
+        hash = (53 * hash) + getEntityChangesList().hashCode();
+      }
+      if (getAuthResponsesCount() > 0) {
+        hash = (37 * hash) + AUTHRESPONSES_FIELD_NUMBER;
+        hash = (53 * hash) + getAuthResponsesList().hashCode();
+      }
+      if (getActionsCount() > 0) {
+        hash = (37 * hash) + ACTIONS_FIELD_NUMBER;
+        hash = (53 * hash) + getActionsList().hashCode();
+      }
+      if (hasAuthCorrection()) {
+        hash = (37 * hash) + AUTHCORRECTION_FIELD_NUMBER;
+        hash = (53 * hash) + getAuthCorrection().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -3941,7 +7394,7 @@ public final class EntityProto {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -3958,7 +7411,7 @@ public final class EntityProto {
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
         return EntityProto.internal_static_GamePacket_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -3967,13 +7420,24 @@ public final class EntityProto {
 
       // Construct using EntityProto.GamePacket.newBuilder()
       private Builder() {
-
+        maybeForceBuilderInitialization();
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
-
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getEntitiesFieldBuilder();
+          getPositionUpdatesFieldBuilder();
+          getEntityChangesFieldBuilder();
+          getAuthResponsesFieldBuilder();
+          getActionsFieldBuilder();
+          getAuthCorrectionFieldBuilder();
+        }
       }
       @Override
       public Builder clear() {
@@ -3993,6 +7457,32 @@ public final class EntityProto {
           positionUpdatesBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000002);
+        if (entityChangesBuilder_ == null) {
+          entityChanges_ = java.util.Collections.emptyList();
+        } else {
+          entityChanges_ = null;
+          entityChangesBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000004);
+        if (authResponsesBuilder_ == null) {
+          authResponses_ = java.util.Collections.emptyList();
+        } else {
+          authResponses_ = null;
+          authResponsesBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        if (actionsBuilder_ == null) {
+          actions_ = java.util.Collections.emptyList();
+        } else {
+          actions_ = null;
+          actionsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000010);
+        authCorrection_ = null;
+        if (authCorrectionBuilder_ != null) {
+          authCorrectionBuilder_.dispose();
+          authCorrectionBuilder_ = null;
+        }
         return this;
       }
 
@@ -4044,10 +7534,45 @@ public final class EntityProto {
         } else {
           result.positionUpdates_ = positionUpdatesBuilder_.build();
         }
+        if (entityChangesBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) != 0)) {
+            entityChanges_ = java.util.Collections.unmodifiableList(entityChanges_);
+            bitField0_ = (bitField0_ & ~0x00000004);
+          }
+          result.entityChanges_ = entityChanges_;
+        } else {
+          result.entityChanges_ = entityChangesBuilder_.build();
+        }
+        if (authResponsesBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) != 0)) {
+            authResponses_ = java.util.Collections.unmodifiableList(authResponses_);
+            bitField0_ = (bitField0_ & ~0x00000008);
+          }
+          result.authResponses_ = authResponses_;
+        } else {
+          result.authResponses_ = authResponsesBuilder_.build();
+        }
+        if (actionsBuilder_ == null) {
+          if (((bitField0_ & 0x00000010) != 0)) {
+            actions_ = java.util.Collections.unmodifiableList(actions_);
+            bitField0_ = (bitField0_ & ~0x00000010);
+          }
+          result.actions_ = actions_;
+        } else {
+          result.actions_ = actionsBuilder_.build();
+        }
       }
 
       private void buildPartial0(GamePacket result) {
         int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.authCorrection_ = authCorrectionBuilder_ == null
+              ? authCorrection_
+              : authCorrectionBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        result.bitField0_ |= to_bitField0_;
       }
 
       @Override
@@ -4146,6 +7671,87 @@ public final class EntityProto {
             }
           }
         }
+        if (entityChangesBuilder_ == null) {
+          if (!other.entityChanges_.isEmpty()) {
+            if (entityChanges_.isEmpty()) {
+              entityChanges_ = other.entityChanges_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+            } else {
+              ensureEntityChangesIsMutable();
+              entityChanges_.addAll(other.entityChanges_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.entityChanges_.isEmpty()) {
+            if (entityChangesBuilder_.isEmpty()) {
+              entityChangesBuilder_.dispose();
+              entityChangesBuilder_ = null;
+              entityChanges_ = other.entityChanges_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+              entityChangesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getEntityChangesFieldBuilder() : null;
+            } else {
+              entityChangesBuilder_.addAllMessages(other.entityChanges_);
+            }
+          }
+        }
+        if (authResponsesBuilder_ == null) {
+          if (!other.authResponses_.isEmpty()) {
+            if (authResponses_.isEmpty()) {
+              authResponses_ = other.authResponses_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+            } else {
+              ensureAuthResponsesIsMutable();
+              authResponses_.addAll(other.authResponses_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.authResponses_.isEmpty()) {
+            if (authResponsesBuilder_.isEmpty()) {
+              authResponsesBuilder_.dispose();
+              authResponsesBuilder_ = null;
+              authResponses_ = other.authResponses_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+              authResponsesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getAuthResponsesFieldBuilder() : null;
+            } else {
+              authResponsesBuilder_.addAllMessages(other.authResponses_);
+            }
+          }
+        }
+        if (actionsBuilder_ == null) {
+          if (!other.actions_.isEmpty()) {
+            if (actions_.isEmpty()) {
+              actions_ = other.actions_;
+              bitField0_ = (bitField0_ & ~0x00000010);
+            } else {
+              ensureActionsIsMutable();
+              actions_.addAll(other.actions_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.actions_.isEmpty()) {
+            if (actionsBuilder_.isEmpty()) {
+              actionsBuilder_.dispose();
+              actionsBuilder_ = null;
+              actions_ = other.actions_;
+              bitField0_ = (bitField0_ & ~0x00000010);
+              actionsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getActionsFieldBuilder() : null;
+            } else {
+              actionsBuilder_.addAllMessages(other.actions_);
+            }
+          }
+        }
+        if (other.hasAuthCorrection()) {
+          mergeAuthCorrection(other.getAuthCorrection());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -4198,6 +7804,52 @@ public final class EntityProto {
                 }
                 break;
               } // case 18
+              case 26: {
+                EntityChange m =
+                    input.readMessage(
+                        EntityChange.parser(),
+                        extensionRegistry);
+                if (entityChangesBuilder_ == null) {
+                  ensureEntityChangesIsMutable();
+                  entityChanges_.add(m);
+                } else {
+                  entityChangesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 26
+              case 34: {
+                AuthResponse m =
+                    input.readMessage(
+                        AuthResponse.parser(),
+                        extensionRegistry);
+                if (authResponsesBuilder_ == null) {
+                  ensureAuthResponsesIsMutable();
+                  authResponses_.add(m);
+                } else {
+                  authResponsesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 34
+              case 42: {
+                Action m =
+                    input.readMessage(
+                        Action.parser(),
+                        extensionRegistry);
+                if (actionsBuilder_ == null) {
+                  ensureActionsIsMutable();
+                  actions_.add(m);
+                } else {
+                  actionsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 42
+              case 50: {
+                input.readMessage(
+                    getAuthCorrectionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -4694,6 +8346,847 @@ public final class EntityProto {
         }
         return positionUpdatesBuilder_;
       }
+
+      private java.util.List<EntityChange> entityChanges_ =
+        java.util.Collections.emptyList();
+      private void ensureEntityChangesIsMutable() {
+        if (!((bitField0_ & 0x00000004) != 0)) {
+          entityChanges_ = new java.util.ArrayList<EntityChange>(entityChanges_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          EntityChange, EntityChange.Builder, EntityChangeOrBuilder> entityChangesBuilder_;
+
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public java.util.List<EntityChange> getEntityChangesList() {
+        if (entityChangesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(entityChanges_);
+        } else {
+          return entityChangesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public int getEntityChangesCount() {
+        if (entityChangesBuilder_ == null) {
+          return entityChanges_.size();
+        } else {
+          return entityChangesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public EntityChange getEntityChanges(int index) {
+        if (entityChangesBuilder_ == null) {
+          return entityChanges_.get(index);
+        } else {
+          return entityChangesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public Builder setEntityChanges(
+          int index, EntityChange value) {
+        if (entityChangesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureEntityChangesIsMutable();
+          entityChanges_.set(index, value);
+          onChanged();
+        } else {
+          entityChangesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public Builder setEntityChanges(
+          int index, EntityChange.Builder builderForValue) {
+        if (entityChangesBuilder_ == null) {
+          ensureEntityChangesIsMutable();
+          entityChanges_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          entityChangesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public Builder addEntityChanges(EntityChange value) {
+        if (entityChangesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureEntityChangesIsMutable();
+          entityChanges_.add(value);
+          onChanged();
+        } else {
+          entityChangesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public Builder addEntityChanges(
+          int index, EntityChange value) {
+        if (entityChangesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureEntityChangesIsMutable();
+          entityChanges_.add(index, value);
+          onChanged();
+        } else {
+          entityChangesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public Builder addEntityChanges(
+          EntityChange.Builder builderForValue) {
+        if (entityChangesBuilder_ == null) {
+          ensureEntityChangesIsMutable();
+          entityChanges_.add(builderForValue.build());
+          onChanged();
+        } else {
+          entityChangesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public Builder addEntityChanges(
+          int index, EntityChange.Builder builderForValue) {
+        if (entityChangesBuilder_ == null) {
+          ensureEntityChangesIsMutable();
+          entityChanges_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          entityChangesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public Builder addAllEntityChanges(
+          Iterable<? extends EntityChange> values) {
+        if (entityChangesBuilder_ == null) {
+          ensureEntityChangesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, entityChanges_);
+          onChanged();
+        } else {
+          entityChangesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public Builder clearEntityChanges() {
+        if (entityChangesBuilder_ == null) {
+          entityChanges_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+          onChanged();
+        } else {
+          entityChangesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public Builder removeEntityChanges(int index) {
+        if (entityChangesBuilder_ == null) {
+          ensureEntityChangesIsMutable();
+          entityChanges_.remove(index);
+          onChanged();
+        } else {
+          entityChangesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public EntityChange.Builder getEntityChangesBuilder(
+          int index) {
+        return getEntityChangesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public EntityChangeOrBuilder getEntityChangesOrBuilder(
+          int index) {
+        if (entityChangesBuilder_ == null) {
+          return entityChanges_.get(index);  } else {
+          return entityChangesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public java.util.List<? extends EntityChangeOrBuilder>
+           getEntityChangesOrBuilderList() {
+        if (entityChangesBuilder_ != null) {
+          return entityChangesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(entityChanges_);
+        }
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public EntityChange.Builder addEntityChangesBuilder() {
+        return getEntityChangesFieldBuilder().addBuilder(
+            EntityChange.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public EntityChange.Builder addEntityChangesBuilder(
+          int index) {
+        return getEntityChangesFieldBuilder().addBuilder(
+            index, EntityChange.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .EntityChange entityChanges = 3;</code>
+       */
+      public java.util.List<EntityChange.Builder>
+           getEntityChangesBuilderList() {
+        return getEntityChangesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          EntityChange, EntityChange.Builder, EntityChangeOrBuilder>
+          getEntityChangesFieldBuilder() {
+        if (entityChangesBuilder_ == null) {
+          entityChangesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              EntityChange, EntityChange.Builder, EntityChangeOrBuilder>(
+                  entityChanges_,
+                  ((bitField0_ & 0x00000004) != 0),
+                  getParentForChildren(),
+                  isClean());
+          entityChanges_ = null;
+        }
+        return entityChangesBuilder_;
+      }
+
+      private java.util.List<AuthResponse> authResponses_ =
+        java.util.Collections.emptyList();
+      private void ensureAuthResponsesIsMutable() {
+        if (!((bitField0_ & 0x00000008) != 0)) {
+          authResponses_ = new java.util.ArrayList<AuthResponse>(authResponses_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          AuthResponse, AuthResponse.Builder, AuthResponseOrBuilder> authResponsesBuilder_;
+
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public java.util.List<AuthResponse> getAuthResponsesList() {
+        if (authResponsesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(authResponses_);
+        } else {
+          return authResponsesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public int getAuthResponsesCount() {
+        if (authResponsesBuilder_ == null) {
+          return authResponses_.size();
+        } else {
+          return authResponsesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public AuthResponse getAuthResponses(int index) {
+        if (authResponsesBuilder_ == null) {
+          return authResponses_.get(index);
+        } else {
+          return authResponsesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public Builder setAuthResponses(
+          int index, AuthResponse value) {
+        if (authResponsesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAuthResponsesIsMutable();
+          authResponses_.set(index, value);
+          onChanged();
+        } else {
+          authResponsesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public Builder setAuthResponses(
+          int index, AuthResponse.Builder builderForValue) {
+        if (authResponsesBuilder_ == null) {
+          ensureAuthResponsesIsMutable();
+          authResponses_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          authResponsesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public Builder addAuthResponses(AuthResponse value) {
+        if (authResponsesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAuthResponsesIsMutable();
+          authResponses_.add(value);
+          onChanged();
+        } else {
+          authResponsesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public Builder addAuthResponses(
+          int index, AuthResponse value) {
+        if (authResponsesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAuthResponsesIsMutable();
+          authResponses_.add(index, value);
+          onChanged();
+        } else {
+          authResponsesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public Builder addAuthResponses(
+          AuthResponse.Builder builderForValue) {
+        if (authResponsesBuilder_ == null) {
+          ensureAuthResponsesIsMutable();
+          authResponses_.add(builderForValue.build());
+          onChanged();
+        } else {
+          authResponsesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public Builder addAuthResponses(
+          int index, AuthResponse.Builder builderForValue) {
+        if (authResponsesBuilder_ == null) {
+          ensureAuthResponsesIsMutable();
+          authResponses_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          authResponsesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public Builder addAllAuthResponses(
+          Iterable<? extends AuthResponse> values) {
+        if (authResponsesBuilder_ == null) {
+          ensureAuthResponsesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, authResponses_);
+          onChanged();
+        } else {
+          authResponsesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public Builder clearAuthResponses() {
+        if (authResponsesBuilder_ == null) {
+          authResponses_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+          onChanged();
+        } else {
+          authResponsesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public Builder removeAuthResponses(int index) {
+        if (authResponsesBuilder_ == null) {
+          ensureAuthResponsesIsMutable();
+          authResponses_.remove(index);
+          onChanged();
+        } else {
+          authResponsesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public AuthResponse.Builder getAuthResponsesBuilder(
+          int index) {
+        return getAuthResponsesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public AuthResponseOrBuilder getAuthResponsesOrBuilder(
+          int index) {
+        if (authResponsesBuilder_ == null) {
+          return authResponses_.get(index);  } else {
+          return authResponsesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public java.util.List<? extends AuthResponseOrBuilder>
+           getAuthResponsesOrBuilderList() {
+        if (authResponsesBuilder_ != null) {
+          return authResponsesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(authResponses_);
+        }
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public AuthResponse.Builder addAuthResponsesBuilder() {
+        return getAuthResponsesFieldBuilder().addBuilder(
+            AuthResponse.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public AuthResponse.Builder addAuthResponsesBuilder(
+          int index) {
+        return getAuthResponsesFieldBuilder().addBuilder(
+            index, AuthResponse.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .AuthResponse authResponses = 4;</code>
+       */
+      public java.util.List<AuthResponse.Builder>
+           getAuthResponsesBuilderList() {
+        return getAuthResponsesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          AuthResponse, AuthResponse.Builder, AuthResponseOrBuilder>
+          getAuthResponsesFieldBuilder() {
+        if (authResponsesBuilder_ == null) {
+          authResponsesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              AuthResponse, AuthResponse.Builder, AuthResponseOrBuilder>(
+                  authResponses_,
+                  ((bitField0_ & 0x00000008) != 0),
+                  getParentForChildren(),
+                  isClean());
+          authResponses_ = null;
+        }
+        return authResponsesBuilder_;
+      }
+
+      private java.util.List<Action> actions_ =
+        java.util.Collections.emptyList();
+      private void ensureActionsIsMutable() {
+        if (!((bitField0_ & 0x00000010) != 0)) {
+          actions_ = new java.util.ArrayList<Action>(actions_);
+          bitField0_ |= 0x00000010;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          Action, Action.Builder, ActionOrBuilder> actionsBuilder_;
+
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public java.util.List<Action> getActionsList() {
+        if (actionsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(actions_);
+        } else {
+          return actionsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public int getActionsCount() {
+        if (actionsBuilder_ == null) {
+          return actions_.size();
+        } else {
+          return actionsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Action getActions(int index) {
+        if (actionsBuilder_ == null) {
+          return actions_.get(index);
+        } else {
+          return actionsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Builder setActions(
+          int index, Action value) {
+        if (actionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureActionsIsMutable();
+          actions_.set(index, value);
+          onChanged();
+        } else {
+          actionsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Builder setActions(
+          int index, Action.Builder builderForValue) {
+        if (actionsBuilder_ == null) {
+          ensureActionsIsMutable();
+          actions_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          actionsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Builder addActions(Action value) {
+        if (actionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureActionsIsMutable();
+          actions_.add(value);
+          onChanged();
+        } else {
+          actionsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Builder addActions(
+          int index, Action value) {
+        if (actionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureActionsIsMutable();
+          actions_.add(index, value);
+          onChanged();
+        } else {
+          actionsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Builder addActions(
+          Action.Builder builderForValue) {
+        if (actionsBuilder_ == null) {
+          ensureActionsIsMutable();
+          actions_.add(builderForValue.build());
+          onChanged();
+        } else {
+          actionsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Builder addActions(
+          int index, Action.Builder builderForValue) {
+        if (actionsBuilder_ == null) {
+          ensureActionsIsMutable();
+          actions_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          actionsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Builder addAllActions(
+          Iterable<? extends Action> values) {
+        if (actionsBuilder_ == null) {
+          ensureActionsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, actions_);
+          onChanged();
+        } else {
+          actionsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Builder clearActions() {
+        if (actionsBuilder_ == null) {
+          actions_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000010);
+          onChanged();
+        } else {
+          actionsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Builder removeActions(int index) {
+        if (actionsBuilder_ == null) {
+          ensureActionsIsMutable();
+          actions_.remove(index);
+          onChanged();
+        } else {
+          actionsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Action.Builder getActionsBuilder(
+          int index) {
+        return getActionsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public ActionOrBuilder getActionsOrBuilder(
+          int index) {
+        if (actionsBuilder_ == null) {
+          return actions_.get(index);  } else {
+          return actionsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public java.util.List<? extends ActionOrBuilder>
+           getActionsOrBuilderList() {
+        if (actionsBuilder_ != null) {
+          return actionsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(actions_);
+        }
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Action.Builder addActionsBuilder() {
+        return getActionsFieldBuilder().addBuilder(
+            Action.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public Action.Builder addActionsBuilder(
+          int index) {
+        return getActionsFieldBuilder().addBuilder(
+            index, Action.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .Action actions = 5;</code>
+       */
+      public java.util.List<Action.Builder>
+           getActionsBuilderList() {
+        return getActionsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          Action, Action.Builder, ActionOrBuilder>
+          getActionsFieldBuilder() {
+        if (actionsBuilder_ == null) {
+          actionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              Action, Action.Builder, ActionOrBuilder>(
+                  actions_,
+                  ((bitField0_ & 0x00000010) != 0),
+                  getParentForChildren(),
+                  isClean());
+          actions_ = null;
+        }
+        return actionsBuilder_;
+      }
+
+      private AuthCorrection authCorrection_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          AuthCorrection, AuthCorrection.Builder, AuthCorrectionOrBuilder> authCorrectionBuilder_;
+      /**
+       * <code>.AuthCorrection authCorrection = 6;</code>
+       * @return Whether the authCorrection field is set.
+       */
+      public boolean hasAuthCorrection() {
+        return ((bitField0_ & 0x00000020) != 0);
+      }
+      /**
+       * <code>.AuthCorrection authCorrection = 6;</code>
+       * @return The authCorrection.
+       */
+      public AuthCorrection getAuthCorrection() {
+        if (authCorrectionBuilder_ == null) {
+          return authCorrection_ == null ? AuthCorrection.getDefaultInstance() : authCorrection_;
+        } else {
+          return authCorrectionBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.AuthCorrection authCorrection = 6;</code>
+       */
+      public Builder setAuthCorrection(AuthCorrection value) {
+        if (authCorrectionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          authCorrection_ = value;
+        } else {
+          authCorrectionBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.AuthCorrection authCorrection = 6;</code>
+       */
+      public Builder setAuthCorrection(
+          AuthCorrection.Builder builderForValue) {
+        if (authCorrectionBuilder_ == null) {
+          authCorrection_ = builderForValue.build();
+        } else {
+          authCorrectionBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.AuthCorrection authCorrection = 6;</code>
+       */
+      public Builder mergeAuthCorrection(AuthCorrection value) {
+        if (authCorrectionBuilder_ == null) {
+          if (((bitField0_ & 0x00000020) != 0) &&
+            authCorrection_ != null &&
+            authCorrection_ != AuthCorrection.getDefaultInstance()) {
+            getAuthCorrectionBuilder().mergeFrom(value);
+          } else {
+            authCorrection_ = value;
+          }
+        } else {
+          authCorrectionBuilder_.mergeFrom(value);
+        }
+        if (authCorrection_ != null) {
+          bitField0_ |= 0x00000020;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.AuthCorrection authCorrection = 6;</code>
+       */
+      public Builder clearAuthCorrection() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        authCorrection_ = null;
+        if (authCorrectionBuilder_ != null) {
+          authCorrectionBuilder_.dispose();
+          authCorrectionBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.AuthCorrection authCorrection = 6;</code>
+       */
+      public AuthCorrection.Builder getAuthCorrectionBuilder() {
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return getAuthCorrectionFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.AuthCorrection authCorrection = 6;</code>
+       */
+      public AuthCorrectionOrBuilder getAuthCorrectionOrBuilder() {
+        if (authCorrectionBuilder_ != null) {
+          return authCorrectionBuilder_.getMessageOrBuilder();
+        } else {
+          return authCorrection_ == null ?
+              AuthCorrection.getDefaultInstance() : authCorrection_;
+        }
+      }
+      /**
+       * <code>.AuthCorrection authCorrection = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          AuthCorrection, AuthCorrection.Builder, AuthCorrectionOrBuilder>
+          getAuthCorrectionFieldBuilder() {
+        if (authCorrectionBuilder_ == null) {
+          authCorrectionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              AuthCorrection, AuthCorrection.Builder, AuthCorrectionOrBuilder>(
+                  getAuthCorrection(),
+                  getParentForChildren(),
+                  isClean());
+          authCorrection_ = null;
+        }
+        return authCorrectionBuilder_;
+      }
       @Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -4774,6 +9267,26 @@ public final class EntityProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_PositionUpdate_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_AuthCorrection_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_AuthCorrection_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_EntityChange_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_EntityChange_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_AuthResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_AuthResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_Action_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_Action_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_GameEntity_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -4792,19 +9305,30 @@ public final class EntityProto {
       descriptor;
   static {
     String[] descriptorData = {
-      "\n\022entity_proto.proto\"]\n\017CharacterEntity\022" +
+      "\n\022entity_proto.proto\"y\n\017CharacterEntity\022" +
       "\n\n\002id\030\001 \001(\005\022\020\n\010isPlayer\030\002 \001(\010\022\014\n\004name\030\003 " +
-      "\001(\t\022\016\n\006states\030\004 \003(\005\022\016\n\006outFix\030\005 \003(\005\"_\n\022L" +
-      "ocationItemEntity\022\n\n\002id\030\001 \001(\005\022\022\n\nisLocat" +
-      "ion\030\002 \001(\010\022\014\n\004name\030\003 \001(\t\022\016\n\006states\030\004 \003(\005\022" +
-      "\013\n\003key\030\005 \001(\003\">\n\016PositionUpdate\022\020\n\010entity" +
-      "Id\030\001 \001(\005\022\014\n\004posX\030\002 \001(\005\022\014\n\004posY\030\003 \001(\005\"o\n\n" +
-      "GameEntity\022%\n\tcharacter\030\001 \001(\0132\020.Characte" +
-      "rEntityH\000\022+\n\014locationItem\030\002 \001(\0132\023.Locati" +
-      "onItemEntityH\000B\r\n\013entity_type\"U\n\nGamePac" +
-      "ket\022\035\n\010entities\030\001 \003(\0132\013.GameEntity\022(\n\017po" +
-      "sitionUpdates\030\002 \003(\0132\017.PositionUpdateb\006pr" +
-      "oto3"
+      "\001(\t\022\014\n\004posX\030\004 \001(\005\022\014\n\004posY\030\005 \001(\005\022\016\n\006state" +
+      "s\030\006 \003(\005\022\016\n\006outfit\030\007 \003(\005\"{\n\022LocationItemE" +
+      "ntity\022\n\n\002id\030\001 \001(\005\022\022\n\nisLocation\030\002 \001(\010\022\014\n" +
+      "\004name\030\003 \001(\t\022\014\n\004posX\030\004 \001(\005\022\014\n\004posY\030\005 \001(\005\022" +
+      "\016\n\006states\030\006 \003(\005\022\013\n\003key\030\007 \001(\003\"8\n\016Position" +
+      "Update\022\n\n\002id\030\001 \001(\005\022\014\n\004posX\030\002 \001(\005\022\014\n\004posY" +
+      "\030\003 \001(\005\",\n\016AuthCorrection\022\014\n\004posX\030\001 \001(\005\022\014" +
+      "\n\004posY\030\002 \001(\005\"H\n\014EntityChange\022\n\n\002id\030\001 \001(\005" +
+      "\022\014\n\004name\030\002 \001(\t\022\016\n\006outfit\030\003 \003(\005\022\016\n\006states" +
+      "\030\004 \003(\005\"9\n\014AuthResponse\022\013\n\003key\030\001 \001(\005\022\r\n\005v" +
+      "alid\030\002 \001(\010\022\r\n\005value\030\003 \001(\003\"B\n\006Action\022\n\n\002i" +
+      "d\030\001 \001(\005\022\020\n\010isPlayer\030\002 \001(\010\022\013\n\003key\030\003 \001(\005\022\r" +
+      "\n\005value\030\004 \001(\005\"o\n\nGameEntity\022%\n\tcharacter" +
+      "\030\001 \001(\0132\020.CharacterEntityH\000\022+\n\014locationIt" +
+      "em\030\002 \001(\0132\023.LocationItemEntityH\000B\r\n\013entit" +
+      "y_type\"\344\001\n\nGamePacket\022\035\n\010entities\030\001 \003(\0132" +
+      "\013.GameEntity\022(\n\017positionUpdates\030\002 \003(\0132\017." +
+      "PositionUpdate\022$\n\rentityChanges\030\003 \003(\0132\r." +
+      "EntityChange\022$\n\rauthResponses\030\004 \003(\0132\r.Au" +
+      "thResponse\022\030\n\007actions\030\005 \003(\0132\007.Action\022\'\n\016" +
+      "authCorrection\030\006 \001(\0132\017.AuthCorrectionb\006p" +
+      "roto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4815,31 +9339,55 @@ public final class EntityProto {
     internal_static_CharacterEntity_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_CharacterEntity_descriptor,
-        new String[] { "Id", "IsPlayer", "Name", "States", "OutFix", });
+        new String[] { "Id", "IsPlayer", "Name", "PosX", "PosY", "States", "Outfit", });
     internal_static_LocationItemEntity_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_LocationItemEntity_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_LocationItemEntity_descriptor,
-        new String[] { "Id", "IsLocation", "Name", "States", "Key", });
+        new String[] { "Id", "IsLocation", "Name", "PosX", "PosY", "States", "Key", });
     internal_static_PositionUpdate_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_PositionUpdate_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_PositionUpdate_descriptor,
-        new String[] { "EntityId", "PosX", "PosY", });
-    internal_static_GameEntity_descriptor =
+        new String[] { "Id", "PosX", "PosY", });
+    internal_static_AuthCorrection_descriptor =
       getDescriptor().getMessageTypes().get(3);
+    internal_static_AuthCorrection_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_AuthCorrection_descriptor,
+        new String[] { "PosX", "PosY", });
+    internal_static_EntityChange_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_EntityChange_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_EntityChange_descriptor,
+        new String[] { "Id", "Name", "Outfit", "States", });
+    internal_static_AuthResponse_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_AuthResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_AuthResponse_descriptor,
+        new String[] { "Key", "Valid", "Value", });
+    internal_static_Action_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_Action_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_Action_descriptor,
+        new String[] { "Id", "IsPlayer", "Key", "Value", });
+    internal_static_GameEntity_descriptor =
+      getDescriptor().getMessageTypes().get(7);
     internal_static_GameEntity_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_GameEntity_descriptor,
         new String[] { "Character", "LocationItem", "EntityType", });
     internal_static_GamePacket_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_GamePacket_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_GamePacket_descriptor,
-        new String[] { "Entities", "PositionUpdates", });
+        new String[] { "Entities", "PositionUpdates", "EntityChanges", "AuthResponses", "Actions", "AuthCorrection", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
