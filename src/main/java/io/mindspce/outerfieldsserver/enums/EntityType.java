@@ -3,7 +3,7 @@ package io.mindspce.outerfieldsserver.enums;
 import io.mindspce.outerfieldsserver.area.AreaEntity;
 import io.mindspce.outerfieldsserver.area.ChunkEntity;
 import io.mindspce.outerfieldsserver.entities.LocationEntity;
-import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
+import io.mindspce.outerfieldsserver.entities.PlayerEntity;
 import jakarta.annotation.Nullable;
 
 import java.util.Objects;
@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 public enum EntityType{
     ANY((byte) -1, Object.class, Objects::nonNull),
     PLAYER_ENTITY((byte) 0, Object.class, x -> x instanceof PlayerEntity),
-    NON_PLAYER((byte) 1, Object.class, Objects::nonNull),
+    NON_PLAYER_ENTITY((byte) 1, Object.class, Objects::nonNull),
     AREA_ENTITY((byte) 2, AreaEntity.class, x -> x instanceof AreaEntity),
     LOCATION_ENTITY((byte) 3, LocationEntity.class, x -> x instanceof LocationEntity),
     CHUNK_ENTITY((byte) 4, ChunkEntity.class, x -> x instanceof ChunkEntity);

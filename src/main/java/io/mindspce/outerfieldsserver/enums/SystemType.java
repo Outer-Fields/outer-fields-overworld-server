@@ -5,5 +5,5 @@ public enum SystemType {
     TEST2,
     NONE,
     WORLD,
-    PLAYER,
+    PLAYER, NPC,
 }

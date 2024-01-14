@@ -8,9 +8,13 @@ import static io.mindspce.outerfieldsserver.ai.decisiongraph.Node.NodeType.ACTIO
 public class ActionNode<T> extends Node<T> {
     private final Action<T> action;
 
-    public ActionNode(Action<T> action, String name) {
+    public ActionNode(String name, Action<T> action) {
         super(ACTION, name);
         this.action = action;
+    }
+
+    public static <T> ActionNode<T> of(String name, Action<T> action) {
+        return new ActionNode<>(name, action);
     }
 
     @Override

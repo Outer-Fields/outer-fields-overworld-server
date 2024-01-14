@@ -45,7 +45,7 @@ public class DecisionEventGraph<T, U extends Enum<U>> {
     // of the current node
     public DecisionEventGraph<T, U> addLeaf(ActionEvent<T, U> event) {
         eventNodes.add(event);
-        addChild(new ActionNode<>(event, event.name()));
+        addChild(new ActionNode<>(event.name(), event));
         stepBack(); // Step back to the parent of the leaf
         return this;
     }

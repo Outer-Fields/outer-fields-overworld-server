@@ -4,21 +4,15 @@ import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EntityState;
-import io.mindspce.outerfieldsserver.enums.QueryType;
 import io.mindspce.outerfieldsserver.systems.event.Event;
-import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.geometry.IPolygon2;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
-import io.mindspice.mindlib.functional.consumers.PredicatedConsumer;
 
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 
 public class EventData {
@@ -44,7 +38,7 @@ public class EventData {
     public record LocalAreaChanged(boolean isPlayer, Set<IVector2> localChunks) { }
 
 
-    public record NewEntity(boolean isPlayer, AreaId area, IVector2 position, Entity entity) { }
+    public record NewEntity(AreaId area, IVector2 position, Entity entity) { }
 
 
     public record TileDataUpdate(AreaId areaId, IVector2 chunkIndex, List<Pair<IVector2, TileData>> tileData, boolean isRemoval) { }
@@ -58,6 +52,11 @@ public class EventData {
 
     public record EntitySerialization(int[] ids, ByteBuffer buffer) { }
 
+
+    public record NpcLocationArrival(long locationKey, int locationId) { }
+
+
+    public record NPCTravelTo(IVector2 locationPos, long locationKey, int locationId, int speed, boolean overRideExisting) { }
 
 
 }

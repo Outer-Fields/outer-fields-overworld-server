@@ -31,7 +31,7 @@ public class PlayerSession extends Component<PlayerSession> {
     }
 
     public void send(byte[] data) {
-        System.out.println("sending data: " + data.length);
+      //  System.out.println("sending data: " + data.length);
         if (!session.isOpen()) {
             // TODO do something
             return;

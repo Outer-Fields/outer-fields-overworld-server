@@ -8,6 +8,10 @@ public record ChunkTileIndex(
         IVector2 tileIndex
 ) {
 
+    public static ChunkTileIndex of(IVector2 chunkIndex, IVector2 tileIndex) {
+        return new ChunkTileIndex(chunkIndex, tileIndex);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) { return true; }

@@ -27,12 +27,11 @@ public class LocalTileGrid extends Component<LocalTileGrid> {
                 localTileGrid.set(x, y, new DynamicTileRef(areaId.entity, IVector2.of(-x, -y)));
             }
         }
-        registerListener(EventType.ENTITY_POSITION_CHANGED, LocalTileGrid::onSelfPositionChanged);
-        registerListener(EventType.ENTITY_AREA_CHANGED, LocalTileGrid::onSelfAreaChanged);
 
     }
 
     public void onSelfPositionChanged(Event<EventData.EntityPositionChanged> event) {
+        System.out.println("self pos change");
         calcPositionChange(event.data().newPosition());
     }
 

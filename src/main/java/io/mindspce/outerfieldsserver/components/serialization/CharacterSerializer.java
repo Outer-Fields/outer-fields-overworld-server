@@ -1,10 +1,9 @@
 package io.mindspce.outerfieldsserver.components.serialization;
 
 import io.mindspce.outerfieldsserver.components.Component;
-import io.mindspce.outerfieldsserver.components.entity.GlobalPosition;
 import io.mindspce.outerfieldsserver.core.networking.proto.EntityProto;
-import io.mindspce.outerfieldsserver.entities.Entity;
-import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
+import io.mindspce.outerfieldsserver.entities.PlayerEntity;
+import io.mindspce.outerfieldsserver.entities.PositionalEntity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.systems.event.Event;
@@ -24,7 +23,7 @@ public class CharacterSerializer extends Component<CharacterSerializer> {
     private EntityProto.CharacterEntity lastSerialization;
     private long lastSerializationTime;
 
-    public CharacterSerializer(PlayerEntity parentEntity, Supplier<IVector2> position,
+    public  CharacterSerializer(PositionalEntity parentEntity, Supplier<IVector2> position,
             Supplier<int[]> states, Supplier<int[]> outfit) {
         super(parentEntity, ComponentType.CHARACTER_SERIALIZER,
                 List.of(EventType.SERIALIZED_ENTITY_REQUEST, EventType.SERIALIZED_ENTITIES_REQUEST)
@@ -40,8 +39,6 @@ public class CharacterSerializer extends Component<CharacterSerializer> {
     }
 
     public void onSerializedEntityRequest(Event<Integer> event) {
-        System.out.println("serialization req recieved");
-        DebugUtils.printStackTrace();
         if (lastSerialization == null || System.currentTimeMillis() - lastSerializationTime > 20) {
             var pos = position.get();
             var builder = EntityProto.CharacterEntity.newBuilder()

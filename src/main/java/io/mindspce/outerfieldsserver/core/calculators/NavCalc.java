@@ -46,7 +46,7 @@ public class NavCalc {
         Map<ChunkTileIndex, Integer> costSoFar = new HashMap<>();
         PriorityQueue<Node> frontier = new PriorityQueue<>(Comparator.comparingInt(Node::priority));
 
-        frontier.add(new Node(start, 0));
+        frontier.add(new Node(start, ThreadLocalRandom.current().nextInt(100)));
         costSoFar.put(start, 0);
 
         while (!frontier.isEmpty()) {
@@ -90,7 +90,6 @@ public class NavCalc {
                     current.tileIndex().y() + dir.asVec2().y()
             );
             IMutVector2 neighborChunkIndex = IVector2.ofMutable(current.chunkIndex());
-
 
             // Adjust chunk index if the neighbor tile index is outside the current chunk
             boolean crossesBoundary = false;
@@ -179,7 +178,7 @@ public class NavCalc {
         ArrayList<IVector2> path = new ArrayList<>();
         ChunkTileIndex current = goal;
         while (!current.equals(start)) {
-            path.addFirst(fuzzTile(current));
+            path.addFirst(chunkToVector(current));
             current = cameFrom.get(current);
             if (current == null) {
                 // TODO log this
@@ -196,19 +195,22 @@ public class NavCalc {
      * @param tileChunk The ChunkTileIndex of the tile to fuzz.
      * @return The fuzzed position of the tile.
      */
-    private static IVector2 fuzzTile(ChunkTileIndex tileChunk) {
+
+    private static IVector2 chunkToVector(ChunkTileIndex tileChunk) {
         IVector2 chunk = tileChunk.chunkIndex();
         IVector2 tile = tileChunk.tileIndex();
 
-        IMutVector2 pos = IVector2.ofMutable(
+        IVector2 pos = IVector2.ofMutable(
                 (chunk.x() * GameSettings.GET().chunkSize().x()) + (tile.x() * GameSettings.GET().tileSize()),
                 (chunk.y() * GameSettings.GET().chunkSize().y()) + (tile.y() * GameSettings.GET().tileSize())
-        );
+        ).add(16, 16);
 
-        pos.add(
-                ThreadLocalRandom.current().nextInt(GameSettings.GET().tileSize()),
-                ThreadLocalRandom.current().nextInt(GameSettings.GET().tileSize())
-        );
+//        if (ThreadLocalRandom.current().nextFloat(1) < 0.2) {
+//            pos.add(
+//                    ThreadLocalRandom.current().nextInt(-8, 8),
+//                    ThreadLocalRandom.current().nextInt(-8, 8)
+//            );
+//        }
 
         return pos;
     }
@@ -218,4 +220,29 @@ public class NavCalc {
             int priority
     ) { }
 
+    public static List<IVector2> interpolatePath(List<IVector2> originalPath, float speed) {
+        List<IVector2> interpolatedPath = new LinkedList<>();
+        float stepSize = speed * (1.0f / GameSettings.GET().tickRate());
+
+        for (int i = 0; i < originalPath.size() - 1; i++) {
+            IVector2 start = originalPath.get(i);
+            IVector2 end = originalPath.get(i + 1);
+
+            // Add the start position
+            interpolatedPath.add(start);
+
+            float distance = start.distanceTo(end);
+            int steps = Math.max(1, (int) (distance / stepSize));
+
+            for (int step = 1; step < steps; step++) {
+                float t = step / (float) steps;
+                interpolatedPath.add(IVector2.lerp(start, end, t));
+            }
+        }
+
+        // Add the last position
+        interpolatedPath.add(originalPath.get(originalPath.size() - 1));
+
+        return interpolatedPath;
+    }
 }

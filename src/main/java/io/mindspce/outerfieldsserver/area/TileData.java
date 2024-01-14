@@ -5,13 +5,13 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 
 public record TileData(
         IVector2 index,
-        NavData navData,
+        boolean isNavigable,
         boolean isCollision,
         boolean isLocation
 ) {
 
     public boolean isNavigable() {
-        return navData != null;
+        return isNavigable;
     }
 
     public boolean hasCollision() {
@@ -23,15 +23,15 @@ public record TileData(
     }
 
     public TileData withCollisionChange(boolean collision) {
-        return new TileData(index, navData, collision, isLocation);
+        return new TileData(index, isNavigable, collision, isLocation);
     }
 
-    public TileData withNavChange(NavData data) {
-        return new TileData(index, data, isCollision, isLocation);
+    public TileData withNavChange(boolean navigable) {
+        return new TileData(index, navigable, isCollision, isLocation);
     }
 
     public TileData withLocationChange(boolean location) {
-        return new TileData(index, navData, isCollision, location);
+        return new TileData(index, isNavigable, isCollision, location);
     }
 
 

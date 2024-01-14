@@ -42,7 +42,6 @@ public class ActiveEntities extends Component<ActiveEntities> {
     }
 
     public void onNewEntityEvent(Event<EventData.NewEntity> event) {
-
         addActiveEntity(event.data().entity(), event.data().position());
     }
 

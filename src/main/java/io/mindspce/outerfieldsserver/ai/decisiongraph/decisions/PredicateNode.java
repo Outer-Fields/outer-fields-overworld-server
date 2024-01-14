@@ -16,6 +16,10 @@ public class PredicateNode<T> extends Node<T> {
         this.decisions = decisions;
     }
 
+    public static <T> PredicateNode<T> of(String name, List<Predicate<T>> decisions) {
+        return new PredicateNode<>(name, decisions);
+    }
+
     @Override
     public boolean travel(T focusState) {
         for (Predicate<T> decision : decisions) {

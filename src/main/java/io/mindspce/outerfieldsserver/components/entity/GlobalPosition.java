@@ -13,8 +13,6 @@ import io.mindspice.mindlib.data.geometry.*;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static io.mindspce.outerfieldsserver.systems.event.EventType.*;
 
@@ -32,7 +30,7 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
         this.currArea = currArea;
         this.currChunkIndex = IVector2.of(currChunkIndex);
         this.mVector = ILine2.ofMutable(mVector, mVector);
-      //  registerListener(ENTITY_POSITION_CHANGED, GlobalPosition::onSelfPositionUpdate);
+        //  registerListener(ENTITY_POSITION_CHANGED, GlobalPosition::onSelfPositionUpdate);
         registerListener(ENTITY_AREA_UPDATE, GlobalPosition::onSelfAreaUpdate);
     }
 
@@ -57,11 +55,11 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
         emitEvent(Event.entityAreaChanged(this, eventData));
     }
 
-    public void onSelfPositionUpdate(Event<IVector2> positionUpdate) {
-            updatePosition(positionUpdate.data().x(), positionUpdate.data().y());
+    public void onPositionUpdate(Event<IVector2> positionUpdate) {
+        updatePosition(positionUpdate.data().x(), positionUpdate.data().y());
     }
 
-    public void onSelfPositionUpdate(IVector2 pos) {
+    public void updatePosition(IVector2 pos) {
         updatePosition(pos.x(), pos.y());
     }
 
@@ -100,10 +98,6 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
         return mVector.end();
     }
 
-    public Supplier<IVector2> currPositionSupplier() {
-        return this::currPosition;
-    }
-
     public IVector2 lastPosition() {
         return mVector.start();
     }
@@ -111,16 +105,6 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
     public ILine2 mVector() {
         return mVector;
     }
-
-    public Supplier<IVector2> lastPositionSupplier() {
-        return this::lastPosition;
-    }
-
-    public Supplier<ILine2> mVectorSupplier() {
-        return this::mVector;
-    }
-
-
 
     @Override
     public int byteSize() {

@@ -67,20 +67,20 @@ public class ChunkEntity extends Entity {
         ConcurrentHashMap<IVector2, TileData> tileData = new ConcurrentHashMap<>(50);
 
         for (var collision : json.collisionMask()) {
-            tileData.put(collision, new TileData(collision, null, true, false));
+            tileData.put(collision, new TileData(collision, false, true, false));
         }
         for (var area : json.areaMask()) {
             if (tileData.containsKey(area)) {
                 tileData.get(area).withLocationChange(true);
             }
-            tileData.put(area, new TileData(area, null, false, true));
+            tileData.put(area, new TileData(area, false, false, true));
         }
 
         for (var navigation : json.navMask()) {
             if (tileData.containsKey(navigation)) {
-                tileData.get(navigation).withNavChange(new NavData());
+                tileData.get(navigation).withNavChange(true);
             }
-            tileData.put(navigation, new TileData(navigation, new NavData(), false, false));
+            tileData.put(navigation, new TileData(navigation, true, false, false));
         }
         return tileData;
     }

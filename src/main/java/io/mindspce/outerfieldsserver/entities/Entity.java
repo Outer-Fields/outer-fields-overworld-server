@@ -1,8 +1,6 @@
 package io.mindspce.outerfieldsserver.entities;
 
-import io.mindspce.outerfieldsserver.area.AreaEntity;
 import io.mindspce.outerfieldsserver.components.Component;
-import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
@@ -12,10 +10,7 @@ import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.collections.sets.AtomicBitSet;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
-import io.mindspice.mindlib.data.wrappers.LazyFinalValue;
-import io.mindspice.mindlib.util.DebugUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -34,6 +29,7 @@ public abstract class Entity {
     private List<Component<?>> componentList;
     protected final AtomicBitSet attachedComponents = new AtomicBitSet(ComponentType.values().length);
     protected final AtomicBitSet listeningFor = new AtomicBitSet(EventType.values().length);
+    private SystemListener systemRegistry;
 
     public Entity(int id, EntityType entityType, AreaId areaId, List<Component<?>> components) {
         this.id = id;
@@ -68,9 +64,22 @@ public abstract class Entity {
     }
 
     public void addComponent(Component<?> component) {
-
         if (componentList == null) {
             componentList = new CopyOnWriteArrayList<>();
+        }
+
+        componentList.forEach(c -> {
+            if (c.equals(component)) {
+                throw new IllegalStateException("Attempted to add same component twice on Entity: " + id
+                        + " | EntityType: " + entityType + " | Compoent: " + component);
+            }
+            if (c.componentType == component.componentType) {
+                //TODO log this
+                System.out.println("Added multiple components of same type on entity: " + id);
+            }
+        });
+        if (systemRegistry != null) {
+            systemRegistry.registerComponent(component);
         }
         componentList.add(component);
         attachedComponents.set(component.componentType().ordinal());
@@ -78,9 +87,6 @@ public abstract class Entity {
     }
 
     public void addComponents(List<Component<?>> components) {
-        if (componentList == null) {
-            componentList = new CopyOnWriteArrayList<>();
-        }
         components.forEach(this::addComponent);
     }
 
@@ -102,6 +108,10 @@ public abstract class Entity {
 
     public IVector2 chunkIndex() {
         return chunkIndex;
+    }
+
+    public SystemType registeredWith() {
+        return systemRegistry == null ? SystemType.NONE : systemRegistry.systemType();
     }
 
     public boolean isListenerFor(EventType eventType) {
@@ -154,8 +164,10 @@ public abstract class Entity {
         return sb.toString();
     }
 
-    public void registerComponents(SystemListener systemRegistry) {
+    public void registerWithSystem(SystemListener systemRegistry) {
         systemRegistry.registerComponents(componentList);
+        this.systemRegistry = systemRegistry;
+
     }
 
 

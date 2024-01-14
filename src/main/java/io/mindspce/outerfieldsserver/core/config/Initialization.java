@@ -1,5 +1,6 @@
 package io.mindspce.outerfieldsserver.core.config;
 
+import io.mindspce.outerfieldsserver.ai.thought.ThoughtFactory;
 import io.mindspce.outerfieldsserver.area.AreaEntity;
 import io.mindspce.outerfieldsserver.area.ChunkEntity;
 import io.mindspce.outerfieldsserver.area.ChunkJson;
@@ -7,19 +8,22 @@ import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.core.networking.SocketService;
 import io.mindspce.outerfieldsserver.core.networking.websockets.GameServerSocketHandler;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
+import io.mindspce.outerfieldsserver.core.systems.NPCSystem;
 import io.mindspce.outerfieldsserver.core.systems.PlayerSystem;
 import io.mindspce.outerfieldsserver.core.systems.WorldSystem;
-import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
+import io.mindspce.outerfieldsserver.entities.PlayerEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ClothingItem;
 import io.mindspce.outerfieldsserver.enums.EntityState;
 import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
+import jakarta.annotation.PostConstruct;
 import org.jctools.maps.NonBlockingHashMapLong;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +52,11 @@ public class Initialization {
         return new GameServerSocketHandler(socketService, playerTable);
     }
 
+
+
+
+
+
     @Bean
     public WorldSystem worldSystem() throws IOException {
 
@@ -62,15 +71,15 @@ public class Initialization {
                 List.of()
         );
 
-
         Map<IVector2, TileData> chunkData = ChunkEntity.loadFromJson(chunkJson);
         ChunkEntity[][] chunkMap = new ChunkEntity[1][1];
         chunkMap[0][0] = EntityManager.GET().newChunkEntity(AreaId.TEST, IVector2.of(0, 0), chunkJson);
         area.setChunkMap(chunkMap);
 
-
         area.addCollisionToGrid(chunkJson.collisionPolys());
-     //   System.out.println(EntityManager.GET().areaById(AreaId.TEST));
+        //   System.out.println(EntityManager.GET().areaById(AreaId.TEST));
+
+
         return new WorldSystem(true, Map.of(AreaId.TEST, area));
 
     }
@@ -79,6 +88,14 @@ public class Initialization {
     public PlayerSystem playerSystem() {
         return new PlayerSystem();
     }
+
+    @Bean
+    public NPCSystem npcSystem() {
+        return new NPCSystem();
+
+    }
+
+
 
 
 }

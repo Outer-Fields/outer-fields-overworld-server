@@ -1,4 +1,4 @@
-package io.mindspce.outerfieldsserver.entities.player;
+package io.mindspce.outerfieldsserver.entities;
 
 import io.mindspce.outerfieldsserver.components.*;
 import io.mindspce.outerfieldsserver.entities.PositionalEntity;
@@ -22,7 +22,7 @@ public class PlayerEntity extends PositionalEntity {
         super.name = playerName;
         this.playerId = playerId;
 
-        ComponentFactory.System.initPlayerEntityComponents(
+        ComponentFactory.System.attachPlayerEntityComponents(
                 this, currPosition, currArea, initStates, initOutfit, webSocketSession
         );
     }

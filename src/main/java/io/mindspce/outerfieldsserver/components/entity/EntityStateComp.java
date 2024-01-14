@@ -60,7 +60,7 @@ public class EntityStateComp extends Component<EntityStateComp> implements NetSe
         broadcastState();
     }
 
-    public int[] stateSupplier() {
+    public int[] currStates() {
         return states.stream().mapToInt(EntityState::value).toArray();
     }
 

@@ -4,6 +4,7 @@ import io.mindspce.outerfieldsserver.components.ai.DecisionTree;
 import io.mindspce.outerfieldsserver.components.ai.ThoughtModule;
 import io.mindspce.outerfieldsserver.components.*;
 import io.mindspce.outerfieldsserver.components.monitors.AreaMonitor;
+import io.mindspce.outerfieldsserver.components.npc.TravelController;
 import io.mindspce.outerfieldsserver.components.primatives.ComponentSystem;
 import io.mindspce.outerfieldsserver.components.primatives.SimpleEmitter;
 import io.mindspce.outerfieldsserver.components.primatives.SimpleListener;
@@ -40,14 +41,14 @@ public enum ComponentType {
     PLAYER_NET_OUT(PlayerNetOut.class, x -> x instanceof PlayerNetOut),
     ENTITY_STATE(EntityStateComp.class, x -> x instanceof EntityStateComp),
     OUTFIT(CharacterOutfit.class, x -> x instanceof CharacterOutfit),
-    EntityProperties(io.mindspce.outerfieldsserver.components.entity.EntityProperties.class, x -> x instanceof EntityProperties),
+    EntityProperties(EntityProperties.class, x -> x instanceof EntityProperties),
     NET_SERIALIZER(NetSerializer.class, x -> x instanceof NetSerializer),
     LOCATION_ENTITIES(LocationEntities.class, x -> x instanceof LocationEntities),
     TRACKED_ENTITIES(TrackedEntities.class, x -> x instanceof TrackedEntities),
-    THOUGHT_MODULE(ThoughtModule.class, x -> x instanceof ThoughtModule<?, ?, ?>),
+    THOUGHT_MODULE(ThoughtModule.class, x -> x instanceof ThoughtModule<?, ?>),
     DECISION_TREE(DecisionTree.class, x -> x instanceof DecisionTree),
-    CHARACTER_SERIALIZER(CharacterSerializer.class, x -> x instanceof CharacterSerializer );
-
+    CHARACTER_SERIALIZER(CharacterSerializer.class, x -> x instanceof CharacterSerializer),
+    TRAVEL_CONTROLLER(TravelController.class, x -> x instanceof TravelController);
 
     public final Class<?> componentClass;
     private final Predicate<Object> validator;

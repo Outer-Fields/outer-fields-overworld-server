@@ -11,6 +11,7 @@ import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.mindlib.functional.consumers.TriConsumer;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.ThreadLocalRandom;
@@ -18,15 +19,15 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 
-public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>, V> extends Component<ThoughtModule<T, U, V>> {
-    public Task<T, U> currentTask;
+public class ThoughtModule<T extends Enum<T>, V> extends Component<ThoughtModule<T, V>> {
+    public Task<T, ?> currentTask;
     public T lastTask;
 
-    public List<Thought<T, U>> tryingToDo = new ArrayList<>(2);
-    public List<Thought<T, U>> wantingToDo = new ArrayList<>(2);
-    public List<Thought<T, U>> randomTasks = new ArrayList<>(2);
-    public PriorityQueue<Task<T, U>> queuedTasks = new PriorityQueue<>(
-            (Task<T, U> o1, Task<T, U> o2) -> Float.compare(o2.taskWeight, o1.taskWeight));
+    public List<Thought<T>> tryingToDo = new LinkedList<>();
+    public List<Thought<T>> wantingToDo = new LinkedList<>();
+    public List<Thought<T>> randomTasks = new LinkedList<>();
+    public PriorityQueue<Task<T, ?>> taskQueue = new PriorityQueue<>(
+            (Task<T, ?> o1, Task<T, ?> o2) -> Float.compare(o2.taskWeight, o1.taskWeight));
 
     public List<T> canDo = new ArrayList<>(6);
     public DecisionEventGraph<V, T> decisionGraph;
@@ -34,7 +35,7 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>, V> extends C
     public int graphQueryRate;
     private int currQueryTick;
 
-    public Consumer<Task<T, U>> taskConsumer;
+    public Consumer<Task<T, ?>> taskConsumer;
 
     public ThoughtModule(Entity parentEntity, DecisionEventGraph<V, T> decisionGraph, V graphFocusState, int queryRate) {
         super(parentEntity, ComponentType.THOUGHT_MODULE, List.of());
@@ -46,7 +47,7 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>, V> extends C
     }
 
     public ThoughtModule(Entity parentEntity, DecisionEventGraph<V, T> decisionGraph, V graphFocusState, int queryRate,
-            Consumer<Task<T, U>> taskConsumer) {
+            Consumer<Task<T, ?>> taskConsumer) {
         super(parentEntity, ComponentType.THOUGHT_MODULE, List.of());
         this.taskConsumer = taskConsumer;
         this.decisionGraph = decisionGraph;
@@ -56,9 +57,22 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>, V> extends C
         setOnTickConsumer(ThoughtModule::tickProcess);
     }
 
-    public ThoughtModule(Entity parentEntity) {
-        super(parentEntity, ComponentType.THOUGHT_MODULE, List.of());
-        setOnTickConsumer(ThoughtModule::tickProcess);
+    public void addWantingToDo(T type, boolean isOneShot, Predicate<Tick> startPredicate, Task<T, ?> task) {
+        task.linkListenerControls(this::registerInputHook, this::clearInputHooksFor);
+        var thought = new Thought<>(type, isOneShot, startPredicate, task);
+        tryingToDo.add(thought);
+    }
+
+    public void addTryingToDo(T type, boolean isOneShot, Predicate<Tick> startPredicate, Task<T, ?> task) {
+        task.linkListenerControls(this::registerInputHook, this::clearInputHooksFor);
+        var thought = new Thought<>(type, isOneShot, startPredicate, task);
+        tryingToDo.add(thought);
+    }
+
+    public void addRandomTask(T type, boolean isOneShot, Predicate<Tick> startPredicate, Task<T, ?> task) {
+        task.linkListenerControls(this::registerInputHook, this::clearInputHooksFor);
+        var thought = new Thought<>(type, isOneShot, startPredicate, task);
+        randomTasks.add(thought);
     }
 
     private void onEventNodeResponse(T eventKey) {
@@ -66,28 +80,35 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>, V> extends C
     }
 
     public void tickProcess(Tick tick) {
-        if (--currQueryTick == 0) {
+        if (--currQueryTick <= 0) {
             canDo.clear();
             decisionGraph.getRoot().travel(graphFocusState);
             currQueryTick = graphQueryRate;
         }
 
-        if (!currentTask.isCompleted() && !currentTask.isSuspendable()) {
-            return;
-        }
-
-        if (currentTask.isCompleted()) {
-            var queuedTask = queuedTasks.poll();
-            if (queuedTask != null) {
-                currentTask = queuedTask;
-                currentTask.resume();
+        if (currentTask != null) {
+            if (!currentTask.isCompleted() && !currentTask.isSuspendable()) {
+                currentTask.onTick(tick);
                 return;
             }
-        }
+            if (currentTask.isCompleted()) {
+                var queuedTask = taskQueue.poll();
+                if (queuedTask != null) {
+                    taskQueue.add(currentTask);
+                    currentTask = queuedTask;
+                    currentTask.start();
+                } else {
+                    lastTask = currentTask.taskType;
+                    currentTask.reset();
+                    currentTask = null;
+                }
+                return;
+            }
 
-        if (currentTask.isSuspendable()) {
-            if (calculateSuspendable(tryingToDo, tick)) { return; }
-            if (calculateSuspendable(wantingToDo, tick)) { return; }
+            if (currentTask.isSuspendable()) {
+                if (calculateSuspendable(tryingToDo, tick)) { return; }
+            }
+            currentTask.onTick(tick);
         }
 
         if (!canDo.isEmpty()) {
@@ -96,19 +117,21 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>, V> extends C
         }
         if (!randomTasks.isEmpty()) {
             var randTasks = randomTasks.stream().filter(t -> canDo.contains(t.type)).toList();
-            Thought<T, U> randThought = randTasks.get(ThreadLocalRandom.current().nextInt(randTasks.size()));
+            Thought<T> randThought = randTasks.get(ThreadLocalRandom.current().nextInt(randTasks.size()));
             if (randThought.oneShot) {
                 randomTasks.remove(randThought);
             }
         }
     }
 
-    public void queueTask(Task<T, U> task) {
-        queuedTasks.add(task);
+    public void queueTask(Task<T, ?> task) {
+        taskQueue.add(task);
     }
 
-    public boolean calculateSuspendable(List<Thought<T, U>> taskList, Tick tick) {
-        List<Thought<T, U>> canDoTasks = taskList.stream()
+    public boolean calculateSuspendable(List<Thought<T>> taskList, Tick tick) {
+        if (taskList == null) { return false; }
+
+        List<Thought<T>> canDoTasks = taskList.stream()
                 .filter(t -> canDo.contains(t.type()))
                 .sorted((t1, t2) -> Double.compare(t2.weight(), t1.weight()))
                 .toList();
@@ -116,11 +139,17 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>, V> extends C
         for (var thought : canDoTasks) {
             if (thought.tickPredicate.test(tick)) {
                 if (thought.weight() > currentTask.taskWeight) {
-                    queuedTasks.add(currentTask);
+                    taskQueue.add(currentTask);
                     currentTask.suspend();
                     currentTask = thought.task;
                     if (taskConsumer != null) { taskConsumer.accept(thought.task); }
-                    if (thought.oneShot) { taskList.remove(thought); }
+                    currentTask.start();
+                    if (thought.oneShot) {
+                        taskList.remove(thought);
+                    } else {
+                        taskList.removeFirst();
+                        taskList.add(thought);
+                    }
                     return true;
                 }
             }
@@ -132,31 +161,37 @@ public class ThoughtModule<T extends Enum<T>, U extends Task<T, U>, V> extends C
         return Pair.of(this::registerInputHook, this::clearInputHooksFor);
     }
 
-    public boolean calculateTask(List<Thought<T, U>> taskList, Tick tick) {
-        List<Thought<T, U>> canDoTasks = taskList.stream()
+    public boolean calculateTask(List<Thought<T>> taskList, Tick tick) {
+        if (taskList == null) { return false; }
+
+        List<Thought<T>> canDoTasks = taskList.stream()
                 .filter(t -> canDo.contains(t.type()))
                 .sorted((t1, t2) -> Double.compare(t2.weight(), t1.weight()))
                 .toList();
 
         for (var thought : canDoTasks) {
             if (thought.tickPredicate.test(tick)) {
-                lastTask = currentTask.taskType;
                 currentTask = thought.task;
                 if (taskConsumer != null) { taskConsumer.accept(thought.task); }
-                if (thought.oneShot) { taskList.remove(thought); }
+                currentTask.start();
+                if (thought.oneShot) {
+                    taskList.remove(thought);
+                } else {
+                    taskList.removeFirst();
+                    taskList.add(thought);
+                }
                 return true;
             }
         }
         return false;
     }
 
-    public record Thought<T extends Enum<T>, U extends Task<T, U>>(
+    public record Thought<T extends Enum<T>>(
             T type,
-            Task<T, U> task,
             boolean oneShot,
-            Predicate<Tick> tickPredicate
+            Predicate<Tick> tickPredicate,
+            Task<T, ?> task
     ) {
-
         public float weight() {
             return task.taskWeight;
         }

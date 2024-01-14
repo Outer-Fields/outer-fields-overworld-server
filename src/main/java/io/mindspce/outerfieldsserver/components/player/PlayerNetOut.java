@@ -75,6 +75,7 @@ public class PlayerNetOut extends Component<PlayerNetOut> {
     }
 
     public void authCorrection(IVector2 pos) {
+        System.out.println("auth correction");
         haveData = true;
         var correction = EntityProto.AuthCorrection.newBuilder()
                 .setPosX(pos.x())
@@ -122,7 +123,7 @@ public class PlayerNetOut extends Component<PlayerNetOut> {
                     .build();
             gamePacket.addPositionUpdates(posUpdate);
         }
-        System.out.println(gamePacket);
+       // System.out.println(gamePacket);
         playerSession.send(gamePacket.build().toByteArray());
         gamePacket = EntityProto.GamePacket.newBuilder();
         positionData.clear();

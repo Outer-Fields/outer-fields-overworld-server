@@ -57,8 +57,7 @@ public enum Direction {
         deltaX = Integer.compare(deltaX, 0);
         deltaY = Integer.compare(deltaY, 0);
 
-        // Access the directions array with adjusted indices
-        System.out.println(deltaX + " | " + deltaY);
+
         return directions[deltaY + 1][deltaX + 1];
     }
     public static Direction getDirectionOf(IVector2 target, IVector2 current) {

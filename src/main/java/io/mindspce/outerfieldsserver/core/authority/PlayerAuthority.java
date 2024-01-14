@@ -28,8 +28,7 @@ public class PlayerAuthority {
                     IVector2 direction = Direction.getDirectionOf(mVector.start(), mVector.end()).asVec2();
 //                    System.out.println(Direction.getDirectionOf(mVector.start(), mVector.end()));
 //                    System.out.println(direction);
-                    mVector.setEnd(mVector.start().x() + (direction.x() ), mVector.start().y() + (direction.y() ));
-                    mVector.setStart(mVector.start().x() + (direction.x() ), mVector.start().y() + (direction.y() ));
+                    mVector.setEnd(mVector.start().x() + (direction.x() * 16), mVector.start().y() + (direction.y() * 16));
                     //mVector.setEnd(mVector.start());
                     return false;
                 }

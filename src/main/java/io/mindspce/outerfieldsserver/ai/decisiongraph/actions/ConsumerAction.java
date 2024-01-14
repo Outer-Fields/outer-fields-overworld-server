@@ -10,6 +10,10 @@ public class ConsumerAction<T> extends Action<T> {
         this.actionConsumer = actionConsumer;
     }
 
+    public static <T> ConsumerAction<T> of(Consumer<T> actionConsumer) {
+        return new ConsumerAction<>(actionConsumer);
+    }
+
     @Override
     public boolean doAction(T focusState) {
         actionConsumer.accept(focusState);

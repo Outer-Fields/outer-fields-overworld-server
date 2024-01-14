@@ -2,12 +2,10 @@ package io.mindspce.outerfieldsserver.core.networking.websockets;
 
 import io.mindspce.outerfieldsserver.core.networking.SocketService;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
-import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
+import io.mindspce.outerfieldsserver.entities.PlayerEntity;
 import io.mindspce.outerfieldsserver.enums.*;
 import io.mindspce.outerfieldsserver.networking.NetMsgIn;
 import io.mindspce.outerfieldsserver.networking.incoming.NetMessageIn;
-import io.mindspce.outerfieldsserver.systems.event.Event;
-import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import org.jctools.maps.NonBlockingHashMapLong;
 import org.springframework.lang.NonNull;
@@ -46,6 +44,8 @@ public class GameServerSocketHandler extends AbstractWebSocketHandler {
             NetMessageIn netMessageIn = new NetMessageIn(System.currentTimeMillis(), pid, eid, messageType, byteBuffer);
             socketService.handOffMessageIn(netMessageIn);
         } catch (Exception e) {
+            e.printStackTrace();
+
             //todo logging
             session.close();
         }

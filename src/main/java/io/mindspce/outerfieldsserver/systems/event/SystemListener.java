@@ -24,7 +24,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicIntegerArray;
-import java.util.stream.Collectors;
 
 
 public abstract class SystemListener implements EventListener<SystemListener> {
@@ -109,7 +108,6 @@ public abstract class SystemListener implements EventListener<SystemListener> {
 
     private Runnable process() {
         return (() -> {
-
             while (running) {
                 Event<?> nextEvent;
                 while ((nextEvent = eventQueue.relaxedPoll()) == null) {
@@ -133,9 +131,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
 
     public boolean drainRemainingQueue() {
         running = false;
-        Future<?> future = executorService.submit(() -> {
-            eventQueue.drain(this::processQueueItem);
-        });
+        Future<?> future = executorService.submit(() -> eventQueue.drain(this::processQueueItem));
         try {
             future.get();
             return true;
@@ -157,7 +153,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
 
     public void onRegisterComponent(Event<Pair<SystemType, Entity>> event) {
         Entity entity = event.data().second();
-        entity.registerComponents(this);
+        entity.registerWithSystem(this);
     }
 
     public void registerComponent(Component<?> component) {

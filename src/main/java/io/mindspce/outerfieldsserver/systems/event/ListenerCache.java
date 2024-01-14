@@ -27,7 +27,7 @@ public abstract class ListenerCache<T> {
     private Consumer<EventType> onAddEventListener;
     private Consumer<EventType> onRemoveEventListener;
 
-    public void linkSystemUpdates(Consumer<EventType> incConsumer, Consumer<EventType> decConsumer){
+    public void linkSystemUpdates(Consumer<EventType> incConsumer, Consumer<EventType> decConsumer) {
         this.onAddEventListener = incConsumer;
         this.onRemoveEventListener = decConsumer;
     }
@@ -65,7 +65,7 @@ public abstract class ListenerCache<T> {
         }
         @SuppressWarnings("unchecked")
         Consumer<Event<?>> castedHandler = (Consumer<Event<?>>) callback;
-        outputEventHooks.computeIfAbsent(eventType, v ->  new ArrayList<>(1))
+        outputEventHooks.computeIfAbsent(eventType, v -> new ArrayList<>(1))
                 .add(Pair.of(intercept, castedHandler));
         outputHooksFor.set(eventType.ordinal());
     }
@@ -74,12 +74,17 @@ public abstract class ListenerCache<T> {
         isListening = true;
         if (inputEventHooks == null) {
             inputEventHooks = new EnumMap<>(EventType.class);
-            inputEventHooks.put(eventType, new ArrayList<>(1));
             inputHooksFor = new BitSet(EventType.values().length);
+        }
+
+        var hookList = inputEventHooks.get(eventType);
+        if (hookList == null) {
+            hookList = new ArrayList<>(1);
+            inputEventHooks.put(eventType, hookList);
         }
         @SuppressWarnings("unchecked")
         Consumer<Event<?>> castedHandler = (Consumer<Event<?>>) callback;
-        var hookList = inputEventHooks.get(eventType);
+
         hookList.add(Pair.of(intercept, castedHandler));
 
         inputHooksFor.set(eventType.ordinal());
@@ -95,8 +100,8 @@ public abstract class ListenerCache<T> {
     public void clearInputHooksFor(EventType eventType) {
         inputEventHooks.getOrDefault(eventType, List.of()).forEach(e -> decListenEvent(eventType));
         inputHooksFor.set(eventType.ordinal(), false);
-        decListenEvent(eventType);
         inputEventHooks.remove(eventType);
+        listeningFor.decrement(eventType.ordinal());
     }
 
     public <E> void registerListener(EventType eventType, BiConsumer<T, Event<E>> handler) {
@@ -142,6 +147,7 @@ public abstract class ListenerCache<T> {
             T self = (T) this;
             handleTick(self, tickEvent);
         } catch (Exception e) {
+            e.printStackTrace();
             //TODO log this
         }
     }
@@ -153,7 +159,6 @@ public abstract class ListenerCache<T> {
                 Event<Consumer<T>> consumer = (Event<Consumer<T>>) event;
                 handleCallBack(consumer);
             } else {
-                ;
                 @SuppressWarnings("unchecked")
                 T self = (T) this;
                 handleEvent(self, event);
@@ -165,20 +170,25 @@ public abstract class ListenerCache<T> {
     }
 
     protected void handleEvent(T selfInstance, Event<?> event) {
-
         boolean isIntercept = false;
         if (inputEventHooks != null && inputHooksFor.get(event.eventType().ordinal())) {
             var hooks = inputEventHooks.get(event.eventType());
             if (hooks != null) {
                 for (var hook : hooks) {
                     hook.second().accept(event);
-                    ;
                     if (hook.first()) { isIntercept = true; }
+                    System.out.println("accepted event: " + event);
 
                 }
             }
         }
+
         if (isIntercept) { return; }
+        if (listeners == null) {
+            // TODO log this as debug
+            //System.out.println("null listener for event:" + event + " | " + this);
+            return;
+        }
         //BiConsumer<T, Event<?>> consumer = listeners.get(event.eventType());
         var listener = listeners.get(event.eventType());
         if (listener != null) {
@@ -269,5 +279,33 @@ public abstract class ListenerCache<T> {
         emittedEvents.addAll(eventTypes);
     }
 
-
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ListenerCache:\n");
+        sb.append("  listeningFor: ").append(listeningFor);
+        sb.append("\n");
+        sb.append("  outputHooksFor: ").append(outputHooksFor);
+        sb.append("\n");
+        sb.append("  inputHooksFor: ").append(inputHooksFor);
+        sb.append("\n");
+        sb.append("  listeners: ").append(listeners);
+        sb.append("\n");
+        sb.append("  outputEventHooks: ").append(outputEventHooks);
+        sb.append("\n");
+        sb.append("  inputEventHooks: ").append(inputEventHooks);
+        sb.append("\n");
+        sb.append("  emittedEvents: ").append(emittedEvents);
+        sb.append("\n");
+        sb.append("  tickConsumer: ").append(tickConsumer);
+        sb.append("\n");
+        sb.append("  isListening: ").append(isListening);
+        sb.append("\n");
+        sb.append("  isOnTick: ").append(isOnTick);
+        sb.append("\n");
+        sb.append("  onAddEventListener: ").append(onAddEventListener);
+        sb.append("\n");
+        sb.append("  onRemoveEventListener: ").append(onRemoveEventListener);
+        sb.append("\n");
+        return sb.toString();
+    }
 }

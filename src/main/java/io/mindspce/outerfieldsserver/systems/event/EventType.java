@@ -52,13 +52,14 @@ public enum EventType {
     ENTITY_AREA_UPDATE(AreaId.class, x -> x instanceof AreaId),
     ENTITY_NAME_UPDATE(String.class, x -> x instanceof String),
     ENTITY_STATE_UPDATE(EventData.EntityStateUpdate.class, x -> x instanceof EventData.EntityStateUpdate),
+    ENTITY_POSITION_UPDATE(IVector2.class, x -> x instanceof IVector2),
 
     // PLAYER SUBSYSTEM EVENTS
     PLAYER_VALID_MOVEMENT(IVector2.class, x -> x instanceof IVector2),
     PLAYER_INVALID_MOVEMENT(EventData.EntityPositionChanged.class, x -> x instanceof EventData.EntityPositionChanged),
 
     // OTHER COMPONENT SPECIFIC EVENTS
-    AREA_MONITOR_ENTERED(EventData.AreaEntered.class, x -> x instanceof EventData.AreaEntered),
+
     TILE_DATA_UPDATE(EventData.TileDataUpdate.class, x -> x instanceof EventData.TileDataUpdate),
     COLLISION_CHANGE(EventData.CollisionData.class, x -> x instanceof EventData.CollisionData),
     COLLISION_UPDATE(EventData.CollisionData.class, x -> x instanceof EventData.CollisionData),
@@ -74,19 +75,31 @@ public enum EventType {
     SERIALIZED_CHARACTER_RESP(EntityProto.CharacterEntity.class, x -> x instanceof EntityProto.CharacterEntity),
     SERIALIZED_LOC_ITEM_RESP(EntityProto.LocationItemEntity.class, x -> x instanceof EntityProto.LocationItemEntity),
 
+    // CHARACTER
     CHARACTER_OUTFIT_CHANGED(ClothingItem.class, x -> x instanceof ClothingItem[]),
     CHARACTER_OUTFIT_UPDATE(byte[].class, x -> x instanceof byte[]),
-    NEW_LOCATION(LocationEntity.class, x -> x instanceof LocationEntity),
-    REMOVE_LOCATION(Integer.class, x -> x instanceof Integer),
+
+    // AREA
     AREA_MONITOR_QUERY(List.class, x -> x instanceof List), //List<Pair<IVector2,Integer>
     AREA_MONITOR_RESP(List.class, x -> x instanceof List), //List<Integer>
+    AREA_MONITOR_ENTERED(EventData.AreaEntered.class, x -> x instanceof EventData.AreaEntered),
+
+    // LOCATION
+    NEW_LOCATION(LocationEntity.class, x -> x instanceof LocationEntity),
+    REMOVE_LOCATION(Integer.class, x -> x instanceof Integer),
+
+    //SYSTEM
+    SYSTEM_REGISTER_ENTITY(Pair.class, x -> x instanceof Pair),
     SYSTEM_ENTITIES_QUERY(Predicate.class, x -> x instanceof Predicate<?>),
     SYSTEM_ENTITIES_RESP(List.class, x -> x instanceof List<?>),
+
+    // RANDOM
     KEY_VALUE_EVENT(Pair.class, x -> x instanceof Pair),
     DO_TASK(Task.class, x -> x instanceof Task),
 
-    //SYSTEM EVENTS
-    SYSTEM_REGISTER_ENTITY(Pair.class, x -> x instanceof Pair);
+    // NPC
+    NPC_ARRIVED_AT_LOC(EventData.NpcLocationArrival.class, x -> x instanceof EventData.NpcLocationArrival),
+    NPC_TRAVEL_TO(EventData.NPCTravelTo.class, x -> x instanceof EventData.NPCTravelTo);
 
     public final Class<?> dataClass;
     private final Predicate<Object> validator;

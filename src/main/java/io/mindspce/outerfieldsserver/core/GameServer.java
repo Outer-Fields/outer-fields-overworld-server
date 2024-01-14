@@ -1,6 +1,6 @@
 package io.mindspce.outerfieldsserver.core;
 
-import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
+import io.mindspce.outerfieldsserver.entities.PlayerEntity;
 import org.jctools.maps.NonBlockingHashMapLong;
 
 import java.util.concurrent.Executors;

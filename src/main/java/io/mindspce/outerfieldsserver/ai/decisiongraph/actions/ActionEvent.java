@@ -12,6 +12,10 @@ public class ActionEvent<T, U extends Enum<U>> extends Action<T> {
         this.eventKey = eventKey;
     }
 
+    public static <T, U extends Enum<U>> ActionEvent<T, U> of(U eventKey) {
+        return new ActionEvent<>(eventKey);
+    }
+
     public void linkEventConsumer(Consumer<U> eventConsumer) {
         this.eventConsumer = eventConsumer;
     }

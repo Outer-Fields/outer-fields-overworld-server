@@ -15,7 +15,7 @@ public class WorldSystem extends SystemListener {
     public WorldSystem(boolean doStart, Map<AreaId, AreaEntity> areaMap) {
         super(SystemType.WORLD, doStart);
         this.areaMap = areaMap;
-        areaMap.values().forEach(area -> area.registerComponents(this));
+        areaMap.values().forEach(area -> area.registerWithSystem(this));
         EntityManager.GET().registerSystem(this);
     }
 

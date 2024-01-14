@@ -162,6 +162,10 @@ public record Event<T>(
         return new Event<>(EventType.ENTITY_POSITION_CHANGED, component.areaId(), component, position);
     }
 
+    public static Event<IVector2> entityPositionUpdate(Component<?> component, int entityId, IVector2 data) {
+        return new Event<>(EventType.ENTITY_POSITION_UPDATE, component.areaId(), component, entityId, data);
+    }
+
     public static Event<IVector2> playerValidMovement(Component<?> component, IVector2 position) {
         return new Event<>(EventType.PLAYER_VALID_MOVEMENT, component.areaId(), component, position);
     }
@@ -284,6 +288,17 @@ public record Event<T>(
         return new Event<>(EventType.SYSTEM_REGISTER_ENTITY, AreaId.NONE, -1, -1, ComponentType.ANY,
                 EntityType.ANY, -1, -1, ComponentType.ANY, Pair.of(system, entity));
     }
+
+    public static Event<EventData.NpcLocationArrival> npcArrivedAtLocation(Component<?> component, AreaId areaId,
+            EventData.NpcLocationArrival data) {
+        return new Event<>(EventType.NPC_ARRIVED_AT_LOC, areaId, component, data);
+    }
+
+    public static Event<EventData.NPCTravelTo> npcTravelTo(Component<?> component, AreaId areaId,
+            EventData.NPCTravelTo data) {
+        return new Event<>(EventType.NPC_TRAVEL_TO, areaId, component, data);
+    }
+
 
     //public static Event<Object>
 

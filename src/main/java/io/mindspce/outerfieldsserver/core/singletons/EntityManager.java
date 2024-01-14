@@ -1,16 +1,15 @@
 package io.mindspce.outerfieldsserver.core.singletons;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import io.mindspce.outerfieldsserver.area.AreaEntity;
 import io.mindspce.outerfieldsserver.area.ChunkEntity;
 import io.mindspce.outerfieldsserver.area.ChunkJson;
+import io.mindspce.outerfieldsserver.components.ai.ThoughtModule;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.core.Tick;
-import io.mindspce.outerfieldsserver.core.networking.SocketService;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.entities.LocationEntity;
-import io.mindspce.outerfieldsserver.entities.player.PlayerEntity;
+import io.mindspce.outerfieldsserver.entities.NonPlayerEntity;
+import io.mindspce.outerfieldsserver.entities.PlayerEntity;
 import io.mindspce.outerfieldsserver.enums.*;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.*;
@@ -83,12 +82,13 @@ public class EntityManager {
         return returnList;
     }
 
-    public <T> T getEntity(EntityType entityType, int entityId) {
+    public <T> T getEntity(int entityId) {
         long stamp = -1;
         T entity;
         do {
             stamp = entityLock.tryOptimisticRead();
-            entity = entityType.castOrNull(entityCache.get(entityId));
+            Entity tmpEnt = entityCache.get(entityId);
+            entity = tmpEnt.entityType().castOrNull(tmpEnt);
             if (entity == null) {
                 //TODO log this
             }
@@ -104,16 +104,12 @@ public class EntityManager {
         return areaId.entity;
     }
 
-    public SocketService socketService() {
-        return null;
-    }
-
     public int entityCount() {
         return entityCache.getSize();
     }
 
     public List<SystemListener> eventListeners() {
-        return systemListeners;
+        return List.copyOf(systemListeners);
     }
 
     public <T extends Entity> void registerSystem(SystemListener system) {
@@ -121,9 +117,10 @@ public class EntityManager {
     }
 
     public void emitEvent(Event<?> event) {
-//        if (List.of(EventType.ENTITY_POSITION_CHANGED, EventType.SERIALIZED_CHARACTER_RESP).contains(event.eventType())) {
-//            System.out.println(event);
-//        }
+        if (event.eventType() == EventType.TICK) {
+            System.out.println(event);
+        }
+
         for (int i = 0; i < systemListeners.size(); ++i) {
             var listener = systemListeners.get(i);
             if (event.isDirect() && listener.hasListeningEntity(event.recipientEntityId())) {
@@ -191,8 +188,8 @@ public class EntityManager {
             ClothingItem[] outfit, AreaId currArea, IVector2 currPos, WebSocketSession session) {
 
         int id = entityCache.getAndReserveNextIndex();
-
         PlayerEntity playerEntity = new PlayerEntity(id, playerId, playerName, initState, outfit, currArea, currPos, session);
+
         long stamp = entityLock.writeLock();
         try {
             entityMap.get(EntityType.PLAYER_ENTITY).add(id);
@@ -204,13 +201,38 @@ public class EntityManager {
         if (system.isEmpty()) {
             throw new RuntimeException("Attempted to register entity with null system");
         }
-        playerEntity.registerComponents(system.get());
+        playerEntity.registerWithSystem(system.get());
         emitEvent(new Event<>(EventType.NEW_ENTITY, currArea, -1, -1, ComponentType.ANY,
                 EntityType.PLAYER_ENTITY, -1, -1, ComponentType.ANY,
-                new EventData.NewEntity(true, currArea, currPos, playerEntity)
+                new EventData.NewEntity(currArea, currPos, playerEntity)
         ));
-
         return playerEntity;
+    }
+
+    public NonPlayerEntity newNonPlayerEntity(long key, String name, List<EntityState> initStates, ClothingItem[] outfit,
+            AreaId currArea, IVector2 currPos, IVector2 viewRectSize) {
+
+        int id = entityCache.getAndReserveNextIndex();
+        NonPlayerEntity npcEntity = new NonPlayerEntity(id, key, name, initStates, outfit, currArea, currPos, viewRectSize);
+
+        long stamp = entityLock.writeLock();
+        try {
+            entityMap.get(EntityType.NON_PLAYER_ENTITY).add(id);
+        } finally {
+            entityLock.unlockWrite(stamp);
+        }
+
+        // TODO change this to an NPC system
+        var system = systemListeners.stream().filter(s -> s.systemType() == SystemType.NPC).findFirst();
+        if (system.isEmpty()) {
+            throw new RuntimeException("Attempted to register entity with null system");
+        }
+        npcEntity.registerWithSystem(system.get());
+        emitEvent(new Event<>(EventType.NEW_ENTITY, currArea, -1, -1, ComponentType.ANY,
+                EntityType.NON_PLAYER_ENTITY, -1, -1, ComponentType.ANY,
+                new EventData.NewEntity(currArea, currPos, npcEntity)
+        ));
+        return npcEntity;
     }
 }
 

@@ -7,109 +7,123 @@ import io.mindspice.mindlib.data.wrappers.MutableBoolean;
 import io.mindspice.mindlib.functional.consumers.TriConsumer;
 import io.mindspice.mindlib.functional.predicates.BiPredicateFlag;
 
-import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
 
 public record SubTask<T>(
-        T data,
         EventType eventType,
+        T data,
         Consumer<T> onStartConsumer,
-        BiConsumer<T, Event<?>> onEventConsumer,
-        BiPredicateFlag<T, Event<?>> eventPredicate,
-        BiConsumer<T, Tick> onTickConsumer,
-        BiPredicateFlag<T, Tick> tickPredicate,
+        BiPredicateFlag<T, Event<?>> completionEventPredicate,
+        BiPredicateFlag<T, Tick> completionTickPredicate,
         boolean suspendable,
-        MutableBoolean suspended
+        MutableBoolean suspended,
+        TriConsumer<EventType, Consumer<?>, Boolean> listenerLink,
+        Consumer<EventType> listenerUnlink
 ) {
 
     public SubTask {
-        if ((eventType == null) != (onEventConsumer == null)) {
+        if ((eventType == null) != (completionEventPredicate == null)) {
             throw new IllegalStateException("Must have either event type and consumer, or neither");
+        }
+        if (completionEventPredicate == null && completionTickPredicate == null) {
+
         }
     }
 
     public void onStart() {
         if (onStartConsumer() != null) {
             onStartConsumer.accept(data());
+            linkEventListener();
         }
     }
 
-    public void suspend(){
+    public void suspend() {
         suspended.setTrue();
     }
 
-    public void unsuspend(){
+    public void unsuspend() {
         suspended.setFalse();
     }
 
     public static <T> SubTask<T> ofOnEvent(
-            T data,
             EventType eventType,
+            T data,
             Consumer<T> onStartConsumer,
-            BiConsumer<T, Event<?>> eventConsumer,
-            BiPredicate<T, Event<?>> eventPredicate,
-            boolean suspendable) {
-        return new SubTask<>(data, eventType, onStartConsumer, eventConsumer, BiPredicateFlag.of(eventPredicate),
-                null, null, suspendable, MutableBoolean.of(false));
+            BiPredicate<T, Event<?>> completionEventPredicate,
+            boolean suspendable,
+            TriConsumer<EventType, Consumer<?>, Boolean> listenerLink,
+            Consumer<EventType> listenerUnlink
+    ) {
+        return new SubTask<>(eventType, data, onStartConsumer, BiPredicateFlag.of(completionEventPredicate),
+                null, suspendable, MutableBoolean.of(false), listenerLink, listenerUnlink);
     }
 
     public static <T> SubTask<T> ofOnTick(
             T data,
             Consumer<T> onStartConsumer,
-            BiConsumer<T, Tick> tickConsumer,
-            BiPredicate<T, Tick> tickPredicate,
-            boolean suspendable) {
-        return new SubTask<>(data, null, onStartConsumer, null, null,
-                tickConsumer, BiPredicateFlag.of(tickPredicate), suspendable, MutableBoolean.of(false));
+            BiPredicate<T, Tick> completionTickPredicate,
+            boolean suspendable,
+            TriConsumer<EventType, Consumer<?>, Boolean> listenerLink,
+            Consumer<EventType> listenerUnlink
+    ) {
+        return new SubTask<>(null, data, onStartConsumer, null, BiPredicateFlag.of(completionTickPredicate),
+                suspendable, MutableBoolean.of(false), listenerLink, listenerUnlink);
     }
 
     public static <T> SubTask<T> ofEventAndTick(
-            T data,
             EventType eventType,
+            T data,
             Consumer<T> onStartConsumer,
-            BiConsumer<T, Event<?>> eventConsumer,
-            BiPredicate<T, Event<?>> eventPredicate,
-            BiConsumer<T, Tick> tickConsumer,
-            BiPredicate<T, Tick> tickPredicate,
-            boolean suspendable) {
-        return new SubTask<>(data, eventType, onStartConsumer, eventConsumer, BiPredicateFlag.of(eventPredicate),
-                tickConsumer, BiPredicateFlag.of(tickPredicate), suspendable, MutableBoolean.of(false));
+            BiPredicate<T, Event<?>> completionEventPredicate,
+            BiPredicate<T, Tick> completionTickPredicate,
+            boolean suspendable,
+            TriConsumer<EventType, Consumer<?>, Boolean> listenerLink,
+            Consumer<EventType> listenerUnlink
+    ) {
+        return new SubTask<>(eventType, data, onStartConsumer, BiPredicateFlag.of(completionEventPredicate),
+                BiPredicateFlag.of(completionTickPredicate), suspendable, MutableBoolean.of(false), listenerLink, listenerUnlink);
     }
 
     public void onEvent(Event<?> event) {
         if (suspended.get()) { return; }
-        if (!eventPredicate.confirmed() && eventPredicate.test(data, event)) {
-            onEventConsumer.accept(data, event);
+        if (!completionEventPredicate.confirmed()) {
+            completionEventPredicate.test(data, event);
+        }
+        if (completed()) {
+
         }
     }
 
     public void onTick(Tick tick) {
-        if (onTickConsumer == null) { return; }
-        if (suspended.get()) { return; }
-        if (!tickPredicate.confirmed() && tickPredicate.test(data, tick)) {
-            onTickConsumer.accept(data, tick);
+        if (completionTickPredicate == null || suspended.get()) { return; }
+        if (!completionTickPredicate.confirmed()) {
+            completionTickPredicate.test(data, tick);
         }
     }
 
     public boolean completed() {
-        return ((eventPredicate == null || eventPredicate.confirmed())
-                && (tickPredicate == null || tickPredicate.confirmed()));
+
+        if (completionEventPredicate.confirmed()) {
+            unLinkEventListener();
+        }
+        return ((completionEventPredicate == null || completionEventPredicate.confirmed())
+                && (completionTickPredicate == null || completionTickPredicate.confirmed()));
     }
 
     public boolean hasEventListener() {
-        return onTickConsumer != null;
+        return completionEventPredicate != null;
     }
 
-    public void linkEventListener(TriConsumer<EventType, Consumer<?>, Boolean> linkHandle) {
-        if (onTickConsumer == null) { return; }
-        linkHandle.accept(eventType, (Event<?> event) -> onEventConsumer.accept(data, event), false);
+    private void linkEventListener() {
+        if (completionEventPredicate == null) { return; }
+        listenerLink.accept(eventType, (Event<?> event) -> completionEventPredicate.test(data, event), false);
     }
 
-    public void unLinkEventListener(Consumer<EventType> linkHandle) {
+    private void unLinkEventListener() {
         if (eventType == null) { return; }
-        linkHandle.accept(eventType);
+        listenerUnlink.accept(eventType);
     }
 
 

@@ -7,18 +7,27 @@ import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 
 public class EventCacheNode<T, U> extends Node<T> {
     List<U> eventDataCache = new ArrayList<>();
     final EventType gateEvent;
     final BiPredicatedBiConsumer<T, U> eventDataConsumer;
+    final BiConsumer<EventCacheNode<T, U>, T> onTravelConsumer;
 
-    public EventCacheNode(Node.NodeType nodeType, String name, EventType gateEvent,
-            BiPredicatedBiConsumer<T, U> eventDataConsumer) {
-        super(nodeType, name);
+    public EventCacheNode(String name, EventType gateEvent,
+            BiPredicatedBiConsumer<T, U> eventDataConsumer, BiConsumer<EventCacheNode<T, U>, T> onTravelConsumer
+    ) {
+        super(NodeType.DECISION, name);
         this.gateEvent = gateEvent;
         this.eventDataConsumer = eventDataConsumer;
+        this.onTravelConsumer = onTravelConsumer;
+    }
+
+    public static <T, U> EventCacheNode<T, U> of(String name, EventType gateEvent,
+            BiPredicatedBiConsumer<T, U> eventDataConsumer, BiConsumer<EventCacheNode<T, U>, T> onTravelConsumer) {
+        return new EventCacheNode<>(name, gateEvent, eventDataConsumer, onTravelConsumer);
     }
 
     public void onEvent(Event<U> event) {
@@ -30,7 +39,12 @@ public class EventCacheNode<T, U> extends Node<T> {
         for (var event : eventDataCache) {
             if (eventDataConsumer.predicate().test(focusState, event)) {
                 for (Node<T> node : adjacentNodes) {
-                    if (node.travel(focusState)) { return true; }
+                    if (node.travel(focusState)) {
+                        if (onTravelConsumer != null) {
+                            onTravelConsumer.accept(this, focusState);
+                        }
+                        return true;
+                    }
                 }
             }
         }

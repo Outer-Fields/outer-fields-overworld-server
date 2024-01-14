@@ -45,7 +45,7 @@ public class CharacterOutfit extends Component<CharacterOutfit> implements NetSe
         return new byte[]{1, 2, 3, 4, 5, 6};
     }
 
-    public int[] outfitSupplier() {
+    public int[] currOutfit() {
         return Arrays.stream(outfit).mapToInt(ClothingItem::value).toArray();
     }
 

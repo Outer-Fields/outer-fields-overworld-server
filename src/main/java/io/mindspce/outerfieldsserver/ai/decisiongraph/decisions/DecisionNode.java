@@ -2,11 +2,9 @@ package io.mindspce.outerfieldsserver.ai.decisiongraph.decisions;
 
 import io.mindspce.outerfieldsserver.ai.decisiongraph.Node;
 
-
 import java.util.List;
 
 import static io.mindspce.outerfieldsserver.ai.decisiongraph.Node.NodeType.DECISION;
-
 
 
 public class DecisionNode<T> extends Node<T> {
@@ -15,6 +13,10 @@ public class DecisionNode<T> extends Node<T> {
     public DecisionNode(String name, List<Decision<T>> decisions) {
         super(DECISION, name);
         this.decisions = decisions;
+    }
+
+    public static <T> DecisionNode<T> of(String name, List<Decision<T>> decisions) {
+        return new DecisionNode<>(name, decisions);
     }
 
     @Override
