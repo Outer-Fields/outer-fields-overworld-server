@@ -114,7 +114,7 @@ public class EntityManager {
     }
 
     public List<SystemListener> eventListeners() {
-        return List.copyOf(systemListeners);
+        return systemListeners;
     }
 
     public <T extends Entity> void registerSystem(SystemListener system) {

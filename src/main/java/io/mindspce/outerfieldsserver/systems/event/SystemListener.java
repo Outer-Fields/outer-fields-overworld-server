@@ -366,9 +366,8 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         return systemType().name();
     }
 
-    private void addListeningEvent(EventType type, Component<?> component) {
+    private void addListeningEvent(EventType type) {
         listeningFor.incrementAndGet(type.ordinal());
-        List<Component<?>> existing = listenerRegistry.get(type).stream().filter(c -> c.equals())
     }
 
     private void removeListeningEvent(EventType eventType) {
