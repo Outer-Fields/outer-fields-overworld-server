@@ -35,7 +35,7 @@ public class PlayerMovement extends Component<PlayerMovement> {
         this.viewRect = viewRect;
         this.correctionConsumer = correctionConsumer;
         this.validatedConsumer = validatedConsumer;
-        mVector = ILine2.ofMutable(startPos,startPos);
+        mVector = ILine2.ofMutable(startPos, startPos);
         testVector = ILine2.ofMutable(startPos, startPos);
 
         registerListener(EventType.NETWORK_IN_PLAYER_POSITION, PlayerMovement::onPlayerMovementIn);
@@ -43,7 +43,7 @@ public class PlayerMovement extends Component<PlayerMovement> {
 
     public void onPlayerMovementIn(Event<NetInPlayerPosition> event) {
         if (timeout != -1) {
-            if (System.currentTimeMillis() <timeout ) {
+            if (System.currentTimeMillis() < timeout) {
                 lastUpdateTime = event.data().timestamp();
                 correctionConsumer.accept(mVector.end());
                 return;
@@ -51,24 +51,31 @@ public class PlayerMovement extends Component<PlayerMovement> {
         }
         //mVector.shiftLine(event.data().x(), event.data().y()
         // );
+        testVector.shiftLine(event.data().x(), event.data().y());
+        boolean validColl = PlayerAuthority.validateCollision(localGrid.get(2, 2).getAreaRef(), localGrid, viewRect, testVector);
+
+        if (!validColl) {
+            mVector.setEnd(mVector.start());
+            correctionConsumer.accept(mVector.end());
+            lastUpdateTime = event.data().timestamp();
+            timeout = System.currentTimeMillis() + 250;
+            return;
+        }
         mVector.shiftLine(event.data().x(), event.data().y());
         boolean validDist = PlayerAuthority.validateDistance(mVector, lastUpdateTime, event.data().timestamp());
-        boolean validColl = PlayerAuthority.validateCollision(localGrid.get(2, 2).getAreaRef(), localGrid, viewRect, mVector);
-        if (!validDist || !validColl) {
-            timeout = System.currentTimeMillis() + 2000;
+
+        if (!validDist) {
             correctionConsumer.accept(mVector.end());
-
-        } else {
-            timeout = -1;
         }
-
+        timeout = -1;
+        validatedConsumer.accept(mVector.end());
         lastUpdateTime = event.data().timestamp();
 
-        if (!mVector.start().equals(mVector.end())) { // Sending mutable tileData since this get intercepted at the controller component level
-           // emitEvent(Event.playerValidMovement(this, mVector.end()));
-            validatedConsumer.accept(mVector.end());
-        }
-        System.out.println("Processed player movement");
+//        if (!mVector.start().equals(mVector.end())) { // Sending mutable tileData since this get intercepted at the controller component level
+//           // emitEvent(Event.playerValidMovement(this, mVector.end()));
+//            validatedConsumer.accept(mVector.end());
+//        }
+//        System.out.println("Processed player movement");
 
     }
 }

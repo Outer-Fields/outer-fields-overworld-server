@@ -28,15 +28,15 @@ public record SubTask<T>(
             throw new IllegalStateException("Must have either event type and consumer, or neither");
         }
         if (completionEventPredicate == null && completionTickPredicate == null) {
-
+            throw new IllegalStateException("Must have an Event or Tick Predicate");
         }
     }
 
     public void onStart() {
         if (onStartConsumer() != null) {
             onStartConsumer.accept(data());
-            linkEventListener();
         }
+        linkEventListener();
     }
 
     public void suspend() {
@@ -87,12 +87,11 @@ public record SubTask<T>(
     }
 
     public void onEvent(Event<?> event) {
+        System.out.println("\n\n\n EVENT \n\n\n");
+
         if (suspended.get()) { return; }
         if (!completionEventPredicate.confirmed()) {
             completionEventPredicate.test(data, event);
-        }
-        if (completed()) {
-
         }
     }
 
@@ -104,8 +103,7 @@ public record SubTask<T>(
     }
 
     public boolean completed() {
-
-        if (completionEventPredicate.confirmed()) {
+        if (completionEventPredicate != null && completionEventPredicate.confirmed()) {
             unLinkEventListener();
         }
         return ((completionEventPredicate == null || completionEventPredicate.confirmed())

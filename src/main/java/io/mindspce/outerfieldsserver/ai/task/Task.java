@@ -88,6 +88,7 @@ public class Task<T extends Enum<T>, U> {
         if (subTasks.isEmpty()) { return; }
         unsuspend();
         if (concurrentSubTasks) {
+
             subTasks.forEach(SubTask::onStart);
         } else {
             subTasks.getFirst().onStart();
@@ -109,18 +110,6 @@ public class Task<T extends Enum<T>, U> {
         if (subTasks.isEmpty()) { return null; }
         return subTasks.getFirst();
     }
-
-//    private void linkConcurrentListeners() {
-//        subTasks.forEach(t -> {
-//            if (t.hasEventListener()) { t.linkEventListener(enableListener); }
-//        });
-//    }
-//
-//    private void unLinkConcurrentListeners() {
-//        subTasks.forEach(t -> {
-//            if (t.hasEventListener()) { t.unLinkEventListener(disableListener); }
-//        });
-//    }
 
     public boolean onTick(Tick tick) {
         if (subTasks.isEmpty()) { return true; }
@@ -187,6 +176,11 @@ public class Task<T extends Enum<T>, U> {
 
         public Builder<T, U> setTaskWeight(float weight) {
             this.taskWeight = weight;
+            return this;
+        }
+
+        public Builder<T, U> setConcurrent(boolean concurrent) {
+            this.concurrentSubTasks = concurrent;
             return this;
         }
 

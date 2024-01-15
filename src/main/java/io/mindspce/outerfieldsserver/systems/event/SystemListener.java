@@ -257,7 +257,13 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     }
 
     private void handleEvent(Event<?> event) {
+        if(systemType == SystemType.NPC) {
+            System.out.println("\n\n\nNPC EVENT");
+            System.out.println(event);
+            System.out.println("\n\n\n");
+        }
         List<EventListener<?>> listeners = listenerRegistry.get(event.eventType());
+
         if (listeners == null) {
             //TODO log this, error state
             return;
@@ -360,14 +366,15 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         return systemType().name();
     }
 
-    private void addListeningEvent(EventType type) {
+    private void addListeningEvent(EventType type, Component<?> component) {
         listeningFor.incrementAndGet(type.ordinal());
+        List<Component<?>> existing = listenerRegistry.get(type).stream().filter(c -> c.equals())
     }
 
     private void removeListeningEvent(EventType eventType) {
         var val = listeningFor.decrementAndGet(eventType.ordinal());
         if (val < 0) {
-            System.out.println("Decremented listeners below zero, this shouldnt happen.");
+            throw new RuntimeException("Decremented listeners below zero, this shouldnt happen.");
             // TODO log this
         }
     }

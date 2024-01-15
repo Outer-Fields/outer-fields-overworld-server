@@ -104,6 +104,11 @@ public class EntityManager {
         return areaId.entity;
     }
 
+    public SystemListener systemListenerByType(SystemType type) {
+        return systemListeners.stream().filter(s -> s.systemType() == type).findFirst().orElse(null);
+
+    }
+
     public int entityCount() {
         return entityCache.getSize();
     }
@@ -117,7 +122,7 @@ public class EntityManager {
     }
 
     public void emitEvent(Event<?> event) {
-        if (event.eventType() == EventType.TICK) {
+        if (event.eventType() != EventType.TICK) {
             System.out.println(event);
         }
 
@@ -160,6 +165,7 @@ public class EntityManager {
         int id = entityCache.getAndReserveNextIndex();
         ChunkEntity chunkEntity = new ChunkEntity(id, areaId, chunkIndex, chunkJson);
         entityCache.putAtReservedIndex(id, chunkEntity);
+
         long stamp = entityLock.writeLock();
         try {
             entityMap.get(EntityType.CHUNK_ENTITY).add(id);
@@ -175,6 +181,7 @@ public class EntityManager {
         AreaEntity areaEntity = new AreaEntity(id, areaId, areaSize, chunkSize, staticLocations);
         areaId.setEntityId(id);
         areaId.setEntity(areaEntity);
+
         long stamp = entityLock.writeLock();
         try {
             entityMap.get(EntityType.AREA_ENTITY).add(id);

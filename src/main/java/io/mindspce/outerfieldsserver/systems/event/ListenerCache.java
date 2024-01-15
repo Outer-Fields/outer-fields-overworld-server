@@ -1,6 +1,5 @@
 package io.mindspce.outerfieldsserver.systems.event;
 
-import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspice.mindlib.data.collections.sets.ByteSet;
@@ -77,11 +76,7 @@ public abstract class ListenerCache<T> {
             inputHooksFor = new BitSet(EventType.values().length);
         }
 
-        var hookList = inputEventHooks.get(eventType);
-        if (hookList == null) {
-            hookList = new ArrayList<>(1);
-            inputEventHooks.put(eventType, hookList);
-        }
+        var hookList = inputEventHooks.computeIfAbsent(eventType, k -> new ArrayList<>(1));
         @SuppressWarnings("unchecked")
         Consumer<Event<?>> castedHandler = (Consumer<Event<?>>) callback;
 
@@ -219,10 +214,12 @@ public abstract class ListenerCache<T> {
     }
 
     public List<EventType> hasInputHooksFor() {
+        if (inputHooksFor == null) { return List.of(); }
         return Arrays.stream(EventType.values()).filter(e -> inputHooksFor.get(e.ordinal())).toList();
     }
 
     public List<EventType> hasOutputHooksFor() {
+        if (outputHooksFor == null) { return List.of(); }
         return Arrays.stream(EventType.values()).filter(e -> outputHooksFor.get(e.ordinal())).toList();
     }
 
@@ -266,14 +263,7 @@ public abstract class ListenerCache<T> {
         return emittedEvents;
     }
 
-    public List<EventType> getInputHooksFor() {
-        return Arrays.stream(EventType.values()).filter(e -> inputHooksFor.get(e.ordinal())).toList();
-    }
 
-    public List<EventType> getOutputHooksFor() {
-        if (inputHooksFor == null) { return List.of(); }
-        return Arrays.stream(EventType.values()).filter(e -> outputHooksFor.get(e.ordinal())).toList();
-    }
 
     public void addEmittedEvents(List<EventType> eventTypes) {
         emittedEvents.addAll(eventTypes);
