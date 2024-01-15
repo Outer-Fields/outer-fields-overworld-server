@@ -14,6 +14,7 @@ import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.enums.SystemType;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspice.mindlib.data.collections.sets.AtomicBitSet;
+import io.mindspice.mindlib.data.collections.sets.AtomicByteSet;
 import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.mindlib.util.DebugUtils;
 import org.jctools.queues.MpscUnboundedXaddArrayQueue;
@@ -39,7 +40,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
 
     // Thread safe lookup tables for message delivery
     private final AtomicIntegerArray listeningFor = new AtomicIntegerArray(EventType.values().length);
-    private final AtomicBitSet listeningEntities = new AtomicBitSet(EntityManager.GET().entityCount());
+    private final AtomicByteSet listeningEntities = new AtomicByteSet(EntityManager.GET().entityCount());
 
     // Queue/Executor
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -98,7 +99,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     }
 
     public boolean hasListeningEntity(int entityId) {
-        return listeningEntities.get(entityId);
+        return listeningEntities.get(entityId) > 0;
     }
 
     @Override
@@ -162,18 +163,19 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         componentTypeRegistry.computeIfAbsent(component.componentType(), v -> new ArrayList<>()).add(component);
 
         for (var event : component.getAllListeningFor()) {
-            listenerRegistry.computeIfAbsent(event, v -> new ArrayList<>(2)).add(component);
-            listeningFor.incrementAndGet(event.ordinal());
+            addListeningEvent(event, component);
         }
 
-        if (component.isOnTick()) { tickListeners.add(component); }
-        listeningEntities.set(component.entityId());
         var existingEntity = entityRegistry.get(component.entityId());
         if (existingEntity == null) {
             existingEntity = new ArrayList<>(2);
             entityRegistry.put(component.entityId(), existingEntity);
         }
         existingEntity.add(component);
+
+        if (component.isOnTick()) { tickListeners.add(component); }
+        listeningEntities.increment(component.entityId());
+
         component.linkSystemUpdates(this::addListeningEvent, this::removeListeningEvent);
     }
 
@@ -182,14 +184,14 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     }
 
     // TODO make these handle this mess of tables
-    public void removeByComponentId(long componentId) {
+    public void removeByComponent(Component<?> component) {
         Iterator<Map.Entry<EventType, List<EventListener<?>>>> itr = listenerRegistry.entrySet().iterator();
         while (itr.hasNext()) {
             Map.Entry<EventType, List<EventListener<?>>> listenerList = itr.next();
-            listenerList.getValue().removeIf(l -> l.componentId() == componentId);
+            listenerList.getValue().removeIf(l -> l.componentId() == component.componentId());
 
             if (listenerList.getValue().isEmpty()) {
-                listeningFor.incrementAndGet(listenerList.getKey().ordinal());
+                listeningFor.decrementAndGet(listenerList.getKey().ordinal());
                 itr.remove();
             }
         }
@@ -197,19 +199,20 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         Iterator<Map.Entry<ComponentType, List<Component<?>>>> itr2 = componentTypeRegistry.entrySet().iterator();
         while (itr2.hasNext()) {
             Map.Entry<ComponentType, List<Component<?>>> componentList = itr2.next();
-            componentList.getValue().removeIf(l -> l.componentId() == componentId);
+            componentList.getValue().removeIf(l -> l.componentId() == component.componentId());
 
             if (componentList.getValue().isEmpty()) {
                 itr2.remove();
             }
         }
 
-        tickListeners.removeIf(l -> l.componentId() == componentId);
+        listeningEntities.decrement(component.parentEntity().entityId());
+        tickListeners.removeIf(l -> l.componentId() == component.componentId());
     }
 
     public void removeByEntityId(int entityId) {
         entityRegistry.remove(entityId);
-        listeningEntities.set(entityId, false);
+        listeningEntities.set(entityId, 0);
 
         Iterator<Map.Entry<EventType, List<EventListener<?>>>> itr = listenerRegistry.entrySet().iterator();
         while (itr.hasNext()) {
@@ -257,7 +260,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     }
 
     private void handleEvent(Event<?> event) {
-        if(systemType == SystemType.NPC) {
+        if (systemType == SystemType.NPC) {
             System.out.println("\n\n\nNPC EVENT");
             System.out.println(event);
             System.out.println("\n\n\n");
@@ -366,17 +369,22 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         return systemType().name();
     }
 
-    private void addListeningEvent(EventType type, Component<?> component) {
-        listeningFor.incrementAndGet(type.ordinal());
-        List<Component<?>> existing = listenerRegistry.get(type).stream().filter(c -> c.equals())
+    private void addListeningEvent(EventType eventType, Component<?> component) {
+        listeningFor.incrementAndGet(eventType.ordinal());
+
+        List<EventListener<?>> existing = listenerRegistry.computeIfAbsent((eventType), v -> new ArrayList<>());
+        if (!existing.stream().allMatch(c -> c.equals(component))) {
+            existing.add(component);
+        }
     }
 
-    private void removeListeningEvent(EventType eventType) {
+    private void removeListeningEvent(EventType eventType, Component<?> component) {
         var val = listeningFor.decrementAndGet(eventType.ordinal());
         if (val < 0) {
             throw new RuntimeException("Decremented listeners below zero, this shouldnt happen.");
-            // TODO log this
+            // TODO log this and remove exception
         }
+        listenerRegistry.get(eventType).removeIf(c -> c.equals(component));
     }
 
     @Override

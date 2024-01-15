@@ -15,7 +15,7 @@ import java.util.*;
 public abstract class Component<T extends Component<T>> extends ListenerCache<T> implements EventListener<T> {
     protected final Entity parentEntity;
     public final ComponentType componentType;
-    protected final long id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+    protected final long id = UUID.randomUUID().getMostSignificantBits();
     protected String componentName;
     protected SystemType registeredWith = SystemType.NONE;
 

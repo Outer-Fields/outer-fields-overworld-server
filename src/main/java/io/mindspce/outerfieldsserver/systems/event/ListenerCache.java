@@ -1,5 +1,6 @@
 package io.mindspce.outerfieldsserver.systems.event;
 
+import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspice.mindlib.data.collections.sets.ByteSet;
@@ -10,7 +11,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 
-public abstract class ListenerCache<T> {
+public abstract class ListenerCache<T extends Component<T>> {
 
     private ByteSet listeningFor = new ByteSet(EventType.values().length);
     private BitSet outputHooksFor = null;
@@ -23,10 +24,10 @@ public abstract class ListenerCache<T> {
     private boolean isListening = false;
     private boolean isOnTick = false;
 
-    private Consumer<EventType> onAddEventListener;
-    private Consumer<EventType> onRemoveEventListener;
+    private BiConsumer<EventType, Component<?>> onAddEventListener;
+    private BiConsumer<EventType, Component<?>> onRemoveEventListener;
 
-    public void linkSystemUpdates(Consumer<EventType> incConsumer, Consumer<EventType> decConsumer) {
+    public void linkSystemUpdates(BiConsumer<EventType, Component<?>> incConsumer, BiConsumer<EventType, Component<?>> decConsumer) {
         this.onAddEventListener = incConsumer;
         this.onRemoveEventListener = decConsumer;
     }
@@ -36,15 +37,15 @@ public abstract class ListenerCache<T> {
         listeningFor.increment(EventType.CALLBACK.ordinal());
     }
 
-    private void incListeningEvent(EventType eventType) {
+    private void linkToSystem(EventType eventType, Component<?> component) {
         if (onAddEventListener != null) {
-            onAddEventListener.accept(eventType);
+            onAddEventListener.accept(eventType, component);
         }
     }
 
-    private void decListenEvent(EventType eventType) {
+    private void unlinkFromSystem(EventType eventType, Component<?> component) {
         if (onRemoveEventListener != null) {
-            onRemoveEventListener.accept(eventType);
+            onRemoveEventListener.accept(eventType, component);
         }
     }
 
@@ -84,7 +85,7 @@ public abstract class ListenerCache<T> {
 
         inputHooksFor.set(eventType.ordinal());
         listeningFor.increment(eventType.ordinal());
-        incListeningEvent(eventType);
+        linkToSystem(eventType, (Component<?>) this);
     }
 
     public void clearOutputHooksFor(EventType eventType) {
@@ -93,7 +94,9 @@ public abstract class ListenerCache<T> {
     }
 
     public void clearInputHooksFor(EventType eventType) {
-        inputEventHooks.getOrDefault(eventType, List.of()).forEach(e -> decListenEvent(eventType));
+        if (listeningFor.get(eventType.ordinal()) == 1) {
+            unlinkFromSystem(eventType, (Component<?>) this);
+        }
         inputHooksFor.set(eventType.ordinal(), false);
         inputEventHooks.remove(eventType);
         listeningFor.decrement(eventType.ordinal());
@@ -108,7 +111,7 @@ public abstract class ListenerCache<T> {
         BiConsumer<T, Event<?>> castedHandler = (BiConsumer<T, Event<?>>) (Object) handler;
         listeners.put(eventType, castedHandler);
         listeningFor.increment(eventType.ordinal());
-        incListeningEvent(eventType);
+        linkToSystem(eventType, (Component<?>) this);
     }
 
     public <E> void unRegisterListener(EventType eventType, BiConsumer<T, Event<E>> handler) {
@@ -262,8 +265,6 @@ public abstract class ListenerCache<T> {
     public List<EventType> emittedEvents() {
         return emittedEvents;
     }
-
-
 
     public void addEmittedEvents(List<EventType> eventTypes) {
         emittedEvents.addAll(eventTypes);
