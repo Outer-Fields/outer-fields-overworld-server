@@ -1,4 +1,4 @@
-package io.mindspce.outerfieldsserver.components;
+package io.mindspce.outerfieldsserver.factory;
 
 import io.mindspce.outerfieldsserver.area.ChunkEntity;
 import io.mindspce.outerfieldsserver.components.entity.EntityStateComp;

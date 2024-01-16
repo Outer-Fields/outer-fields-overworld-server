@@ -32,7 +32,7 @@ public class NetSerializer extends Component<NetSerializer> {
     }
 
     public void serializeToBuffer(ByteBuffer buffer) {
-        buffer.put(entityType().value);
+        //buffer.put(entityType().value);
         buffer.putInt(entityId());
         buffer.put(entityName().getBytes());
         serializable.forEach(s -> s.addBytesToBuffer(buffer));

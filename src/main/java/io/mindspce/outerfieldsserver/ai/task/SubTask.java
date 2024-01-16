@@ -6,6 +6,7 @@ import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.wrappers.MutableBoolean;
 import io.mindspice.mindlib.functional.consumers.TriConsumer;
 import io.mindspice.mindlib.functional.predicates.BiPredicateFlag;
+import io.mindspice.mindlib.util.DebugUtils;
 
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -87,9 +88,8 @@ public record SubTask<T>(
     }
 
     public void onEvent(Event<?> event) {
-        System.out.println("\n\n\n EVENT \n\n\n");
 
-        if (suspended.get()) { return; }
+        // if (suspended.get()) { return; } still listen on suspend?
         if (!completionEventPredicate.confirmed()) {
             completionEventPredicate.test(data, event);
         }
@@ -100,6 +100,12 @@ public record SubTask<T>(
         if (!completionTickPredicate.confirmed()) {
             completionTickPredicate.test(data, tick);
         }
+    }
+
+    public void reset() {
+        if (completionEventPredicate != null) { completionEventPredicate.reset(); }
+        if (completionTickPredicate != null) { completionTickPredicate.reset(); }
+
     }
 
     public boolean completed() {
@@ -116,7 +122,7 @@ public record SubTask<T>(
 
     private void linkEventListener() {
         if (completionEventPredicate == null) { return; }
-        listenerLink.accept(eventType, (Event<?> event) -> completionEventPredicate.test(data, event), false);
+        listenerLink.accept(eventType, (Event<?> event) -> onEvent(event), false);
     }
 
     private void unLinkEventListener() {

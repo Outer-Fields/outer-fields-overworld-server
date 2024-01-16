@@ -203,6 +203,8 @@ public class EventSystemTests {
         system.registerComponents(List.of(testComp2));
         system2.registerComponents(List.of(testComp));
 
+
+
         // seed event
         EntityManager.GET().emitEvent(new Event<>(EventType.PING, AreaId.GLOBAL, testComp, new Object()));
         assertEquals(2, EntityManager.GET().eventListeners().size());
@@ -294,74 +296,7 @@ public class EventSystemTests {
     }
 
 
-//    @Test
-//    public void threadTest() throws InterruptedException {
-//        EntityManager.GET().eventListeners().clear();
-//        var system = new TestSystem(SystemType.TEST1, true);
-//        var system2 = new TestSystem(SystemType.TEST2, true);
-//        var entity = new TestEntity(422, EntityType.PLAYER, AreaId.TEST);
-//
-//        var testComp = new TestComponent(entity, ComponentType.SIMPLER_LISTENER, List.of(EventType.PING));
-//
-//        for (int i = 0; i < 10; i++) {
-//            var e = new TestEntity(i, EntityType.PLAYER, AreaId.TEST);
-//            var tc = new TestComponent(e, ComponentType.SIMPLE_OBJECT, List.of(EventType.PING));
-//            system2.registerComponent(tc);
-//        }
-//
-//        testComp.testInt = 0;
-//        system.registerComponent(testComp);
-//
-//        List<Integer> intList = new ArrayList<>();
-//        AtomicBoolean fin = new AtomicBoolean();
-//        AtomicInteger intty = new AtomicInteger(0);
-//        int j = 10;
-//        var t = System.nanoTime();
-//        for (int i = 0; i < j; i++) {
-//
-////            var comp = new CompletebleEvent2<>(intList,
-////                    (TestComponent tc, List<Integer> data) -> {
-////                        tc.testInt += 1;
-////                        data.add(tc.testInt);
-////                    },
-////                    (TestComponent tc, List<Integer> data) -> {
-////                        System.out.println(intty);
-////                        if (intty.getAndIncrement() == 9) {
-////                            fin.set(true);
-////                            System.out.println(intList);
-////                        }
-////                    });
-////
-////            var compEvent = new Event<>(EventType.COMPLETABLE_EVENT2, testComp.areaId(), testComp, ComponentType.SIMPLE_OBJECT, comp);
-//
-//                        var compEvent = Event.completableEvent(testComp,
-//                                Event.globalComponentCallback(
-//                                        testComp, AreaId.TEST, ComponentType.SIMPLE_OBJECT,
-//                                        (TestComponent tc) -> {
-//                                            tc.testInt += 1;
-//                                            intty.getAndIncrement();
-//                                            intList.add(tc.testInt);
-//                                        }),
-//                                Event.directComponentCallback(testComp, AreaId.TEST, ComponentType.SIMPLER_LISTENER, testComp.entityId(), testComp.componentId(),
-//                                        (TestComponent tc) -> {
-//                                            tc.testInt += 1;
-//                                            if (tc.testInt == (j - 1)) {
-//                                                fin.set(true);
-//                                            }
-//
-//
-//                                        }
-//
-//                                ));
-//            EntityManager.GET().emitEventToSystem(SystemType.TEST2, compEvent);
-//        }
-//
-//        while (!fin.get()) {
-//        }
-//        System.out.println(intList);
-//
-//
-//    }
+// TODO test for register and unregistering listeners and hooks
 
 
 }

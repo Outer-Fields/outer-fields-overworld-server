@@ -4,6 +4,8 @@ import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
 import io.mindspce.outerfieldsserver.core.networking.proto.EntityProto;
 import io.mindspce.outerfieldsserver.entities.LocationEntity;
+import io.mindspce.outerfieldsserver.entities.PlayerQuestEntity;
+import io.mindspce.outerfieldsserver.entities.WorldQuestEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ClothingItem;
 import io.mindspce.outerfieldsserver.systems.EventData;
@@ -25,6 +27,7 @@ public enum EventType {
     PING(Object.class, Objects::nonNull),
     PONG(Object.class, Objects::nonNull),
     // GENERAL EVENTS
+    ANY(Object.class, Objects::nonNull),
     TICK(Tick.class, x -> x instanceof Tick),
     CALLBACK(Consumer.class, x -> x instanceof Consumer<?>),
     COMPLETABLE_EVENT(EventData.CompletableEvent.class, x -> x instanceof EventData.CompletableEvent<?, ?>),
@@ -85,8 +88,8 @@ public enum EventType {
     AREA_MONITOR_ENTERED(EventData.AreaEntered.class, x -> x instanceof EventData.AreaEntered),
 
     // LOCATION
-    NEW_LOCATION(LocationEntity.class, x -> x instanceof LocationEntity),
-    REMOVE_LOCATION(Integer.class, x -> x instanceof Integer),
+    LOCATION_NEW(LocationEntity.class, x -> x instanceof LocationEntity),
+    LOCATION_REMOVE(Integer.class, x -> x instanceof Integer),
 
     //SYSTEM
     SYSTEM_REGISTER_ENTITY(Pair.class, x -> x instanceof Pair),
@@ -99,7 +102,9 @@ public enum EventType {
 
     // NPC
     NPC_ARRIVED_AT_LOC(EventData.NpcLocationArrival.class, x -> x instanceof EventData.NpcLocationArrival),
-    NPC_TRAVEL_TO(EventData.NPCTravelTo.class, x -> x instanceof EventData.NPCTravelTo);
+    NPC_TRAVEL_TO(EventData.NPCTravelTo.class, x -> x instanceof EventData.NPCTravelTo),
+    QUEST_PLAYER_NEW(PlayerQuestEntity.class, x -> x instanceof PlayerQuestEntity),
+    QUEST_WORLD_NEW(WorldQuestEntity.class, x -> x instanceof WorldQuestEntity);
 
     public final Class<?> dataClass;
     private final Predicate<Object> validator;

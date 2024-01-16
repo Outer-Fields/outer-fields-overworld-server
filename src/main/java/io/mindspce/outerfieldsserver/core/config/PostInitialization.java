@@ -1,6 +1,6 @@
 package io.mindspce.outerfieldsserver.core.config;
 
-import io.mindspce.outerfieldsserver.ai.thought.ThoughtFactory;
+import io.mindspce.outerfieldsserver.factory.ThoughtFactory;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ClothingItem;

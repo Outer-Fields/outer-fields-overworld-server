@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.concurrent.locks.LockSupport;
 
 
 public abstract class SystemListener implements EventListener<SystemListener> {
@@ -46,6 +47,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private volatile boolean running = false;
     private final MpscUnboundedXaddArrayQueue<Event<?>> eventQueue = new MpscUnboundedXaddArrayQueue<>(50);
+    private final long waitNanos;
 
     public SystemListener(SystemType systemType, boolean doStart) {
         this.systemType = systemType;
@@ -53,6 +55,16 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         listeningFor.incrementAndGet(EventType.CALLBACK.ordinal());
         listeningFor.incrementAndGet(EventType.TICK.ordinal());
         listeningFor.incrementAndGet(EventType.COMPLETABLE_EVENT.ordinal());
+        waitNanos = -1;
+    }
+
+    public SystemListener(SystemType systemType, boolean doStart, long waitNanos) {
+        this.systemType = systemType;
+        if (doStart) { start(); }
+        listeningFor.incrementAndGet(EventType.CALLBACK.ordinal());
+        listeningFor.incrementAndGet(EventType.TICK.ordinal());
+        listeningFor.incrementAndGet(EventType.COMPLETABLE_EVENT.ordinal());
+        this.waitNanos = waitNanos;
     }
 
     @Override
@@ -112,7 +124,11 @@ public abstract class SystemListener implements EventListener<SystemListener> {
             while (running) {
                 Event<?> nextEvent;
                 while ((nextEvent = eventQueue.relaxedPoll()) == null) {
-                    Thread.onSpinWait();
+                    if (waitNanos != -1) {
+                        LockSupport.parkNanos(waitNanos);
+                    } else {
+                        Thread.onSpinWait();
+                    }
                 }
                 switch (nextEvent.eventType()) {
                     case EventType.TICK -> handleTick((Tick) nextEvent.data());
@@ -183,7 +199,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         components.forEach(this::registerComponent);
     }
 
-    // TODO make these handle this mess of tables
+
     public void removeByComponent(Component<?> component) {
         Iterator<Map.Entry<EventType, List<EventListener<?>>>> itr = listenerRegistry.entrySet().iterator();
         while (itr.hasNext()) {
@@ -260,14 +276,11 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     }
 
     private void handleEvent(Event<?> event) {
-        if (systemType == SystemType.NPC) {
-            System.out.println("\n\n\nNPC EVENT");
-            System.out.println(event);
-            System.out.println("\n\n\n");
-        }
+
         List<EventListener<?>> listeners = listenerRegistry.get(event.eventType());
 
         if (listeners == null) {
+            System.out.println("null listeners");
             //TODO log this, error state
             return;
         }
@@ -371,9 +384,9 @@ public abstract class SystemListener implements EventListener<SystemListener> {
 
     private void addListeningEvent(EventType eventType, Component<?> component) {
         listeningFor.incrementAndGet(eventType.ordinal());
-
         List<EventListener<?>> existing = listenerRegistry.computeIfAbsent((eventType), v -> new ArrayList<>());
-        if (!existing.stream().allMatch(c -> c.equals(component))) {
+
+        if (existing.stream().noneMatch(c -> c.equals(component))) {
             existing.add(component);
         }
     }

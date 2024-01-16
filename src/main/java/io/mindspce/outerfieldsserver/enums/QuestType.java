@@ -1,4 +1,4 @@
 package io.mindspce.outerfieldsserver.enums;
 
-public enum NPCState {
+public enum QuestType {
 }

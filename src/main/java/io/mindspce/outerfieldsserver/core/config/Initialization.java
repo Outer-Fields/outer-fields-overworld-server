@@ -1,6 +1,5 @@
 package io.mindspce.outerfieldsserver.core.config;
 
-import io.mindspce.outerfieldsserver.ai.thought.ThoughtFactory;
 import io.mindspce.outerfieldsserver.area.AreaEntity;
 import io.mindspce.outerfieldsserver.area.ChunkEntity;
 import io.mindspce.outerfieldsserver.area.ChunkJson;
@@ -13,17 +12,13 @@ import io.mindspce.outerfieldsserver.core.systems.PlayerSystem;
 import io.mindspce.outerfieldsserver.core.systems.WorldSystem;
 import io.mindspce.outerfieldsserver.entities.PlayerEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
-import io.mindspce.outerfieldsserver.enums.ClothingItem;
-import io.mindspce.outerfieldsserver.enums.EntityState;
 import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
-import jakarta.annotation.PostConstruct;
 import org.jctools.maps.NonBlockingHashMapLong;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
 import java.io.File;
 import java.io.IOException;

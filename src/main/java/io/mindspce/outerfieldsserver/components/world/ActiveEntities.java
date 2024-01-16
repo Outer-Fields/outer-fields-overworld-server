@@ -3,7 +3,6 @@ package io.mindspce.outerfieldsserver.components.world;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import io.mindspce.outerfieldsserver.components.Component;
-import io.mindspce.outerfieldsserver.components.ComponentFactory;
 import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
@@ -17,7 +16,6 @@ import io.mindspice.mindlib.data.geometry.IVectorQuadTree;
 import io.mindspice.mindlib.data.geometry.QuadItemId;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 
-import java.util.Arrays;
 import java.util.List;
 
 

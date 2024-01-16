@@ -3,13 +3,9 @@ package io.mindspce.outerfieldsserver.core.singletons;
 import io.mindspce.outerfieldsserver.area.AreaEntity;
 import io.mindspce.outerfieldsserver.area.ChunkEntity;
 import io.mindspce.outerfieldsserver.area.ChunkJson;
-import io.mindspce.outerfieldsserver.components.ai.ThoughtModule;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.core.Tick;
-import io.mindspce.outerfieldsserver.entities.Entity;
-import io.mindspce.outerfieldsserver.entities.LocationEntity;
-import io.mindspce.outerfieldsserver.entities.NonPlayerEntity;
-import io.mindspce.outerfieldsserver.entities.PlayerEntity;
+import io.mindspce.outerfieldsserver.entities.*;
 import io.mindspce.outerfieldsserver.enums.*;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.*;
@@ -240,6 +236,24 @@ public class EntityManager {
                 new EventData.NewEntity(currArea, currPos, npcEntity)
         ));
         return npcEntity;
+    }
+
+    public Entity newSystemEntity(SystemType systemType) {
+        int id = entityCache.getAndReserveNextIndex();
+        SystemEntity systemEntity = new SystemEntity(id, systemType);
+        long stamp = entityLock.writeLock();
+        try {
+            entityMap.get(EntityType.SYSTEM_ENTITY).add(id);
+        } finally {
+            entityLock.unlockWrite(stamp);
+        }
+
+        var system = systemListeners.stream().filter(s -> s.systemType() == systemType).findFirst();
+        if (system.isEmpty()) {
+            throw new RuntimeException("Attempted to register entity with null system");
+        }
+        systemEntity.registerWithSystem(system.get());
+        return systemEntity;
     }
 }
 

@@ -1,4 +1,4 @@
-package io.mindspce.outerfieldsserver.ai.thought;
+package io.mindspce.outerfieldsserver.factory;
 
 import io.mindspce.outerfieldsserver.ai.decisiongraph.DecisionEventGraph;
 import io.mindspce.outerfieldsserver.ai.decisiongraph.RootNode;

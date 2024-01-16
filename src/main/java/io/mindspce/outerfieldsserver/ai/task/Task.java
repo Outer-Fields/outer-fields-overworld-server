@@ -98,6 +98,7 @@ public class Task<T extends Enum<T>, U> {
 
     public void reset() {
         subTasks.addAll(restoredSubTasks);
+        subTasks.forEach(SubTask::reset);
         isCompleted = false;
     }
 

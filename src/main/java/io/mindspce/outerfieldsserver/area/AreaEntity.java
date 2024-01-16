@@ -1,9 +1,5 @@
 package io.mindspce.outerfieldsserver.area;
 
-import io.mindspce.outerfieldsserver.components.*;
-import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
-import io.mindspce.outerfieldsserver.components.primatives.ComponentSystem;
-import io.mindspce.outerfieldsserver.components.primatives.SimpleListener;
 import io.mindspce.outerfieldsserver.components.world.ActiveEntities;
 import io.mindspce.outerfieldsserver.components.world.ChunkMap;
 import io.mindspce.outerfieldsserver.components.world.TrackedEntities;
@@ -12,13 +8,10 @@ import io.mindspce.outerfieldsserver.entities.LocationEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EntityType;
 
-import io.mindspce.outerfieldsserver.systems.EventData;
-import io.mindspce.outerfieldsserver.systems.event.Event;
-import io.mindspce.outerfieldsserver.systems.event.EventType;
+import io.mindspce.outerfieldsserver.factory.ComponentFactory;
 import io.mindspice.mindlib.data.geometry.QuadItem;
 import io.mindspice.mindlib.data.geometry.*;
 import io.mindspice.mindlib.data.tuples.Pair;
-import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 
 import java.util.*;
 

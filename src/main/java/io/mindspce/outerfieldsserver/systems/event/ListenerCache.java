@@ -175,8 +175,6 @@ public abstract class ListenerCache<T extends Component<T>> {
                 for (var hook : hooks) {
                     hook.second().accept(event);
                     if (hook.first()) { isIntercept = true; }
-                    System.out.println("accepted event: " + event);
-
                 }
             }
         }

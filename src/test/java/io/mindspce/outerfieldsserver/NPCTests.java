@@ -17,6 +17,7 @@ import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.core.systems.WorldSystem;
 import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.entities.PositionalEntity;
 import io.mindspce.outerfieldsserver.enums.*;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.Event;
@@ -25,8 +26,10 @@ import io.mindspce.outerfieldsserver.systems.event.SystemListener;
 import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
-import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Bean;
+import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +61,6 @@ public class NPCTests {
         }
     }
 
-    @Bean
     public WorldSystem worldSystem() throws IOException {
 
         ChunkJson chunkJson = GridUtils.parseChunkJson(new File(
@@ -199,12 +201,12 @@ public class NPCTests {
                         null,
                         false)
                 .setConcurrent(true)
-                .setOnCompletion((td) -> td.bool.set(true))
+                .setOnCompletion((td) -> btd.bool().set(true))
                 .build();
 
         thoughtModule.addWantingToDo(
                 ThoughtType.TEST_TRAVEL,
-                false,
+                true,
                 (Tick t) -> true,
                 concurrent
         );
@@ -226,6 +228,22 @@ public class NPCTests {
     }
 
     @Test
+    public void npcTest1() throws IOException, InterruptedException {
+        var ts = new TestSystem(SystemType.NPC, true);
+        var ws = worldSystem();
+
+        var npc = EntityManager.GET().newNonPlayerEntity(-1, "Test_NPC", List.of(EntityState.TEST),
+                new ClothingItem[6], AreaId.TEST, IVector2.of(672, 960), IVector2.of(200, 200));
+
+        var count = testThought1(npc);
+        Thread.sleep(10_000);
+
+        System.out.println(count.get());
+        assertTrue(count.get() > 2);
+
+    }
+
+    @Test
     public void npcTest() throws InterruptedException, IOException {
         var ts = new TestSystem(SystemType.NPC, true);
         var ws = worldSystem();
@@ -235,22 +253,10 @@ public class NPCTests {
 
         var btd = testThought12(npc);
 
+        Thread.sleep(1000);
 
-
-        var start = System.currentTimeMillis();
-        while (System.currentTimeMillis() - start < 2000) {
-            Thread.sleep(1000);
-        }
-        var tc = new TestComponent(npc, ComponentType.SIMPLE_OBJECT, List.of());
-        EntityManager.GET().emitEvent(Event.builder(EventType.PING, tc).setData(new Object()).build());
-        EntityManager.GET().emitEvent(Event.builder(EventType.PONG, tc).setData(new Object()).build());
-
-        while (System.currentTimeMillis() - start < 2000) {
-            Thread.sleep(1000);
-        }
-
-        ThoughtModule<?,?> tm = ComponentType.THOUGHT_MODULE.castOrNull(npc.getComponent(ComponentType.THOUGHT_MODULE).getFirst());
-        assert  tm != null;
+        ThoughtModule<?, ?> tm = ComponentType.THOUGHT_MODULE.castOrNull(npc.getComponent(ComponentType.THOUGHT_MODULE).getFirst());
+        assert tm != null;
         assert tm.hasInputHooksFor().contains(EventType.PING);
         assert tm.hasInputHooksFor().contains(EventType.PONG);
 
@@ -259,7 +265,11 @@ public class NPCTests {
         assert npcSystem.isListeningFor(EventType.PING);
         assert npcSystem.isListeningFor(EventType.PONG);
 
+        var tc = new TestComponent(new PositionalEntity(11, EntityType.PLAYER_ENTITY, AreaId.TEST), ComponentType.SIMPLE_OBJECT, List.of());
+        EntityManager.GET().emitEvent(Event.builder(EventType.PING, tc).setData(new Object()).build());
+        EntityManager.GET().emitEvent(Event.builder(EventType.PONG, tc).setData(new Object()).build());
 
+        Thread.sleep(1000);
 
         assert btd.bool.get();
 

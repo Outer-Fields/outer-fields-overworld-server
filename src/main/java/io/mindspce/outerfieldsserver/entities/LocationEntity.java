@@ -8,11 +8,11 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 
 
 public class LocationEntity extends PositionalEntity {
-    private final int locationKey;
+    private final long key;
 
-    public LocationEntity(int id, AreaId areaId, IVector2 position, int locationKey) {
+    public LocationEntity(int id, AreaId areaId, IVector2 position, int key) {
         super(id, EntityType.LOCATION_ENTITY, areaId, position);
-        this.locationKey = locationKey;
+        this.key = key;
     }
 
     public LocationEntity withAreaMonitor(IRect2 monitorArea) {
@@ -21,6 +21,6 @@ public class LocationEntity extends PositionalEntity {
         return this;
     }
 
-    public int locationKey() { return locationKey; }
+    public long locationKey() { return key; }
 
 }

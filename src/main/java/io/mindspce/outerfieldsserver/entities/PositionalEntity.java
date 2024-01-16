@@ -1,8 +1,7 @@
 package io.mindspce.outerfieldsserver.entities;
 
-import io.mindspce.outerfieldsserver.components.ComponentFactory;
+import io.mindspce.outerfieldsserver.factory.ComponentFactory;
 import io.mindspce.outerfieldsserver.components.entity.GlobalPosition;
-import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.systems.EventData;

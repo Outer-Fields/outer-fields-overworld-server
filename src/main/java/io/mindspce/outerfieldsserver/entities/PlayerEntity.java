@@ -1,11 +1,10 @@
 package io.mindspce.outerfieldsserver.entities;
 
-import io.mindspce.outerfieldsserver.components.*;
-import io.mindspce.outerfieldsserver.entities.PositionalEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ClothingItem;
 import io.mindspce.outerfieldsserver.enums.EntityState;
 import io.mindspce.outerfieldsserver.enums.EntityType;
+import io.mindspce.outerfieldsserver.factory.ComponentFactory;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import org.springframework.web.socket.WebSocketSession;
 

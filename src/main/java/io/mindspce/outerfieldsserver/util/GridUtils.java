@@ -16,13 +16,6 @@ import java.util.List;
 
 public class GridUtils {
 
-//    public static IVector2 calcChunkPos(IVector2 chunkIndex) {
-//        return chunkIndex.multiply(GameSettings.GET().chunkSize());
-//    }
-
-//    public static IVector2 calcChunkIndex(IVector2 pos) {
-//        return pos.divide(GameSettings.GET().chunkSize());
-//    }
 
     public static void printGrid(IVector2[][] grid) {
         for (int x = 0; x < grid[0].length; x++) {

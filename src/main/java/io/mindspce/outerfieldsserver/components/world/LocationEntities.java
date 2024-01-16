@@ -19,10 +19,10 @@ public class LocationEntities extends Component<LocationEntities> {
 
     public LocationEntities(Entity parentEntity) {
         super(parentEntity, ComponentType.LOCATION_ENTITIES, List.of());
-        registerListener(EventType.NEW_LOCATION, BiPredicatedBiConsumer.of(
+        registerListener(EventType.LOCATION_NEW, BiPredicatedBiConsumer.of(
                 PredicateLib::isSameAreaEvent, LocationEntities::onNewLocation)
         );
-        registerListener(EventType.REMOVE_LOCATION, BiPredicatedBiConsumer.of(
+        registerListener(EventType.LOCATION_REMOVE, BiPredicatedBiConsumer.of(
                 PredicateLib::isSameAreaEvent, LocationEntities::onRemoveLocation)
         );
     }
