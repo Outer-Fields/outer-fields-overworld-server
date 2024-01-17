@@ -45,7 +45,7 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
 
     public void updateArea(AreaId newArea) {
         var eventData = new EventData.EntityAreaChanged(
-                parentEntity.entityType() == EntityType.PLAYER_ENTITY,
+                parentEntity.entityType() == EntityType.PLAYER,
                 currArea,
                 newArea,
                 IVector2.of(currPosition())
@@ -75,7 +75,7 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
         if (chunkX != currChunkIndex.x() || chunkY != currChunkIndex.y()) {
             var newChunkIndex = IVector2.of(chunkX, chunkY);
             var eventData = new EventData.EntityChunkChanged(
-                    parentEntity.entityType() == EntityType.PLAYER_ENTITY,
+                    parentEntity.entityType() == EntityType.PLAYER,
                     currChunkIndex,
                     newChunkIndex
             );
@@ -86,7 +86,7 @@ public class GlobalPosition extends Component<GlobalPosition> implements NetSeri
         if (currPosition().x() != x || currPosition().y() != y) {
             mVector.shiftLine(x, y);
             var eventData = new EventData.EntityPositionChanged(
-                    parentEntity.entityType() == EntityType.PLAYER_ENTITY,
+                    parentEntity.entityType() == EntityType.PLAYER,
                     IVector2.of(IVector2.of(lastPosition())),
                     IVector2.of(IVector2.of(currPosition()))
             );

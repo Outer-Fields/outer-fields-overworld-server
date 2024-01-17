@@ -35,7 +35,7 @@ public class AreaMonitor extends Component<AreaMonitor> {
     public void onEntityPositionChanged(Event<EventData.EntityPositionChanged> event) {
         if (monitoredArea.contains(event.data().newPosition())) {
             emitEvent(Event.areaEntered(
-                    this, new EventData.AreaEntered(event.issuerEntityType() == EntityType.PLAYER_ENTITY, event.issuerEntityId())
+                    this, new EventData.AreaEntered(event.issuerEntityType() == EntityType.PLAYER, event.issuerEntityId())
             ));
         }
     }
@@ -43,7 +43,7 @@ public class AreaMonitor extends Component<AreaMonitor> {
     public void onNewEntity(Event<EventData.NewEntity> event) {
         if (monitoredArea.contains(event.data().position())) {
             emitEvent(Event.areaEntered(
-                    this, new EventData.AreaEntered(event.issuerEntityType() == EntityType.PLAYER_ENTITY, event.issuerEntityId())
+                    this, new EventData.AreaEntered(event.issuerEntityType() == EntityType.PLAYER, event.issuerEntityId())
             ));
         }
     }

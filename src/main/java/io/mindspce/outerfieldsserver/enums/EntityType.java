@@ -2,23 +2,23 @@ package io.mindspce.outerfieldsserver.enums;
 
 import io.mindspce.outerfieldsserver.area.AreaEntity;
 import io.mindspce.outerfieldsserver.area.ChunkEntity;
-import io.mindspce.outerfieldsserver.entities.LocationEntity;
-import io.mindspce.outerfieldsserver.entities.PlayerEntity;
-import io.mindspce.outerfieldsserver.entities.SystemEntity;
+import io.mindspce.outerfieldsserver.entities.*;
 import jakarta.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.function.Predicate;
 
 
-public enum EntityType{
-    ANY( -1, Object.class, Objects::nonNull),
-    PLAYER_ENTITY( 0, Object.class, x -> x instanceof PlayerEntity),
-    NON_PLAYER_ENTITY( 1, Object.class, Objects::nonNull),
-    AREA_ENTITY( 2, AreaEntity.class, x -> x instanceof AreaEntity),
-    LOCATION_ENTITY( 3, LocationEntity.class, x -> x instanceof LocationEntity),
-    CHUNK_ENTITY( 4, ChunkEntity.class, x -> x instanceof ChunkEntity), 
-    SYSTEM_ENTITY(5, SystemEntity.class , x -> x instanceof SystemEntity );
+public enum EntityType {
+    ANY(-1, Object.class, Objects::nonNull),
+    PLAYER(0, Object.class, x -> x instanceof PlayerEntity),
+    NON_PLAYER(1, Object.class, Objects::nonNull),
+    AREA(2, AreaEntity.class, x -> x instanceof AreaEntity),
+    LOCATION(3, LocationEntity.class, x -> x instanceof LocationEntity),
+    CHUNK(4, ChunkEntity.class, x -> x instanceof ChunkEntity),
+    SYSTEM(5, SystemEntity.class, x -> x instanceof SystemEntity),
+    QUEST_PLAYER(6, PlayerQuestEntity.class, x -> x instanceof PlayerQuestEntity),
+    QUEST_WORLD(7, WorldQuestEntity.class, x -> x instanceof WorldQuestEntity);
 
     public final int value;
     public final Class<?> dataClass;

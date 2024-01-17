@@ -3,7 +3,6 @@ package io.mindspce.outerfieldsserver.components.serialization;
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.networking.proto.EntityProto;
 import io.mindspce.outerfieldsserver.entities.Entity;
-import io.mindspce.outerfieldsserver.entities.LocationEntity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.systems.event.Event;
@@ -12,7 +11,6 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 
 import java.util.List;
-import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 
@@ -42,7 +40,7 @@ public class LocationItemSerializer extends Component<LocationItemSerializer> {
         if (lastSerialization == null || System.currentTimeMillis() - lastSerializationTime > 20) {
             var pos = position.get();
             var builder = EntityProto.LocationItemEntity.newBuilder()
-                    .setIsLocation(parentEntity.entityType() == EntityType.LOCATION_ENTITY)
+                    .setIsLocation(parentEntity.entityType() == EntityType.LOCATION)
                     .setId(entityId())
                     .setName(parentEntity.name())
                     .setPosX(pos.x())

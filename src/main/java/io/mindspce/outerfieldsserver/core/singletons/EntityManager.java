@@ -14,6 +14,7 @@ import io.mindspice.mindlib.data.collections.lists.primative.IntList;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
+import io.mindspice.mindlib.util.DebugUtils;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.*;
@@ -119,14 +120,12 @@ public class EntityManager {
 
     public void emitEvent(Event<?> event) {
         if (event.eventType() != EventType.TICK) {
-            System.out.println(event);
+            DebugUtils.print("New Event:", event.eventType());
         }
-
 
         for (int i = 0; i < systemListeners.size(); ++i) {
             var listener = systemListeners.get(i);
             if (event.isDirect() && listener.hasListeningEntity(event.recipientEntityId())) {
-
                 listener.onEvent(event);
                 return;
             } else {
@@ -166,7 +165,7 @@ public class EntityManager {
 
         long stamp = entityLock.writeLock();
         try {
-            entityMap.get(EntityType.CHUNK_ENTITY).add(id);
+            entityMap.get(EntityType.CHUNK).add(id);
             return chunkEntity;
         } finally {
             entityLock.unlockWrite(stamp);
@@ -181,10 +180,11 @@ public class EntityManager {
         AreaEntity areaEntity = new AreaEntity(id, areaId, areaSize, chunkSize, staticLocations);
         areaId.setEntityId(id);
         areaId.setEntity(areaEntity);
+        entityCache.putAtReservedIndex(id, areaEntity);
 
         long stamp = entityLock.writeLock();
         try {
-            entityMap.get(EntityType.AREA_ENTITY).add(id);
+            entityMap.get(EntityType.AREA).add(id);
             return areaEntity;
         } finally {
             entityLock.unlockWrite(stamp);
@@ -194,40 +194,58 @@ public class EntityManager {
     }
 
     public PlayerEntity newPlayerEntity(int playerId, String playerName, List<EntityState> initState,
-            ClothingItem[] outfit, AreaId currArea, IVector2 currPos, WebSocketSession session) {
+            ClothingItem[] outfit, AreaId currArea, IVector2 currPos, WebSocketSession session, boolean broadcast) {
 
         int id = entityCache.getAndReserveNextIndex();
         PlayerEntity playerEntity = new PlayerEntity(id, playerId, playerName, initState, outfit, currArea, currPos, session);
+        entityCache.putAtReservedIndex(id, playerEntity);
 
         long stamp = entityLock.writeLock();
         try {
-            entityMap.get(EntityType.PLAYER_ENTITY).add(id);
+            entityMap.get(EntityType.PLAYER).add(id);
         } finally {
             entityLock.unlockWrite(stamp);
         }
 
-
-        emitEvent(Event.newEntity(new EventData.NewEntity(currArea, currPos, playerEntity)));
-        emitEventToSystem(SystemType.PLAYER, Event.systemRegisterEntity(playerEntity));
+        if (broadcast) { Event.emitAndRegisterEntity(SystemType.PLAYER, currArea, currPos, playerEntity); }
         return playerEntity;
     }
 
     public NonPlayerEntity newNonPlayerEntity(long key, String name, List<EntityState> initStates, ClothingItem[] outfit,
-            AreaId currArea, IVector2 currPos, IVector2 viewRectSize) {
+            AreaId currArea, IVector2 currPos, IVector2 viewRectSize, boolean broadcast) {
 
         int id = entityCache.getAndReserveNextIndex();
         NonPlayerEntity npcEntity = new NonPlayerEntity(id, key, name, initStates, outfit, currArea, currPos, viewRectSize);
+        entityCache.putAtReservedIndex(id, npcEntity);
 
         long stamp = entityLock.writeLock();
         try {
-            entityMap.get(EntityType.NON_PLAYER_ENTITY).add(id);
+            entityMap.get(EntityType.NON_PLAYER).add(id);
         } finally {
             entityLock.unlockWrite(stamp);
         }
 
-        emitEvent(Event.newEntity(new EventData.NewEntity(currArea, currPos, npcEntity)));
-      //  emitEventToSystem(SystemType.NPC, Event.systemRegisterEntity(npcEntity));
+        if (broadcast) { Event.emitAndRegisterEntity(SystemType.NPC, currArea, currPos, npcEntity); }
         return npcEntity;
+    }
+
+    public PlayerQuestEntity newPlayerQuestEntity(PlayerQuests quest, int participatingPlayerId, boolean broadcast) {
+        int id = entityCache.getAndReserveNextIndex();
+        PlayerQuestEntity questEntity = new PlayerQuestEntity(id, quest, participatingPlayerId);
+        entityCache.putAtReservedIndex(id, questEntity);
+
+        long stamp = entityLock.writeLock();
+        try {
+            entityMap.get(EntityType.QUEST_PLAYER).add(id);
+        } finally {
+            entityLock.unlockWrite(stamp);
+        }
+
+        if (broadcast) {
+            Event.emitAndRegisterEntity(SystemType.NPC, AreaId.NONE, IVector2.of(-1, -1), questEntity);
+            emitEvent(Event.newPlayerQuest(questEntity));
+        }
+        return questEntity;
     }
 
     public Entity newSystemEntity(SystemType systemType) {
@@ -235,7 +253,7 @@ public class EntityManager {
         SystemEntity systemEntity = new SystemEntity(id, systemType);
         long stamp = entityLock.writeLock();
         try {
-            entityMap.get(EntityType.SYSTEM_ENTITY).add(id);
+            entityMap.get(EntityType.SYSTEM).add(id);
         } finally {
             entityLock.unlockWrite(stamp);
         }

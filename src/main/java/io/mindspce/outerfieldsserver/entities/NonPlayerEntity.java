@@ -15,7 +15,7 @@ public class NonPlayerEntity extends PositionalEntity {
 
     public NonPlayerEntity(int entityId, long key, String characterName, List<EntityState> initStates,
             ClothingItem[] initOutfit, AreaId currArea, IVector2 currPosition, IVector2 viewRectSize) {
-        super(entityId, EntityType.NON_PLAYER_ENTITY, currArea, currPosition);
+        super(entityId, EntityType.NON_PLAYER, currArea, currPosition);
         super.name = characterName;
         this.key = key;
 

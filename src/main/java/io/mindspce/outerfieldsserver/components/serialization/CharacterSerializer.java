@@ -2,7 +2,6 @@ package io.mindspce.outerfieldsserver.components.serialization;
 
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.networking.proto.EntityProto;
-import io.mindspce.outerfieldsserver.entities.PlayerEntity;
 import io.mindspce.outerfieldsserver.entities.PositionalEntity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
@@ -10,7 +9,6 @@ import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
-import io.mindspice.mindlib.util.DebugUtils;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -42,7 +40,7 @@ public class CharacterSerializer extends Component<CharacterSerializer> {
         if (lastSerialization == null || System.currentTimeMillis() - lastSerializationTime > 20) {
             var pos = position.get();
             var builder = EntityProto.CharacterEntity.newBuilder()
-                    .setIsPlayer(parentEntity.entityType() == EntityType.PLAYER_ENTITY)
+                    .setIsPlayer(parentEntity.entityType() == EntityType.PLAYER)
                     .setId(entityId())
                     .setName(parentEntity.name())
                     .setPosX(pos.x())

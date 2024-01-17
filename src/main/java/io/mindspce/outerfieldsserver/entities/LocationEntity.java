@@ -11,7 +11,7 @@ public class LocationEntity extends PositionalEntity {
     private final long key;
 
     public LocationEntity(int id, AreaId areaId, IVector2 position, int key) {
-        super(id, EntityType.LOCATION_ENTITY, areaId, position);
+        super(id, EntityType.LOCATION, areaId, position);
         this.key = key;
     }
 

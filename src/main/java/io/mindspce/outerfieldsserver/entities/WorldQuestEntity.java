@@ -5,13 +5,15 @@ import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.enums.PlayerQuests;
 import io.mindspce.outerfieldsserver.enums.WorldQuests;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 
 public class WorldQuestEntity extends Entity {
     private final WorldQuests quest;
+    private final List<Integer> involvedPlayers = new CopyOnWriteArrayList<>();
 
-
-    public WorldQuestEntity(int id, EntityType entityType, AreaId areaId, WorldQuests quest,
-            int participatingPlayerId, int participatingEntityId) {
+    public WorldQuestEntity(int id, EntityType entityType, AreaId areaId, WorldQuests quest) {
         super(id, entityType, areaId);
         this.quest = quest;
     }
@@ -22,6 +24,14 @@ public class WorldQuestEntity extends Entity {
 
     public final long key() {
         return quest.key;
+    }
+
+    public List<Integer> involvedPlayers() {
+        return involvedPlayers;
+    }
+
+    public void addInvolvedPlayer(int playerId) {
+        involvedPlayers.add(playerId);
     }
 
 }

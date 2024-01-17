@@ -8,7 +8,7 @@ import io.mindspce.outerfieldsserver.components.npc.TravelController;
 import io.mindspce.outerfieldsserver.components.primatives.ComponentSystem;
 import io.mindspce.outerfieldsserver.components.primatives.SimpleEmitter;
 import io.mindspce.outerfieldsserver.components.primatives.SimpleListener;
-import io.mindspce.outerfieldsserver.components.quest.PlayerQuestModule;
+import io.mindspce.outerfieldsserver.components.quest.QuestModule;
 import io.mindspce.outerfieldsserver.components.serialization.CharacterSerializer;
 import io.mindspce.outerfieldsserver.components.serialization.NetSerializer;
 import io.mindspce.outerfieldsserver.components.world.*;
@@ -45,12 +45,12 @@ public enum ComponentType {
     EntityProperties(EntityProperties.class, x -> x instanceof EntityProperties),
     NET_SERIALIZER(NetSerializer.class, x -> x instanceof NetSerializer),
     LOCATION_ENTITIES(LocationEntities.class, x -> x instanceof LocationEntities),
-    TRACKED_ENTITIES(TrackedEntities.class, x -> x instanceof TrackedEntities),
+    AREA_ENTITIES(AreaEntities.class, x -> x instanceof AreaEntities),
     THOUGHT_MODULE(ThoughtModule.class, x -> x instanceof ThoughtModule<?, ?>),
     DECISION_TREE(DecisionTree.class, x -> x instanceof DecisionTree),
     CHARACTER_SERIALIZER(CharacterSerializer.class, x -> x instanceof CharacterSerializer),
     TRAVEL_CONTROLLER(TravelController.class, x -> x instanceof TravelController),
-    PLAYER_QUEST(PlayerQuestModule.class, x -> x instanceof PlayerQuestModule);
+    QUEST_MODULE(QuestModule.class, x -> x instanceof QuestModule);
 
     public final Class<?> componentClass;
     private final Predicate<Object> validator;

@@ -21,12 +21,12 @@ public class ChunkEntity extends Entity {
 
     public ChunkEntity(int entityId, AreaId areaId, IVector2 index, Map<IVector2,
             TileData> activeTiles) {
-        super(entityId, EntityType.CHUNK_ENTITY, areaId, index);
+        super(entityId, EntityType.CHUNK, areaId, index);
         this.activeTiles = activeTiles;
     }
 
     public ChunkEntity(int entityId, AreaId areaId, IVector2 index, ChunkJson chunkJson) {
-        super(entityId, EntityType.CHUNK_ENTITY, areaId, index);
+        super(entityId, EntityType.CHUNK, areaId, index);
         activeTiles = loadFromJson(chunkJson);
         this.chunkIndex = chunkIndex;
     }

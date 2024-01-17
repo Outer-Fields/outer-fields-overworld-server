@@ -146,6 +146,7 @@ public abstract class ListenerCache<T extends Component<T>> {
             T self = (T) this;
             handleTick(self, tickEvent);
         } catch (Exception e) {
+            System.out.println("Tick Exception");
             e.printStackTrace();
             //TODO log this
         }
@@ -163,7 +164,7 @@ public abstract class ListenerCache<T extends Component<T>> {
                 handleEvent(self, event);
             }
         } catch (Exception e) {
-            //TODO log this
+            System.out.println("Event Exception");
             e.printStackTrace();
         }
     }
@@ -205,6 +206,7 @@ public abstract class ListenerCache<T extends Component<T>> {
             T self = (T) this;
             event.data().accept(self);
         } catch (Exception e) {
+            System.out.println("Callback Exception");
             e.printStackTrace();
             //TODO log this
         }

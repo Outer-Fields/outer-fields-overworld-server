@@ -2,7 +2,10 @@ package io.mindspce.outerfieldsserver.systems.event;
 
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
+import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.entities.PlayerQuestEntity;
+import io.mindspce.outerfieldsserver.entities.WorldQuestEntity;
 import io.mindspce.outerfieldsserver.enums.*;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspice.mindlib.data.geometry.IRect2;
@@ -182,8 +185,8 @@ public record Event<T>(
     }
 
     public static Event<EventData.NewEntity> newEntity(EventData.NewEntity newEntityData) {
-        return new Event<>(EventType.NEW_ENTITY, AreaId.GLOBAL, -1, -1, ComponentType.ANY,
-                newEntityData.entity().entityType(), 1-1, -1, ComponentType.ANY, newEntityData);
+        return new Event<>(EventType.NEW_ENTITY, newEntityData.area(), -1, -1, ComponentType.ANY,
+                newEntityData.entity().entityType(), -1, -1, ComponentType.ANY, newEntityData);
     }
 
     public static Event<IRect2> entityViewRectChanged(Component<?> component, IRect2 viewRect) {
@@ -290,6 +293,11 @@ public record Event<T>(
                 EntityType.ANY, -1, -1, ComponentType.ANY, entity);
     }
 
+    public static void emitAndRegisterEntity(SystemType systemType, AreaId currArea, IVector2 currPos, Entity entity) {
+        EntityManager.GET().emitEvent(Event.newEntity(new EventData.NewEntity(currArea, currPos, entity)));
+        EntityManager.GET().emitEventToSystem(systemType, Event.systemRegisterEntity(entity));
+
+    }
 
     public static Event<EventData.NpcLocationArrival> npcArrivedAtLocation(Component<?> component, AreaId areaId,
             EventData.NpcLocationArrival data) {
@@ -300,6 +308,27 @@ public record Event<T>(
             EventData.NPCTravelTo data) {
         return new Event<>(EventType.NPC_TRAVEL_TO, areaId, component, data);
     }
+
+    public static Event<PlayerQuestEntity> newPlayerQuest(PlayerQuestEntity entity) {
+        return new Event<>(EventType.QUEST_PLAYER_NEW, AreaId.NONE, -1, -1, ComponentType.ANY,
+                EntityType.ANY, -1, -1, ComponentType.ANY, entity);
+    }
+
+    public static Event<WorldQuestEntity> newWorldQuest(WorldQuestEntity entity) {
+        return new Event<>(EventType.QUEST_WORLD_NEW, AreaId.NONE, -1, -1, ComponentType.ANY,
+                EntityType.ANY, -1, -1, ComponentType.ANY, entity);
+    }
+
+    public static Event<PlayerQuestEntity> questCompletedPlayer(PlayerQuestEntity quest) {
+        return new Event<>(EventType.QUEST_COMPLETED_PLAYER, AreaId.NONE, -1, -1, ComponentType.QUEST_MODULE,
+                EntityType.ANY, -1, -1, ComponentType.ANY, quest);
+    }
+
+    public static Event<WorldQuestEntity> questCompletedWorld( WorldQuestEntity quest) {
+        return new Event<>(EventType.QUEST_COMPLETED_WORLD, AreaId.NONE, -1, -1, ComponentType.QUEST_MODULE,
+                EntityType.ANY, -1, -1, ComponentType.ANY, quest);
+    }
+
 
     public static class Builder<T> {
         EventType eventType;

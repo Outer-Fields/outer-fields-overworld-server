@@ -17,6 +17,7 @@ import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.core.systems.WorldSystem;
 import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.entities.NonPlayerEntity;
 import io.mindspce.outerfieldsserver.entities.PositionalEntity;
 import io.mindspce.outerfieldsserver.enums.*;
 import io.mindspce.outerfieldsserver.systems.EventData;
@@ -27,7 +28,6 @@ import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.Assert.*;
 
@@ -169,12 +169,12 @@ public class NPCTests {
         }
 
         entity.addComponent(thoughtModule);
-        EntityManager.GET().emitEventToSystem(SystemType.NPC, Event.systemRegisterEntity(entity));
+        Event.emitAndRegisterEntity(SystemType.NPC, entity.areaId(), IVector2.of(0,0), entity);
         return testCount;
 
     }
 
-    public static BasicTaskData testThought12(Entity entity) throws InterruptedException {
+    public static BasicTaskData testThought12(NonPlayerEntity entity) throws InterruptedException {
         AtomicBoolean testCount = new AtomicBoolean(false);
         // @formatter:off
         DecisionEventGraph<BasicFocus, ThoughtType> graph =
@@ -224,8 +224,7 @@ public class NPCTests {
         }
 
         entity.addComponent(thoughtModule);
-
-        EntityManager.GET().emitEventToSystem(SystemType.NPC, Event.systemRegisterEntity(entity));
+        Event.emitAndRegisterEntity(SystemType.NPC, entity.areaId(), IVector2.of(0,0), entity);
         return btd;
 
     }
@@ -236,7 +235,7 @@ public class NPCTests {
         var ws = worldSystem();
 
         var npc = EntityManager.GET().newNonPlayerEntity(-1, "Test_NPC", List.of(EntityState.TEST),
-                new ClothingItem[6], AreaId.TEST, IVector2.of(672, 960), IVector2.of(200, 200));
+                new ClothingItem[6], AreaId.TEST, IVector2.of(672, 960), IVector2.of(200, 200), false);
 
         var count = testThought1(npc);
         Thread.sleep(10_000);
@@ -252,7 +251,7 @@ public class NPCTests {
         var ws = worldSystem();
 
         var npc = EntityManager.GET().newNonPlayerEntity(-1, "Test_NPC", List.of(EntityState.TEST),
-                new ClothingItem[6], AreaId.TEST, IVector2.of(672, 960), IVector2.of(200, 200));
+                new ClothingItem[6], AreaId.TEST, IVector2.of(672, 960), IVector2.of(200, 200), false);
 
         var btd = testThought12(npc);
 
@@ -268,7 +267,7 @@ public class NPCTests {
         assert npcSystem.isListeningFor(EventType.PING);
         assert npcSystem.isListeningFor(EventType.PONG);
 
-        var tc = new TestComponent(new PositionalEntity(11, EntityType.PLAYER_ENTITY, AreaId.TEST), ComponentType.SIMPLE_OBJECT, List.of());
+        var tc = new TestComponent(new PositionalEntity(11, EntityType.PLAYER, AreaId.TEST), ComponentType.SIMPLE_OBJECT, List.of());
         EntityManager.GET().emitEvent(Event.builder(EventType.PING, tc).setData(new Object()).build());
         EntityManager.GET().emitEvent(Event.builder(EventType.PONG, tc).setData(new Object()).build());
 

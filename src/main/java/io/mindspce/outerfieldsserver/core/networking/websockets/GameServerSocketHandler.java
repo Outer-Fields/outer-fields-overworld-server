@@ -59,13 +59,13 @@ public class GameServerSocketHandler extends AbstractWebSocketHandler {
 
         var player = EntityManager.GET().newPlayerEntity(
                 1, "test_1", List.of(EntityState.TEST),
-                new ClothingItem[6], AreaId.TEST, IVector2.of(0, 0), session
+                new ClothingItem[6], AreaId.TEST, IVector2.of(0, 0), session, true
         );
 
         session.getAttributes().put("pid", count);
         session.getAttributes().put("eid", player.entityId());
 
-        playerTable.put(player.getPlayerId(), player);
+        playerTable.put(player.playerId(), player);
 
         count++;
 

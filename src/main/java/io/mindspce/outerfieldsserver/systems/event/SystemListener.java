@@ -20,6 +20,7 @@ import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.mindlib.util.DebugUtils;
 import org.jctools.queues.MpscUnboundedXaddArrayQueue;
 
+import java.sql.SQLOutput;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -128,34 +129,41 @@ public abstract class SystemListener implements EventListener<SystemListener> {
 
     private Runnable process() {
         return (() -> {
-            while (running) {
-                Event<?> nextEvent;
-                while ((nextEvent = eventQueue.relaxedPoll()) == null) {
-                    if (waitNanos != -1) {
-                        LockSupport.parkNanos(waitNanos);
-                    } else {
-                        Thread.onSpinWait();
-                    }
-                }
-                if (systemEvents.get(nextEvent.eventType().ordinal())) {
-                    handleSystemEvent(nextEvent);
-                    return;
-                }
 
-                switch (nextEvent.eventType()) {
-                    case EventType.TICK -> handleTick((Tick) nextEvent.data());
-                    case EventType.CALLBACK -> handleCallBack(nextEvent);
-                    case EventType.COMPLETABLE_EVENT -> handleCompletableEvent(nextEvent);
-                    default -> {
-                        if (nextEvent.isDirect()) {
-                            handleDirectEvent(nextEvent);
+                while (running) {
+                    try {
+
+                    Event<?> nextEvent;
+                    while ((nextEvent = eventQueue.relaxedPoll()) == null) {
+                        if (waitNanos != -1) {
+                            LockSupport.parkNanos(waitNanos);
                         } else {
-                            handleEvent(nextEvent);
+                            Thread.onSpinWait();
                         }
                     }
+                    if (systemEvents.get(nextEvent.eventType().ordinal())) {
+                        handleSystemEvent(nextEvent);
+                        continue;
+                    }
+
+                    switch (nextEvent.eventType()) {
+                        case EventType.TICK -> handleTick((Tick) nextEvent.data());
+                        case EventType.CALLBACK -> handleCallBack(nextEvent);
+                        case EventType.COMPLETABLE_EVENT -> handleCompletableEvent(nextEvent);
+                        default -> {
+                            if (nextEvent.isDirect()) {
+                                handleDirectEvent(nextEvent);
+                            } else {
+                                handleEvent(nextEvent);
+                            }
+                        }
+                    }
+                    } catch (Exception e) {
+                        System.out.println("Exception Processing for system listener: " + systemType);
+                        e.printStackTrace();
+                    }
                 }
 
-            }
         });
     }
 
@@ -174,8 +182,11 @@ public abstract class SystemListener implements EventListener<SystemListener> {
                 EntityManager.GET().emitEvent(new Event<>(EventType.SYSTEM_ENTITIES_RESP, AreaId.GLOBAL, -1, -1, ComponentType.ANY,
                         EntityType.ANY, event.issuerEntityId(), event.issuerComponentId(), ComponentType.ANY, rtnEntities));
             }
-            case SYSTEM_REGISTER_ENTITY -> onRegisterComponent((Entity) event.data());
+            case SYSTEM_REGISTER_ENTITY -> {
+                onRegisterComponent((Entity) event.data());
+            }
         }
+
     }
 
     public boolean drainRemainingQueue() {
@@ -205,8 +216,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     }
 
     public void registerComponent(Component<?> component) {
-        System.out.println("registered:" + component.componentType);
-
+        DebugUtils.print("Registered:", component.componentName(), "With:", systemType());
         component.setRegisteredWith(systemType);
         componentRegistry.put(component.componentId(), component);
         componentTypeRegistry.computeIfAbsent(component.componentType(), v -> new ArrayList<>()).add(component);
@@ -222,15 +232,17 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         }
         existingEntity.add(component);
 
-        if (component.isOnTick()) {
-            tickListeners.add(component);
-        }
+        if (component.isOnTick()) { tickListeners.add(component); }
 
         listeningEntities.increment(component.entityId());
         component.linkSystemUpdates(this::addListeningEvent, this::removeListeningEvent);;
     }
 
     public void registerComponents(List<Component<?>> components) {
+        if (components == null) {
+            // TODO log this
+            System.out.println("Attempted to register null component list");
+        }
         components.forEach(this::registerComponent);
     }
 
@@ -304,21 +316,13 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     }
 
     private void handleTick(Tick tick) {
-        System.out.println("handling tick:" + systemType);
-        try {
             for (int i = 0; i < tickListeners.size(); ++i) {
                 tickListeners.get(i).onTick(tick);
-                System.out.println("Listener for tick: " + tickListeners.get(i).componentName());
             }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
     }
 
     private void handleEvent(Event<?> event) {
-
         List<EventListener<?>> listeners = listenerRegistry.get(event.eventType());
-
         if (listeners == null) {
             System.out.println("null listeners");
             //TODO log this, error state

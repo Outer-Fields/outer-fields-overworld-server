@@ -52,8 +52,7 @@ public abstract class Entity {
         this.entityType = entityType;
         this.areaId = areaId;
         this.chunkIndex = chunkIndex;
-        componentList = new CopyOnWriteArrayList<>();
-        componentList.addAll(components);
+        componentList = new CopyOnWriteArrayList<>(components);
     }
 
     public Entity(int id, EntityType entityType, AreaId areaId, IVector2 chunkIndex) {

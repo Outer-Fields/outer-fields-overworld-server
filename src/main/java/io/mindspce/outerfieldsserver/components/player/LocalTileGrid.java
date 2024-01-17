@@ -31,7 +31,6 @@ public class LocalTileGrid extends Component<LocalTileGrid> {
     }
 
     public void onSelfPositionChanged(Event<EventData.EntityPositionChanged> event) {
-        System.out.println("self pos change");
         calcPositionChange(event.data().newPosition());
     }
 

@@ -17,7 +17,7 @@ public class PlayerEntity extends PositionalEntity {
     public PlayerEntity(int entityId, int playerId, String playerName, List<EntityState> initStates,
             ClothingItem[] initOutfit, AreaId currArea,
             IVector2 currPosition, WebSocketSession webSocketSession) {
-        super(entityId, EntityType.PLAYER_ENTITY, currArea, currPosition);
+        super(entityId, EntityType.PLAYER, currArea, currPosition);
         super.name = playerName;
         this.playerId = playerId;
 
@@ -26,7 +26,7 @@ public class PlayerEntity extends PositionalEntity {
         );
     }
 
-    public int getPlayerId() { return playerId; }
+    public int playerId() { return playerId; }
 
     public String playerName() { return name; }
 

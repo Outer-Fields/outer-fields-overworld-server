@@ -59,7 +59,7 @@ public class EventSystemTests {
     public void parameterGetterTests() {
         EntityManager.GET().eventListeners().clear();
         var system = new TestSystem(SystemType.WORLD, true);
-        var entity = new TestEntity(42, EntityType.PLAYER_ENTITY, AreaId.TEST);
+        var entity = new TestEntity(42, EntityType.PLAYER, AreaId.TEST);
         var testComp = new TestComponent(entity, ComponentType.SIMPLE_OBJECT, List.of(EventType.PONG));
         var testComp2 = new TestComponent(entity, ComponentType.SIMPLE_OBJECT, List.of(EventType.PONG));
         testComp.registerListener(EventType.PING, null);
@@ -112,8 +112,8 @@ public class EventSystemTests {
         EntityManager.GET().eventListeners().clear();
         var system = new TestSystem(SystemType.TEST1, true);
         var system2 = new TestSystem(SystemType.TEST2, true);
-        var entity = new TestEntity(42, EntityType.PLAYER_ENTITY, AreaId.TEST);
-        var entity2 = new TestEntity(422, EntityType.PLAYER_ENTITY, AreaId.TEST);
+        var entity = new TestEntity(42, EntityType.PLAYER, AreaId.TEST);
+        var entity2 = new TestEntity(422, EntityType.PLAYER, AreaId.TEST);
         var testComp = new TestComponent(entity, ComponentType.SIMPLE_OBJECT, List.of(EventType.PING));
         var testComp2 = new TestComponent(entity2, ComponentType.SIMPLE_OBJECT, List.of(EventType.PONG));
 
@@ -163,8 +163,8 @@ public class EventSystemTests {
         EntityManager.GET().eventListeners().clear();
         var system = new TestSystem(SystemType.TEST1, true);
         var system2 = new TestSystem(SystemType.TEST2, true);
-        var entity = new TestEntity(42, EntityType.PLAYER_ENTITY, AreaId.TEST);
-        var entity2 = new TestEntity(422, EntityType.PLAYER_ENTITY, AreaId.TEST);
+        var entity = new TestEntity(42, EntityType.PLAYER, AreaId.TEST);
+        var entity2 = new TestEntity(422, EntityType.PLAYER, AreaId.TEST);
         var testComp = new TestComponent(entity, ComponentType.SIMPLE_OBJECT, List.of(EventType.PING));
         var testComp2 = new TestComponent(entity2, ComponentType.SIMPLE_OBJECT, List.of(EventType.PONG));
 
@@ -222,9 +222,9 @@ public class EventSystemTests {
         EntityManager.GET().eventListeners().clear();
         var system = new TestSystem(SystemType.TEST1, true);
         var system2 = new TestSystem(SystemType.TEST2, true);
-        var entity = new TestEntity(42, EntityType.PLAYER_ENTITY, AreaId.TEST);
-        var entity2 = new TestEntity(422, EntityType.PLAYER_ENTITY, AreaId.TEST);
-        var entity3 = new TestEntity(1, EntityType.PLAYER_ENTITY, AreaId.TEST);
+        var entity = new TestEntity(42, EntityType.PLAYER, AreaId.TEST);
+        var entity2 = new TestEntity(422, EntityType.PLAYER, AreaId.TEST);
+        var entity3 = new TestEntity(1, EntityType.PLAYER, AreaId.TEST);
         var testComp = new TestComponent(entity, ComponentType.SIMPLE_OBJECT, List.of(EventType.PING));
         var testComp3 = new TestComponent(entity3, ComponentType.SIMPLE_OBJECT, List.of(EventType.PING));
         var testComp2 = new TestComponent(entity2, ComponentType.SIMPLE_OBJECT, List.of(EventType.PONG));

@@ -87,6 +87,8 @@ public enum EventType {
     AREA_MONITOR_QUERY(List.class, x -> x instanceof List), //List<Pair<IVector2,Integer>
     AREA_MONITOR_RESP(List.class, x -> x instanceof List), //List<Integer>
     AREA_MONITOR_ENTERED(EventData.AreaEntered.class, x -> x instanceof EventData.AreaEntered),
+    AREA_ENTITIES_QUERY(AreaId.class, x -> x instanceof AreaId),
+    AREA_ENTITIES_RESPONSE(List.class, x -> x instanceof List<?>),
 
     // LOCATION
     LOCATION_NEW(LocationEntity.class, x -> x instanceof LocationEntity),
@@ -104,8 +106,12 @@ public enum EventType {
     // NPC
     NPC_ARRIVED_AT_LOC(EventData.NpcLocationArrival.class, x -> x instanceof EventData.NpcLocationArrival),
     NPC_TRAVEL_TO(EventData.NPCTravelTo.class, x -> x instanceof EventData.NPCTravelTo),
+
+    // Quest
     QUEST_PLAYER_NEW(PlayerQuestEntity.class, x -> x instanceof PlayerQuestEntity),
-    QUEST_WORLD_NEW(WorldQuestEntity.class, x -> x instanceof WorldQuestEntity);
+    QUEST_WORLD_NEW(WorldQuestEntity.class, x -> x instanceof WorldQuestEntity),
+    QUEST_COMPLETED_PLAYER(PlayerQuestEntity.class, x -> x instanceof PlayerQuestEntity),
+    QUEST_COMPLETED_WORLD(WorldQuestEntity.class, x -> x instanceof WorldQuestEntity);
 
     public final Class<?> dataClass;
     private final Predicate<Object> validator;

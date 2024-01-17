@@ -29,12 +29,12 @@ public class QuestSystem extends SystemListener {
         newQuestListener = new SimpleListener(EntityManager.GET().newSystemEntity(SystemType.QUEST));
         newQuestListener.registerInputHook(EventType.QUEST_PLAYER_NEW, this::addPlayerQuest, true);
         newQuestListener.registerInputHook(EventType.QUEST_WORLD_NEW, this::addWorldQuest, true);
+        registerComponent(newQuestListener);
     }
 
     private void addPlayerQuest(Event<PlayerQuestEntity> event) {
         PlayerQuestEntity playerQuest = event.data();
         playerQuestsTable.computeIfAbsent(playerQuest.quest(), v -> new ArrayList<>(4)).add(playerQuest);
-
     }
 
     private void addWorldQuest(Event<WorldQuestEntity> event) {

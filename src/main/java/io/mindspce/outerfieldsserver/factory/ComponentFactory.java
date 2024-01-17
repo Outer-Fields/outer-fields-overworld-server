@@ -75,14 +75,14 @@ public class ComponentFactory {
         return grid;
     }
 
-    public static TrackedEntities addTrackedEntities(Entity entity, List<Entity> trackedEntities) {
-        var tracker = new TrackedEntities(entity, trackedEntities);
+    public static AreaEntities addTrackedEntities(Entity entity, List<Entity> trackedEntities) {
+        var tracker = new AreaEntities(entity, trackedEntities);
         entity.addComponent(tracker);
         return tracker;
     }
 
-    public static TrackedEntities addTrackedEntities(Entity entity) {
-        var tracker = new TrackedEntities(entity);
+    public static AreaEntities addTrackedEntities(Entity entity) {
+        var tracker = new AreaEntities(entity);
         entity.addComponent(tracker);
         return tracker;
     }

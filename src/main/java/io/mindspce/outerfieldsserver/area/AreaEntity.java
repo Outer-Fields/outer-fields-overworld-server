@@ -2,7 +2,7 @@ package io.mindspce.outerfieldsserver.area;
 
 import io.mindspce.outerfieldsserver.components.world.ActiveEntities;
 import io.mindspce.outerfieldsserver.components.world.ChunkMap;
-import io.mindspce.outerfieldsserver.components.world.TrackedEntities;
+import io.mindspce.outerfieldsserver.components.world.AreaEntities;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.entities.LocationEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
@@ -22,20 +22,20 @@ public class AreaEntity extends Entity {
     private final IConcurrentPQuadTree<IPolygon2> collisionGrid;
     private ChunkMap chunkMap;
     private final ActiveEntities activeEntities;
-    private final TrackedEntities trackedEntities;
+    private final AreaEntities areaEntities;
 
     public AreaEntity(int id, AreaId arenaName, IRect2 areaSize, IVector2 chunkSize,
             List<Pair<LocationEntity, IVector2>> initLocations) {
-        super(id, EntityType.AREA_ENTITY, arenaName);
+        super(id, EntityType.AREA, arenaName);
         this.areaSize = areaSize;
         this.chunkSize = chunkSize;
         this.activeEntities = ComponentFactory.addActiveEntityGrid(this, 100, areaSize, 6);
         this.collisionGrid = ComponentFactory.addCollisionGrid(this, new IConcurrentPQuadTree<>(areaSize, 6)).collisionGrid;
-        this.trackedEntities = ComponentFactory.addTrackedEntities(this);
+        this.areaEntities = ComponentFactory.addTrackedEntities(this);
 
         initLocations.forEach(l -> {
             activeEntities.addActiveEntity(l.first(), l.second());
-            trackedEntities.addEntity(l.first());
+            areaEntities.addEntity(l.first());
         });
 
     }

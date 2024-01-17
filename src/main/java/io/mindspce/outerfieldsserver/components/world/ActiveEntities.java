@@ -58,11 +58,11 @@ public class ActiveEntities extends Component<ActiveEntities> {
 
     public void addActiveEntity(Entity entity, IVector2 position) {
         if (activeEntities.contains(entity.entityId())) {
-
             // TODO log this important error
             // this will trigger on if a new player event is sent and then a new area event for the same player-area
             return;
         }
+        System.out.println("Added active entity");
         activeEntities.add(entity.entityId());
         entityGrid.insert(entity.entityId(), position, entity);
 

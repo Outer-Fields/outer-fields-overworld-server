@@ -8,14 +8,11 @@ import io.mindspce.outerfieldsserver.enums.PlayerQuests;
 public class PlayerQuestEntity extends Entity {
     private final PlayerQuests quest;
     private final int participatingPlayerId;
-    private final int participatingEntityId;
 
-    public PlayerQuestEntity(int id, EntityType entityType, AreaId areaId, PlayerQuests quest,
-            int participatingPlayerId, int participatingEntityId) {
-        super(id, entityType, areaId);
+    public PlayerQuestEntity(int id, PlayerQuests quest, int participatingPlayerId) {
+        super(id, EntityType.QUEST_PLAYER, AreaId.NONE);
         this.quest = quest;
         this.participatingPlayerId = participatingPlayerId;
-        this.participatingEntityId = participatingEntityId;
     }
 
     public PlayerQuests quest() {
@@ -30,7 +27,4 @@ public class PlayerQuestEntity extends Entity {
         return participatingPlayerId;
     }
 
-    public int participatingEntityId() {
-        return participatingEntityId;
-    }
 }
