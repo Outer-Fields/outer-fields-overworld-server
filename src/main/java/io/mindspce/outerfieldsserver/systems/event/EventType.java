@@ -3,6 +3,7 @@ package io.mindspce.outerfieldsserver.systems.event;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
 import io.mindspce.outerfieldsserver.core.networking.proto.EntityProto;
+import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.entities.LocationEntity;
 import io.mindspce.outerfieldsserver.entities.PlayerQuestEntity;
 import io.mindspce.outerfieldsserver.entities.WorldQuestEntity;
@@ -92,7 +93,7 @@ public enum EventType {
     LOCATION_REMOVE(Integer.class, x -> x instanceof Integer),
 
     //SYSTEM
-    SYSTEM_REGISTER_ENTITY(Pair.class, x -> x instanceof Pair),
+    SYSTEM_REGISTER_ENTITY(Entity.class, x -> x instanceof Entity),
     SYSTEM_ENTITIES_QUERY(Predicate.class, x -> x instanceof Predicate<?>),
     SYSTEM_ENTITIES_RESP(List.class, x -> x instanceof List<?>),
 

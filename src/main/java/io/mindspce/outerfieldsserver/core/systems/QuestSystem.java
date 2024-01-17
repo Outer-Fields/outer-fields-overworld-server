@@ -34,13 +34,12 @@ public class QuestSystem extends SystemListener {
     private void addPlayerQuest(Event<PlayerQuestEntity> event) {
         PlayerQuestEntity playerQuest = event.data();
         playerQuestsTable.computeIfAbsent(playerQuest.quest(), v -> new ArrayList<>(4)).add(playerQuest);
-        playerQuest.registerWithSystem(this);
+
     }
 
     private void addWorldQuest(Event<WorldQuestEntity> event) {
         WorldQuestEntity worldQuest = event.data();
         worldQuestTable.putIfAbsent(worldQuest.quest(), worldQuest);
-        worldQuest.registerWithSystem(this);
     }
 
 }

@@ -122,9 +122,11 @@ public class EntityManager {
             System.out.println(event);
         }
 
+
         for (int i = 0; i < systemListeners.size(); ++i) {
             var listener = systemListeners.get(i);
             if (event.isDirect() && listener.hasListeningEntity(event.recipientEntityId())) {
+
                 listener.onEvent(event);
                 return;
             } else {
@@ -169,6 +171,8 @@ public class EntityManager {
         } finally {
             entityLock.unlockWrite(stamp);
         }
+
+        // Doesnt need to register is handled internally on world system
     }
 
     public AreaEntity newAreaEntity(AreaId areaId, IRect2 areaSize, IVector2 chunkSize,
@@ -185,6 +189,8 @@ public class EntityManager {
         } finally {
             entityLock.unlockWrite(stamp);
         }
+        // Doesnt need to register is handled internally on world system
+
     }
 
     public PlayerEntity newPlayerEntity(int playerId, String playerName, List<EntityState> initState,
@@ -200,15 +206,9 @@ public class EntityManager {
             entityLock.unlockWrite(stamp);
         }
 
-        var system = systemListeners.stream().filter(s -> s.systemType() == SystemType.PLAYER).findFirst();
-        if (system.isEmpty()) {
-            throw new RuntimeException("Attempted to register entity with null system");
-        }
-        playerEntity.registerWithSystem(system.get());
-        emitEvent(new Event<>(EventType.NEW_ENTITY, currArea, -1, -1, ComponentType.ANY,
-                EntityType.PLAYER_ENTITY, -1, -1, ComponentType.ANY,
-                new EventData.NewEntity(currArea, currPos, playerEntity)
-        ));
+
+        emitEvent(Event.newEntity(new EventData.NewEntity(currArea, currPos, playerEntity)));
+        emitEventToSystem(SystemType.PLAYER, Event.systemRegisterEntity(playerEntity));
         return playerEntity;
     }
 
@@ -225,16 +225,8 @@ public class EntityManager {
             entityLock.unlockWrite(stamp);
         }
 
-        // TODO change this to an NPC system
-        var system = systemListeners.stream().filter(s -> s.systemType() == SystemType.NPC).findFirst();
-        if (system.isEmpty()) {
-            throw new RuntimeException("Attempted to register entity with null system");
-        }
-        npcEntity.registerWithSystem(system.get());
-        emitEvent(new Event<>(EventType.NEW_ENTITY, currArea, -1, -1, ComponentType.ANY,
-                EntityType.NON_PLAYER_ENTITY, -1, -1, ComponentType.ANY,
-                new EventData.NewEntity(currArea, currPos, npcEntity)
-        ));
+        emitEvent(Event.newEntity(new EventData.NewEntity(currArea, currPos, npcEntity)));
+      //  emitEventToSystem(SystemType.NPC, Event.systemRegisterEntity(npcEntity));
         return npcEntity;
     }
 
@@ -252,8 +244,10 @@ public class EntityManager {
         if (system.isEmpty()) {
             throw new RuntimeException("Attempted to register entity with null system");
         }
-        systemEntity.registerWithSystem(system.get());
+
+        // doesn't need to register this is handled internally
         return systemEntity;
     }
+
 }
 

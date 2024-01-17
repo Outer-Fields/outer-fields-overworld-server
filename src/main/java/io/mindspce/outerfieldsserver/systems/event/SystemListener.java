@@ -8,6 +8,7 @@ import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.entities.Entity;
+import io.mindspce.outerfieldsserver.entities.SystemEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.enums.EntityType;
@@ -20,12 +21,10 @@ import io.mindspice.mindlib.util.DebugUtils;
 import org.jctools.queues.MpscUnboundedXaddArrayQueue;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.locks.LockSupport;
+import java.util.function.Predicate;
 
 
 public abstract class SystemListener implements EventListener<SystemListener> {
@@ -48,23 +47,31 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     private volatile boolean running = false;
     private final MpscUnboundedXaddArrayQueue<Event<?>> eventQueue = new MpscUnboundedXaddArrayQueue<>(50);
     private final long waitNanos;
+    private BitSet systemEvents = new BitSet(EventType.values().length);
 
     public SystemListener(SystemType systemType, boolean doStart) {
         this.systemType = systemType;
         if (doStart) { start(); }
-        listeningFor.incrementAndGet(EventType.CALLBACK.ordinal());
-        listeningFor.incrementAndGet(EventType.TICK.ordinal());
-        listeningFor.incrementAndGet(EventType.COMPLETABLE_EVENT.ordinal());
         waitNanos = -1;
+        initSystemListeners();
     }
 
     public SystemListener(SystemType systemType, boolean doStart, long waitNanos) {
         this.systemType = systemType;
         if (doStart) { start(); }
+
+        this.waitNanos = waitNanos;
+        initSystemListeners();
+    }
+
+    private void initSystemListeners() {
         listeningFor.incrementAndGet(EventType.CALLBACK.ordinal());
         listeningFor.incrementAndGet(EventType.TICK.ordinal());
         listeningFor.incrementAndGet(EventType.COMPLETABLE_EVENT.ordinal());
-        this.waitNanos = waitNanos;
+        listeningFor.incrementAndGet(EventType.SYSTEM_ENTITIES_QUERY.ordinal());
+        listeningFor.incrementAndGet(EventType.SYSTEM_REGISTER_ENTITY.ordinal());
+        systemEvents.set(EventType.SYSTEM_ENTITIES_QUERY.ordinal());
+        systemEvents.set(EventType.SYSTEM_REGISTER_ENTITY.ordinal());
     }
 
     @Override
@@ -130,6 +137,11 @@ public abstract class SystemListener implements EventListener<SystemListener> {
                         Thread.onSpinWait();
                     }
                 }
+                if (systemEvents.get(nextEvent.eventType().ordinal())) {
+                    handleSystemEvent(nextEvent);
+                    return;
+                }
+
                 switch (nextEvent.eventType()) {
                     case EventType.TICK -> handleTick((Tick) nextEvent.data());
                     case EventType.CALLBACK -> handleCallBack(nextEvent);
@@ -142,8 +154,28 @@ public abstract class SystemListener implements EventListener<SystemListener> {
                         }
                     }
                 }
+
             }
         });
+    }
+
+    private void handleSystemEvent(Event<?> event) {
+        switch (event.eventType()) {
+            case SYSTEM_ENTITIES_QUERY -> {
+                @SuppressWarnings("unchecked")
+                Predicate<Entity> pred = (Predicate<Entity>) event.data();
+                List<Entity> rtnEntities = new ArrayList<>();
+                for (int i = 0; i < EntityManager.GET().entityCount(); ++i) {
+                    if (listeningEntities.get(i) > 0) {
+                        Entity entity = EntityManager.GET().entityById(i);
+                        if (pred.test(entity)) { rtnEntities.add(entity); }
+                    }
+                }
+                EntityManager.GET().emitEvent(new Event<>(EventType.SYSTEM_ENTITIES_RESP, AreaId.GLOBAL, -1, -1, ComponentType.ANY,
+                        EntityType.ANY, event.issuerEntityId(), event.issuerComponentId(), ComponentType.ANY, rtnEntities));
+            }
+            case SYSTEM_REGISTER_ENTITY -> onRegisterComponent((Entity) event.data());
+        }
     }
 
     public boolean drainRemainingQueue() {
@@ -168,12 +200,13 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         }
     }
 
-    public void onRegisterComponent(Event<Pair<SystemType, Entity>> event) {
-        Entity entity = event.data().second();
+    public void onRegisterComponent(Entity entity) {
         entity.registerWithSystem(this);
     }
 
     public void registerComponent(Component<?> component) {
+        System.out.println("registered:" + component.componentType);
+
         component.setRegisteredWith(systemType);
         componentRegistry.put(component.componentId(), component);
         componentTypeRegistry.computeIfAbsent(component.componentType(), v -> new ArrayList<>()).add(component);
@@ -189,16 +222,17 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         }
         existingEntity.add(component);
 
-        if (component.isOnTick()) { tickListeners.add(component); }
-        listeningEntities.increment(component.entityId());
+        if (component.isOnTick()) {
+            tickListeners.add(component);
+        }
 
-        component.linkSystemUpdates(this::addListeningEvent, this::removeListeningEvent);
+        listeningEntities.increment(component.entityId());
+        component.linkSystemUpdates(this::addListeningEvent, this::removeListeningEvent);;
     }
 
     public void registerComponents(List<Component<?>> components) {
         components.forEach(this::registerComponent);
     }
-
 
     public void removeByComponent(Component<?> component) {
         Iterator<Map.Entry<EventType, List<EventListener<?>>>> itr = listenerRegistry.entrySet().iterator();
@@ -270,8 +304,14 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     }
 
     private void handleTick(Tick tick) {
-        for (int i = 0; i < tickListeners.size(); ++i) {
-            tickListeners.get(i).onTick(tick);
+        System.out.println("handling tick:" + systemType);
+        try {
+            for (int i = 0; i < tickListeners.size(); ++i) {
+                tickListeners.get(i).onTick(tick);
+                System.out.println("Listener for tick: " + tickListeners.get(i).componentName());
+            }
+        } catch (Exception e) {
+            System.out.println(e);
         }
     }
 

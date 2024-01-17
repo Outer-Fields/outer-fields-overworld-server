@@ -14,6 +14,7 @@ import io.mindspice.mindlib.data.tuples.Pair;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 
 /**
@@ -75,10 +76,11 @@ public abstract class Entity {
             }
             if (c.componentType == component.componentType) {
                 //TODO log this
-                System.out.println("Added multiple components of same type on entity: " + id);
             }
         });
+
         if (systemRegistry != null) {
+            System.out.println("Registed component with system: " + component.componentType);
             systemRegistry.registerComponent(component);
         }
         componentList.add(component);
@@ -167,8 +169,6 @@ public abstract class Entity {
     public void registerWithSystem(SystemListener systemRegistry) {
         systemRegistry.registerComponents(componentList);
         this.systemRegistry = systemRegistry;
-
     }
-
 
 }

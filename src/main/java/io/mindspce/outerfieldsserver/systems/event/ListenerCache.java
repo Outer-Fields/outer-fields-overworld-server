@@ -71,6 +71,7 @@ public abstract class ListenerCache<T extends Component<T>> {
     }
 
     public <E> void registerInputHook(EventType eventType, Consumer<E> callback, boolean intercept) {
+
         isListening = true;
         if (inputEventHooks == null) {
             inputEventHooks = new EnumMap<>(EventType.class);
@@ -182,7 +183,6 @@ public abstract class ListenerCache<T extends Component<T>> {
         if (isIntercept) { return; }
         if (listeners == null) {
             // TODO log this as debug
-            //System.out.println("null listener for event:" + event + " | " + this);
             return;
         }
         //BiConsumer<T, Event<?>> consumer = listeners.get(event.eventType());

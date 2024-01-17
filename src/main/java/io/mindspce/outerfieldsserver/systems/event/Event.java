@@ -181,8 +181,9 @@ public record Event<T>(
         return new Event<>(EventType.ENTITY_AREA_CHANGED, component.areaId(), component, entityChunkChanged);
     }
 
-    public static Event<EventData.NewEntity> newEntity(Component<?> component, EventData.NewEntity entityData) {
-        return new Event<>(EventType.NEW_ENTITY, component.areaId(), component, entityData);
+    public static Event<EventData.NewEntity> newEntity(EventData.NewEntity newEntityData) {
+        return new Event<>(EventType.NEW_ENTITY, AreaId.GLOBAL, -1, -1, ComponentType.ANY,
+                newEntityData.entity().entityType(), 1-1, -1, ComponentType.ANY, newEntityData);
     }
 
     public static Event<IRect2> entityViewRectChanged(Component<?> component, IRect2 viewRect) {
@@ -284,10 +285,11 @@ public record Event<T>(
         return new Event<>(EventType.ENTITY_PROPERTY_CHANGE, areaId, component, data);
     }
 
-    public static Event<Pair<SystemType, Entity>> systemRegisterEntity(SystemType system, Entity entity) {
+    public static Event<Entity> systemRegisterEntity(Entity entity) {
         return new Event<>(EventType.SYSTEM_REGISTER_ENTITY, AreaId.NONE, -1, -1, ComponentType.ANY,
-                EntityType.ANY, -1, -1, ComponentType.ANY, Pair.of(system, entity));
+                EntityType.ANY, -1, -1, ComponentType.ANY, entity);
     }
+
 
     public static Event<EventData.NpcLocationArrival> npcArrivedAtLocation(Component<?> component, AreaId areaId,
             EventData.NpcLocationArrival data) {
@@ -298,10 +300,6 @@ public record Event<T>(
             EventData.NPCTravelTo data) {
         return new Event<>(EventType.NPC_TRAVEL_TO, areaId, component, data);
     }
-
-
-    //public static Event<Object>
-
 
     public static class Builder<T> {
         EventType eventType;

@@ -169,11 +169,12 @@ public class NPCTests {
         }
 
         entity.addComponent(thoughtModule);
+        EntityManager.GET().emitEventToSystem(SystemType.NPC, Event.systemRegisterEntity(entity));
         return testCount;
 
     }
 
-    public static BasicTaskData testThought12(Entity entity) {
+    public static BasicTaskData testThought12(Entity entity) throws InterruptedException {
         AtomicBoolean testCount = new AtomicBoolean(false);
         // @formatter:off
         DecisionEventGraph<BasicFocus, ThoughtType> graph =
@@ -223,6 +224,8 @@ public class NPCTests {
         }
 
         entity.addComponent(thoughtModule);
+
+        EntityManager.GET().emitEventToSystem(SystemType.NPC, Event.systemRegisterEntity(entity));
         return btd;
 
     }
