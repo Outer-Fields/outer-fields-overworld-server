@@ -34,7 +34,7 @@ public enum ComponentType {
     SIMPLE_EMITTER(SimpleEmitter.class, x -> x instanceof SimpleEmitter),
     SIMPLE_OBJECT(SimpleObject.class, x -> x instanceof SimpleObject<?>),
     CHUNK_MAP(ChunkMap.class, x -> x instanceof ChunkMap),
-    ACTIVE_ENTITIES(ActiveEntities.class, x -> x instanceof ActiveEntities),
+    ACTIVE_ENTITIES(EntityGrid.class, x -> x instanceof EntityGrid),
     COLLISION_GRID(CollisionGrid.class, x -> x instanceof CollisionGrid),
     KNOWN_ENTITIES(KnownEntities.class, x -> x instanceof KnownEntities),
     PLAYER_ENTITY_UPDATE_DATA(PlayerEntityUpdateData.class, x -> x instanceof PlayerEntityUpdateData),

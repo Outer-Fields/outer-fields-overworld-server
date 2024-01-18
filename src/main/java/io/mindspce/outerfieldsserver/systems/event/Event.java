@@ -1,5 +1,6 @@
 package io.mindspce.outerfieldsserver.systems.event;
 
+import com.google.protobuf.Internal;
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
@@ -8,6 +9,7 @@ import io.mindspce.outerfieldsserver.entities.PlayerQuestEntity;
 import io.mindspce.outerfieldsserver.entities.WorldQuestEntity;
 import io.mindspce.outerfieldsserver.enums.*;
 import io.mindspce.outerfieldsserver.systems.EventData;
+import io.mindspice.mindlib.data.collections.lists.primative.IntList;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
@@ -324,11 +326,14 @@ public record Event<T>(
                 EntityType.ANY, -1, -1, ComponentType.ANY, quest);
     }
 
-    public static Event<WorldQuestEntity> questCompletedWorld( WorldQuestEntity quest) {
+    public static Event<WorldQuestEntity> questCompletedWorld(WorldQuestEntity quest) {
         return new Event<>(EventType.QUEST_COMPLETED_WORLD, AreaId.NONE, -1, -1, ComponentType.QUEST_MODULE,
                 EntityType.ANY, -1, -1, ComponentType.ANY, quest);
     }
 
+    public static Event<IntList> tileDataQuery(Component<?> component, AreaId area, IntList query) {
+        return new Event<>(EventType.TILE_DATA_QUERY, area, component, query);
+    }
 
     public static class Builder<T> {
         EventType eventType;

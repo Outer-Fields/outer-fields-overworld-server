@@ -1,6 +1,6 @@
 package io.mindspce.outerfieldsserver.components.player;
 
-import io.mindspce.outerfieldsserver.area.AreaEntity;
+import io.mindspce.outerfieldsserver.entities.AreaEntity;
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.data.wrappers.DynamicTileRef;
@@ -9,7 +9,6 @@ import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.Event;
-import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.collections.other.GridArray;
 import io.mindspice.mindlib.data.geometry.IVector2;
 

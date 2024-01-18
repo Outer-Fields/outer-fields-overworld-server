@@ -1,9 +1,8 @@
 package io.mindspce.outerfieldsserver.core.authority;
 
-import io.mindspce.outerfieldsserver.area.AreaEntity;
+import io.mindspce.outerfieldsserver.entities.AreaEntity;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.data.wrappers.DynamicTileRef;
-import io.mindspce.outerfieldsserver.enums.Direction;
 import io.mindspice.mindlib.data.collections.other.GridArray;
 import io.mindspice.mindlib.data.geometry.*;
 

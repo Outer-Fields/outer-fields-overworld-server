@@ -1,7 +1,7 @@
 package io.mindspce.outerfieldsserver.core.config;
 
-import io.mindspce.outerfieldsserver.area.AreaEntity;
-import io.mindspce.outerfieldsserver.area.ChunkEntity;
+import io.mindspce.outerfieldsserver.entities.AreaEntity;
+import io.mindspce.outerfieldsserver.entities.ChunkEntity;
 import io.mindspce.outerfieldsserver.area.ChunkJson;
 import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.core.networking.SocketService;

@@ -1,6 +1,6 @@
 package io.mindspce.outerfieldsserver.core.systems;
 
-import io.mindspce.outerfieldsserver.area.AreaEntity;
+import io.mindspce.outerfieldsserver.entities.AreaEntity;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.SystemType;

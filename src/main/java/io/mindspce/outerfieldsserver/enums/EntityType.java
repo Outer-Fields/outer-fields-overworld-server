@@ -1,7 +1,7 @@
 package io.mindspce.outerfieldsserver.enums;
 
-import io.mindspce.outerfieldsserver.area.AreaEntity;
-import io.mindspce.outerfieldsserver.area.ChunkEntity;
+import io.mindspce.outerfieldsserver.entities.AreaEntity;
+import io.mindspce.outerfieldsserver.entities.ChunkEntity;
 import io.mindspce.outerfieldsserver.entities.*;
 import jakarta.annotation.Nullable;
 
@@ -18,7 +18,9 @@ public enum EntityType {
     CHUNK(4, ChunkEntity.class, x -> x instanceof ChunkEntity),
     SYSTEM(5, SystemEntity.class, x -> x instanceof SystemEntity),
     QUEST_PLAYER(6, PlayerQuestEntity.class, x -> x instanceof PlayerQuestEntity),
-    QUEST_WORLD(7, WorldQuestEntity.class, x -> x instanceof WorldQuestEntity);
+    QUEST_WORLD(7, WorldQuestEntity.class, x -> x instanceof WorldQuestEntity),
+    ITEM(8, ItemEntity.class, x -> x instanceof ItemEntity),
+    LOOT(9, LootEntity.class, x -> x instanceof LootEntity);
 
     public final int value;
     public final Class<?> dataClass;
@@ -43,5 +45,6 @@ public enum EntityType {
         }
         return null;
     }
-
 }
+
+

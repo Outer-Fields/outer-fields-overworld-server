@@ -1,13 +1,12 @@
 package io.mindspce.outerfieldsserver.core.singletons;
 
-import io.mindspce.outerfieldsserver.area.AreaEntity;
-import io.mindspce.outerfieldsserver.area.ChunkEntity;
+import io.mindspce.outerfieldsserver.entities.AreaEntity;
+import io.mindspce.outerfieldsserver.entities.ChunkEntity;
 import io.mindspce.outerfieldsserver.area.ChunkJson;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.entities.*;
 import io.mindspce.outerfieldsserver.enums.*;
-import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.*;
 import io.mindspice.mindlib.data.cache.ConcurrentIndexCache;
 import io.mindspice.mindlib.data.collections.lists.primative.IntList;

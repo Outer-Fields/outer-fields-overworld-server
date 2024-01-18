@@ -1,6 +1,8 @@
 package io.mindspce.outerfieldsserver.components.world;
 
-import io.mindspce.outerfieldsserver.area.ChunkEntity;
+import com.google.protobuf.Internal;
+import io.mindspce.outerfieldsserver.area.TileData;
+import io.mindspce.outerfieldsserver.entities.ChunkEntity;
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspce.outerfieldsserver.core.GameSettings;
@@ -10,11 +12,14 @@ import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspce.outerfieldsserver.util.GridUtils;
+import io.mindspice.mindlib.data.collections.lists.primative.IntList;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 import jakarta.annotation.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 
 public class ChunkMap extends Component<ChunkMap> {
@@ -23,8 +28,11 @@ public class ChunkMap extends Component<ChunkMap> {
     public ChunkMap(Entity parent, ChunkEntity[][] chunkMap) {
         super(parent, ComponentType.CHUNK_MAP, List.of());
         this.chunkMap = chunkMap;
-        registerListener(EventType.ENTITY_CHUNK_CHANGED, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, ChunkMap::onEntityChunkChanged));
+//        registerListener(EventType.ENTITY_CHUNK_CHANGED, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, ChunkMap::onEntityChunkChanged));
+//        registerListener(EventType.ENTITY_AREA_CHANGED, ChunkMap::onEntityAreaChange);
+//        registerListener(EventType.NEW_ENTITY, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, ChunkMap::onNewEntityEnteredChunk));
         registerListener(EventType.TILE_DATA_UPDATE, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, ChunkMap::onTileDataUpdate));
+        registerListener(EventType.TILE_DATA_QUERY, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, ChunkMap::onTileDataQuery));
     }
 
     private void onTileDataUpdate(Event<EventData.TileDataUpdate> event) {
@@ -37,29 +45,40 @@ public class ChunkMap extends Component<ChunkMap> {
         tileData.updateChunkData(event.data());
     }
 
-    private void onEntityChunkChanged(Event<EventData.EntityChunkChanged> event) {
-        ChunkEntity oldChunk = getChunkByIndex(event.data().oldChunk());
-        ChunkEntity newChunk = getChunkByIndex(event.data().newChunk());
-        if (oldChunk == null) {
-            //todo logs this
-        } else {
-            oldChunk.removeActivePlayer(event.issuerEntityId());
-        }
-        if (newChunk == null) {
-            // TODO log this
-        } else {
-            newChunk.addActivePlayer(event.issuerEntityId());
-        }
+    public void onTileDataQuery(Event<List<IVector2>> event) {
+        List<TileData> respList = event.data().stream().map(this::getTileByIndex).toList();
+        emitEvent(Event.responseEvent(this, event, EventType.TILE_DATA_RESPONSE, respList));
     }
 
-    private void onNewEntityEnteredChunk(Event<EventData.NewEntity> event) {
-        ChunkEntity chunk = getChunkByIndex(GridUtils.globalToChunk(event.data().position()));
-        if (chunk == null) {
-            // TODO log this
-            return;
-        }
-        chunk.addActivePlayer(event.issuerEntityId());
-    }
+//    private void onEntityAreaChange(Event<EventData.EntityAreaChanged> event) {
+//        if (areaId() == event.data().oldArea()) {
+//
+//        }
+//    }
+//
+//    private void onEntityChunkChanged(Event<EventData.EntityChunkChanged> event) {
+//        ChunkEntity oldChunk = getChunkByIndex(event.data().oldChunk());
+//        ChunkEntity newChunk = getChunkByIndex(event.data().newChunk());
+//        if (oldChunk == null) {
+//            //todo logs this
+//        } else {
+//            oldChunk.removeActivePlayer(event.issuerEntityId());
+//        }
+//        if (newChunk == null) {
+//            // TODO log this
+//        } else {
+//            newChunk.addActivePlayer(event.issuerEntityId());
+//        }
+//    }
+//
+//    private void onNewEntityEnteredChunk(Event<EventData.NewEntity> event) {
+//        ChunkEntity chunk = getChunkByIndex(GridUtils.globalToChunk(event.data().position()));
+//        if (chunk == null) {
+//            // TODO log this
+//            return;
+//        }
+//        chunk.addActivePlayer(event.issuerEntityId());
+//    }
 
     @Nullable
     public ChunkEntity getChunkByGlobalPos(IVector2 pos) {
@@ -95,5 +114,13 @@ public class ChunkMap extends Component<ChunkMap> {
             return null;
         }
         return chunkMap[x][y];
+    }
+
+    @Nullable
+    TileData getTileByIndex(IVector2 tileIndex) {
+        IVector2 chunkIndex = GridUtils.tileIndexToChunk(tileIndex);
+        ChunkEntity chunk = chunkMap[chunkIndex.x()][chunkIndex.y()];
+        if (chunk == null) { return null; }
+        return chunk.getTileByIndex(tileIndex);
     }
 }

@@ -1,9 +1,10 @@
 package io.mindspce.outerfieldsserver.enums;
 
-import io.mindspce.outerfieldsserver.area.AreaEntity;
+import io.mindspce.outerfieldsserver.entities.AreaEntity;
 
 
 public enum AreaId {
+    AREA_KEY(-3),
     NONE(-2),
     GLOBAL(-1),
     TEST(0);

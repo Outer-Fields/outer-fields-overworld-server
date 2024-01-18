@@ -1,7 +1,9 @@
-package io.mindspce.outerfieldsserver.area;
+package io.mindspce.outerfieldsserver.entities;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import io.mindspce.outerfieldsserver.area.ChunkJson;
+import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.EntityType;
@@ -16,19 +18,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkEntity extends Entity {
     // direct reference to the map stored in the component
+    private final IVector2 chunkIndex;
     volatile Map<IVector2, TileData> activeTiles;
-    final TIntSet activePlayers = new TIntHashSet();
+  //  final TIntSet activePlayers = new TIntHashSet();
 
     public ChunkEntity(int entityId, AreaId areaId, IVector2 index, Map<IVector2,
             TileData> activeTiles) {
         super(entityId, EntityType.CHUNK, areaId, index);
         this.activeTiles = activeTiles;
+        this.chunkIndex = index;
     }
 
     public ChunkEntity(int entityId, AreaId areaId, IVector2 index, ChunkJson chunkJson) {
         super(entityId, EntityType.CHUNK, areaId, index);
         activeTiles = loadFromJson(chunkJson);
-        this.chunkIndex = chunkIndex;
+        this.chunkIndex = index;
     }
 
     public void updateChunkData(EventData.TileDataUpdate data) {
@@ -41,17 +45,17 @@ public class ChunkEntity extends Entity {
         }
     }
 
-    public TIntSet getActivePlayers() {
-        return new TIntHashSet(activePlayers);
-    }
-
-    public void addActivePlayer(int entityId) {
-        activePlayers.remove(entityId);
-    }
-
-    public void removeActivePlayer(int entityId) {
-        activePlayers.remove(entityId);
-    }
+//    public TIntSet getActivePlayers() {
+//        return new TIntHashSet(activePlayers);
+//    }
+//
+//    public void addActivePlayer(int entityId) {
+//        activePlayers.remove(entityId);
+//    }
+//
+//    public void removeActivePlayer(int entityId) {
+//        activePlayers.remove(entityId);
+//    }
 
     @Nullable
     public TileData getTileByGlobalPos(IVector2 pos) {

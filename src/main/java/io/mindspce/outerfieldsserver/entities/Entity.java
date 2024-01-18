@@ -36,8 +36,8 @@ public abstract class Entity {
         this.id = id;
         this.entityType = entityType;
         this.areaId = areaId;
-        componentList = new CopyOnWriteArrayList<>();
-        componentList.addAll(components);
+        componentList = new CopyOnWriteArrayList<>(components);
+
     }
 
     public Entity(int id, EntityType entityType, AreaId areaId) {

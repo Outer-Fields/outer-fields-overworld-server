@@ -11,6 +11,7 @@ import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ClothingItem;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.ai.task.Task;
+import io.mindspice.mindlib.data.collections.lists.primative.IntList;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
@@ -27,8 +28,9 @@ public enum EventType {
     // TESTING
     PING(Object.class, Objects::nonNull),
     PONG(Object.class, Objects::nonNull),
+
     // GENERAL EVENTS
-    ANY(Object.class, Objects::nonNull),
+    OBJECT(Object.class, Objects::nonNull),
     TICK(Tick.class, x -> x instanceof Tick),
     CALLBACK(Consumer.class, x -> x instanceof Consumer<?>),
     COMPLETABLE_EVENT(EventData.CompletableEvent.class, x -> x instanceof EventData.CompletableEvent<?, ?>),
@@ -41,35 +43,27 @@ public enum EventType {
     NETWORK_PLAYER_RECONNECT(WebSocketSession.class, x -> x instanceof WebSocketSession),
 
     // ENTITY CHANGE EVENTS
+    NEW_ENTITY(EventData.NewEntity.class, x -> x instanceof EventData.NewEntity),
     ENTITY_POSITION_CHANGED(EventData.EntityPositionChanged.class, x -> x instanceof EventData.EntityPositionChanged),
     ENTITY_VIEW_RECT_ENTERED(Integer.class, x -> x instanceof Integer),
     Entity_VIEW_RECT_EXITED(Integer.class, x -> x instanceof Integer),
-    NEW_ENTITY(EventData.NewEntity.class, x -> x instanceof EventData.NewEntity),
     ENTITY_VIEW_RECT_CHANGED(IRect2.class, x -> x instanceof IRect2),
     ENTITY_CHUNK_CHANGED(EventData.EntityChunkChanged.class, x -> x instanceof EventData.EntityChunkChanged),
     ENTITY_AREA_CHANGED(EventData.EntityAreaChanged.class, x -> x instanceof EventData.EntityAreaChanged),
     ENTITY_STATE_CHANGED(List.class, x -> x instanceof List<?>),
     ENTITY_PROPERTY_CHANGE(Pair.class, x -> x instanceof Pair),
-    ENTITY_PROPERTY_UPDATE(Pair.class, x -> x instanceof Pair),
 
     // ENTITY UPDATE EVENTS
     ENTITY_AREA_UPDATE(AreaId.class, x -> x instanceof AreaId),
     ENTITY_NAME_UPDATE(String.class, x -> x instanceof String),
     ENTITY_STATE_UPDATE(EventData.EntityStateUpdate.class, x -> x instanceof EventData.EntityStateUpdate),
     ENTITY_POSITION_UPDATE(IVector2.class, x -> x instanceof IVector2),
+    ENTITY_PROPERTY_UPDATE(Pair.class, x -> x instanceof Pair),
 
     // PLAYER SUBSYSTEM EVENTS
     PLAYER_VALID_MOVEMENT(IVector2.class, x -> x instanceof IVector2),
     PLAYER_INVALID_MOVEMENT(EventData.EntityPositionChanged.class, x -> x instanceof EventData.EntityPositionChanged),
 
-    // OTHER COMPONENT SPECIFIC EVENTS
-
-    TILE_DATA_UPDATE(EventData.TileDataUpdate.class, x -> x instanceof EventData.TileDataUpdate),
-    COLLISION_CHANGE(EventData.CollisionData.class, x -> x instanceof EventData.CollisionData),
-    COLLISION_UPDATE(EventData.CollisionData.class, x -> x instanceof EventData.CollisionData),
-
-    ENTITY_GRID_QUERY(IRect2.class, x -> x instanceof IRect2),
-    ENTITY_GRID_RESPONSE(int[].class, x -> x instanceof int[]),
 
     // Serialization
     SERIALIZED_ENTITY_REQUEST(Integer.class, x -> x instanceof Integer),
@@ -88,7 +82,17 @@ public enum EventType {
     AREA_MONITOR_RESP(List.class, x -> x instanceof List), //List<Integer>
     AREA_MONITOR_ENTERED(EventData.AreaEntered.class, x -> x instanceof EventData.AreaEntered),
     AREA_ENTITIES_QUERY(AreaId.class, x -> x instanceof AreaId),
-    AREA_ENTITIES_RESPONSE(List.class, x -> x instanceof List<?>),
+    AREA_ENTITIES_RESPONSE(int[].class, x -> x instanceof int[]),
+
+    // OTHER AREA/TILE SPECIFIC EVENTS
+    TILE_DATA_UPDATE(EventData.TileDataUpdate.class, x -> x instanceof EventData.TileDataUpdate),
+    TILE_DATA_QUERY(List.class, x -> x instanceof List), // List<IVector2> chunkIndex
+    TILE_DATA_RESPONSE(List.class, x -> x instanceof List<?>),
+    COLLISION_CHANGE(EventData.CollisionData.class, x -> x instanceof EventData.CollisionData),
+    COLLISION_UPDATE(EventData.CollisionData.class, x -> x instanceof EventData.CollisionData),
+    ENTITY_GRID_QUERY(IRect2.class, x -> x instanceof IRect2),
+    ENTITY_GRID_RESPONSE(int[].class, x -> x instanceof int[]),
+
 
     // LOCATION
     LOCATION_NEW(LocationEntity.class, x -> x instanceof LocationEntity),

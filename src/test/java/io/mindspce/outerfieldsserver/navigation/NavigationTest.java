@@ -1,13 +1,13 @@
 package io.mindspce.outerfieldsserver.navigation;
 
 import io.mindspce.outerfieldsserver.area.*;
-import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.core.calculators.NavCalc;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.core.systems.WorldSystem;
 import io.mindspce.outerfieldsserver.data.wrappers.ChunkTileIndex;
+import io.mindspce.outerfieldsserver.entities.AreaEntity;
+import io.mindspce.outerfieldsserver.entities.ChunkEntity;
 import io.mindspce.outerfieldsserver.enums.AreaId;
-import io.mindspce.outerfieldsserver.enums.NavPath;
 import io.mindspce.outerfieldsserver.util.GridUtils;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;

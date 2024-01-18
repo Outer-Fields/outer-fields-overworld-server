@@ -1,7 +1,7 @@
 package io.mindspce.outerfieldsserver.core.calculators;
 
-import io.mindspce.outerfieldsserver.area.AreaEntity;
-import io.mindspce.outerfieldsserver.area.ChunkEntity;
+import io.mindspce.outerfieldsserver.entities.AreaEntity;
+import io.mindspce.outerfieldsserver.entities.ChunkEntity;
 import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.core.GameSettings;
 import io.mindspce.outerfieldsserver.enums.Direction;

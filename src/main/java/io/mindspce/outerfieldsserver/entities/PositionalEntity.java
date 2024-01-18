@@ -14,7 +14,8 @@ public class PositionalEntity extends Entity {
     public PositionalEntity(int id, EntityType entityType,
             AreaId areaId) {
         super(id, entityType, areaId);
-        GlobalPosition globalPosition = ComponentFactory.addGlobalPosition(this);
+        GlobalPosition globalPosition = new GlobalPosition(this);
+        addComponent(globalPosition);
         globalPosition.registerOutputHook(EventType.ENTITY_AREA_CHANGED, this::onAreaChanged, false);
         globalPosition.registerOutputHook(EventType.ENTITY_CHUNK_CHANGED, this::onChunkChanged, false);
     }
@@ -22,7 +23,8 @@ public class PositionalEntity extends Entity {
     public PositionalEntity(int id, EntityType entityType,
             AreaId areaId, IVector2 position) {
         super(id, entityType, areaId);
-        GlobalPosition globalPosition = ComponentFactory.addGlobalPosition(this);
+        GlobalPosition globalPosition = new GlobalPosition(this);
+        addComponent(globalPosition);
         globalPosition.registerOutputHook(EventType.ENTITY_AREA_CHANGED, this::onAreaChanged, false);
         globalPosition.registerOutputHook(EventType.ENTITY_CHUNK_CHANGED, this::onChunkChanged, false);
         globalPosition.updatePosition(position.x(), position.y());

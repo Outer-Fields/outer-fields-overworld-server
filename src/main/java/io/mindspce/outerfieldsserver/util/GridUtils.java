@@ -57,6 +57,13 @@ public class GridUtils {
         );
     }
 
+    public static IVector2 tileIndexToChunk(IVector2 tileIndex) {
+        return IVector2.of(
+                tileIndex.x() / GameSettings.GET().chunkSize().x(),
+                tileIndex.y() / GameSettings.GET().chunkSize().y()
+        );
+    }
+
     public static IVector2 globalToChunk(IVector2 globalPos) {
         int chunkX = globalPos.x() / GameSettings.GET().chunkSize().x();
         int chunky = globalPos.y() / GameSettings.GET().chunkSize().y();

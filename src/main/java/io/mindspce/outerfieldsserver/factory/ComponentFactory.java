@@ -1,6 +1,6 @@
 package io.mindspce.outerfieldsserver.factory;
 
-import io.mindspce.outerfieldsserver.area.ChunkEntity;
+import io.mindspce.outerfieldsserver.entities.ChunkEntity;
 import io.mindspce.outerfieldsserver.components.entity.EntityStateComp;
 import io.mindspce.outerfieldsserver.components.entity.GlobalPosition;
 import io.mindspce.outerfieldsserver.components.npc.TravelController;
@@ -63,8 +63,8 @@ public class ComponentFactory {
         return chunkMap;
     }
 
-    public static ActiveEntities addActiveEntityGrid(Entity entity, int initialSetSize, IRect2 areaRect, int maxPerQuad) {
-        ActiveEntities grid = new ActiveEntities(entity, initialSetSize, areaRect, maxPerQuad);
+    public static EntityGrid addEntityGrid(Entity entity, int initialSetSize, IRect2 areaRect, int maxPerQuad) {
+        EntityGrid grid = new EntityGrid(entity, initialSetSize, areaRect, maxPerQuad);
         entity.addComponent(grid);
         return grid;
     }
@@ -75,17 +75,17 @@ public class ComponentFactory {
         return grid;
     }
 
-    public static AreaEntities addTrackedEntities(Entity entity, List<Entity> trackedEntities) {
-        var tracker = new AreaEntities(entity, trackedEntities);
-        entity.addComponent(tracker);
-        return tracker;
-    }
-
-    public static AreaEntities addTrackedEntities(Entity entity) {
-        var tracker = new AreaEntities(entity);
-        entity.addComponent(tracker);
-        return tracker;
-    }
+//    public static AreaEntities addTrackedEntities(Entity entity, List<Entity> trackedEntities) {
+//        var tracker = new AreaEntities(entity, trackedEntities);
+//        entity.addComponent(tracker);
+//        return tracker;
+//    }
+//
+//    public static AreaEntities addTrackedEntities(Entity entity) {
+//        var tracker = new AreaEntities(entity);
+//        entity.addComponent(tracker);
+//        return tracker;
+//    }
 
     public static ViewRect addViewRect(PositionalEntity entity, IVector2 size, IVector2 position, boolean emitMutable) {
         GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castOrNull(
