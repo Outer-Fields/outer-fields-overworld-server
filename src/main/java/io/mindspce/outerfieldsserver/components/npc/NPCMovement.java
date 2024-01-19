@@ -19,14 +19,14 @@ import java.util.List;
 import java.util.function.Supplier;
 
 
-public class TravelController extends Component<TravelController> {
+public class NPCMovement extends Component<NPCMovement> {
     public IVector2 position;
     public Supplier<IVector2> positionSupplier;
     public EventData.NPCTravelTo currMovement;
     public List<EventData.NPCTravelTo> queuedMovement = new LinkedList<>();
     public List<IVector2> path;
 
-    public TravelController(Entity parentEntity, IVector2 startingPos, Supplier<IVector2> positionSupplier) {
+    public NPCMovement(Entity parentEntity, IVector2 startingPos, Supplier<IVector2> positionSupplier) {
         super(parentEntity, ComponentType.TRAVEL_CONTROLLER,
                 List.of(EventType.ENTITY_POSITION_UPDATE, EventType.NPC_ARRIVED_AT_LOC)
         );
@@ -34,9 +34,9 @@ public class TravelController extends Component<TravelController> {
         this.positionSupplier = positionSupplier;
 
         registerListener(EventType.NPC_TRAVEL_TO, BiPredicatedBiConsumer.of(
-                PredicateLib::isRecEntitySame, TravelController::onMoveTo
+                PredicateLib::isRecEntitySame, NPCMovement::onMoveTo
         ));
-        setOnTickConsumer(TravelController::onTickConsumer);
+        setOnTickConsumer(NPCMovement::onTickConsumer);
     }
 
     public void onMoveTo(Event<EventData.NPCTravelTo> event) {

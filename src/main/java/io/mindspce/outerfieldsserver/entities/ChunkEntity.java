@@ -20,7 +20,7 @@ public class ChunkEntity extends Entity {
     // direct reference to the map stored in the component
     private final IVector2 chunkIndex;
     volatile Map<IVector2, TileData> activeTiles;
-  //  final TIntSet activePlayers = new TIntHashSet();
+    //  final TIntSet activePlayers = new TIntHashSet();
 
     public ChunkEntity(int entityId, AreaId areaId, IVector2 index, Map<IVector2,
             TileData> activeTiles) {
@@ -71,20 +71,20 @@ public class ChunkEntity extends Entity {
         ConcurrentHashMap<IVector2, TileData> tileData = new ConcurrentHashMap<>(50);
 
         for (var collision : json.collisionMask()) {
-            tileData.put(collision, new TileData(collision, false, true, false));
+            tileData.put(collision, new TileData(collision, false, true, -1, -1, -1));
         }
         for (var area : json.areaMask()) {
             if (tileData.containsKey(area)) {
-                tileData.get(area).withLocationChange(true);
+                tileData.get(area).withLocationChange(1); //TODO fix this
             }
-            tileData.put(area, new TileData(area, false, false, true));
+            tileData.put(area, new TileData(area, false, false, -1, -1, -1));
         }
 
         for (var navigation : json.navMask()) {
             if (tileData.containsKey(navigation)) {
                 tileData.get(navigation).withNavChange(true);
             }
-            tileData.put(navigation, new TileData(navigation, true, false, false));
+            tileData.put(navigation, new TileData(navigation, true, false, 1, -1, -1));
         }
         return tileData;
     }

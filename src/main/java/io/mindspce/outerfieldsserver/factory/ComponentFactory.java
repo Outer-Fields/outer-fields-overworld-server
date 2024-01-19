@@ -3,7 +3,7 @@ package io.mindspce.outerfieldsserver.factory;
 import io.mindspce.outerfieldsserver.entities.ChunkEntity;
 import io.mindspce.outerfieldsserver.components.entity.EntityStateComp;
 import io.mindspce.outerfieldsserver.components.entity.GlobalPosition;
-import io.mindspce.outerfieldsserver.components.npc.TravelController;
+import io.mindspce.outerfieldsserver.components.npc.NPCMovement;
 import io.mindspce.outerfieldsserver.components.player.*;
 import io.mindspce.outerfieldsserver.components.primatives.ComponentSystem;
 import io.mindspce.outerfieldsserver.components.primatives.SimpleEmitter;
@@ -104,6 +104,7 @@ public class ComponentFactory {
 
         public static void attachPlayerEntityComponents(PlayerEntity entity, IVector2 currPosition, AreaId currArea,
                 List<EntityState> initStates, ClothingItem[] initOutFit, WebSocketSession webSocketSession) {
+
             GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castOrNull(
                     entity.getComponent(ComponentType.GLOBAL_POSITION).getFirst()
             );
@@ -139,11 +140,10 @@ public class ComponentFactory {
             globalPosition.registerOutputHook(EventType.ENTITY_AREA_CHANGED, knownEntities::onPlayerAreaChanged, false);
             viewRect.registerOutputHook(EventType.ENTITY_VIEW_RECT_CHANGED, knownEntities::onSelfViewRectChanged, false);
 
-
             entity.addComponents(List.of(playerNetInSystem, stateComp, outfit, characterSerializer, playerNetOut));
         }
 
-        public static  void attachNPCComponents(NonPlayerEntity entity, IVector2 currPosition,
+        public static void attachBaseNPCComponents(NonPlayerEntity entity, IVector2 currPosition,
                 List<EntityState> initStates, ClothingItem[] initOutFit, IVector2 viewRectSize) {
 
             GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castOrNull(
@@ -152,7 +152,7 @@ public class ComponentFactory {
             if (globalPosition == null) { throw new IllegalStateException("Entity must have an existing GlobalPosition component"); }
 
             ViewRect viewRect = new ViewRect(entity, viewRectSize, currPosition, true);
-            TravelController travelController = new TravelController(entity, currPosition, globalPosition::currPosition);
+            NPCMovement NPCMovement = new NPCMovement(entity, currPosition, globalPosition::currPosition);
             EntityStateComp stateComp = new EntityStateComp(entity, initStates);
             CharacterOutfit outfit = new CharacterOutfit(entity, initOutFit);
             CharacterSerializer characterSerializer = new CharacterSerializer(
@@ -162,11 +162,18 @@ public class ComponentFactory {
                     outfit::currOutfit
             );
 
-            travelController.registerOutputHook(EventType.ENTITY_POSITION_UPDATE, globalPosition::onPositionUpdate, true);
+            NPCMovement.registerOutputHook(EventType.ENTITY_POSITION_UPDATE, globalPosition::onPositionUpdate, true);
             globalPosition.registerOutputHook(EventType.ENTITY_POSITION_CHANGED, viewRect::onSelfPositionChanged, false);
 
-            entity.addComponents(List.of(travelController, stateComp, outfit, characterSerializer));
+            entity.addComponents(List.of(NPCMovement, stateComp, outfit, characterSerializer));
         }
+    }
+
+    public static void attachNPCAttackComponents(NonPlayerEntity entity) {
+        ViewRect viewRect = ComponentType.VIEW_RECT.castOrNull(entity.getComponent(ComponentType.VIEW_RECT).getFirst());
+        if (viewRect == null) { throw new IllegalStateException("Entity must have existing ViewRect"); }
+
+
     }
 
 

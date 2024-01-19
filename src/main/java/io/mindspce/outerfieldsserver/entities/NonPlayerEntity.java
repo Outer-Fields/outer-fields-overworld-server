@@ -19,7 +19,7 @@ public class NonPlayerEntity extends PositionalEntity {
         super.name = characterName;
         this.key = key;
 
-        ComponentFactory.System.attachNPCComponents(
+        ComponentFactory.System.attachBaseNPCComponents(
                 this, currPosition, initStates, initOutfit, viewRectSize);
     }
 

@@ -35,6 +35,8 @@ public class ThoughtModule<T extends Enum<T>, V> extends Component<ThoughtModule
     public int graphQueryRate;
     private int currQueryTick;
 
+    public boolean suspendThought = false;
+
     public Consumer<Task<T, ?>> taskConsumer;
 
     public ThoughtModule(Entity parentEntity, DecisionEventGraph<V, T> decisionGraph, V graphFocusState, int queryRate) {
@@ -80,6 +82,7 @@ public class ThoughtModule<T extends Enum<T>, V> extends Component<ThoughtModule
     }
 
     public void tickProcess(Tick tick) {
+        if (suspendThought) { return; }
         if (--currQueryTick <= 0) {
             canDo.clear();
             decisionGraph.getRoot().travel(graphFocusState);

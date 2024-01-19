@@ -176,7 +176,7 @@ public class EntityManager {
     public AreaEntity newAreaEntity(AreaId areaId, IRect2 areaSize, IVector2 chunkSize,
             List<Pair<LocationEntity, IVector2>> staticLocations) {
         int id = entityCache.getAndReserveNextIndex();
-        AreaEntity areaEntity = new AreaEntity(id, areaId, areaSize, chunkSize, staticLocations);
+        AreaEntity areaEntity = new AreaEntity(id, areaId, areaSize, chunkSize, staticLocations, List.of());
         areaId.setEntityId(id);
         areaId.setEntity(areaEntity);
         entityCache.putAtReservedIndex(id, areaEntity);

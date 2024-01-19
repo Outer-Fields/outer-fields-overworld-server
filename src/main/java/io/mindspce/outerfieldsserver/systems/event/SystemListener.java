@@ -130,8 +130,8 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     private Runnable process() {
         return (() -> {
 
-                while (running) {
-                    try {
+            while (running) {
+                try {
 
                     Event<?> nextEvent;
                     while ((nextEvent = eventQueue.relaxedPoll()) == null) {
@@ -158,11 +158,11 @@ public abstract class SystemListener implements EventListener<SystemListener> {
                             }
                         }
                     }
-                    } catch (Exception e) {
-                        System.out.println("Exception Processing for system listener: " + systemType);
-                        e.printStackTrace();
-                    }
+                } catch (Exception e) {
+                    System.out.println("Exception Processing for system listener: " + systemType);
+                    e.printStackTrace();
                 }
+            }
 
         });
     }
@@ -235,7 +235,8 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         if (component.isOnTick()) { tickListeners.add(component); }
 
         listeningEntities.increment(component.entityId());
-        component.linkSystemUpdates(this::addListeningEvent, this::removeListeningEvent);;
+        component.linkSystemUpdates(this::addListeningEvent, this::removeListeningEvent);
+        ;
     }
 
     public void registerComponents(List<Component<?>> components) {
@@ -316,9 +317,9 @@ public abstract class SystemListener implements EventListener<SystemListener> {
     }
 
     private void handleTick(Tick tick) {
-            for (int i = 0; i < tickListeners.size(); ++i) {
-                tickListeners.get(i).onTick(tick);
-            }
+        for (int i = 0; i < tickListeners.size(); ++i) {
+            tickListeners.get(i).onTick(tick);
+        }
     }
 
     private void handleEvent(Event<?> event) {
@@ -331,6 +332,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
         for (int i = 0; i < listeners.size(); ++i) {
             var listener = listeners.get(i);
             if (listener.entityId() == event.issuerEntityId()) { continue; }
+            if (!listener.isListening() && event.eventType() != EventType.CALLBACK) { continue; }
             listener.onEvent(event);
         }
     }
@@ -360,8 +362,10 @@ public abstract class SystemListener implements EventListener<SystemListener> {
                 return;
             }
             for (int i = 0; i < listeners.size(); ++i) {
-                if (listeners.get(i).isListenerFor(event.eventType())) {
-                    listeners.get(i).onEvent(event);
+                var listener = listeners.get(i);
+                if (listener.isListenerFor(event.eventType())) {
+                    if (!listener.isListening() && event.eventType() != EventType.CALLBACK) { continue; }
+                    listener.onEvent(event);
                 }
             }
         }

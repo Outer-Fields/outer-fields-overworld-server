@@ -4,7 +4,7 @@ import io.mindspce.outerfieldsserver.components.ai.DecisionTree;
 import io.mindspce.outerfieldsserver.components.ai.ThoughtModule;
 import io.mindspce.outerfieldsserver.components.*;
 import io.mindspce.outerfieldsserver.components.monitors.AreaMonitor;
-import io.mindspce.outerfieldsserver.components.npc.TravelController;
+import io.mindspce.outerfieldsserver.components.npc.NPCMovement;
 import io.mindspce.outerfieldsserver.components.primatives.ComponentSystem;
 import io.mindspce.outerfieldsserver.components.primatives.SimpleEmitter;
 import io.mindspce.outerfieldsserver.components.primatives.SimpleListener;
@@ -49,7 +49,7 @@ public enum ComponentType {
     THOUGHT_MODULE(ThoughtModule.class, x -> x instanceof ThoughtModule<?, ?>),
     DECISION_TREE(DecisionTree.class, x -> x instanceof DecisionTree),
     CHARACTER_SERIALIZER(CharacterSerializer.class, x -> x instanceof CharacterSerializer),
-    TRAVEL_CONTROLLER(TravelController.class, x -> x instanceof TravelController),
+    TRAVEL_CONTROLLER(NPCMovement.class, x -> x instanceof NPCMovement),
     QUEST_MODULE(QuestModule.class, x -> x instanceof QuestModule);
 
     public final Class<?> componentClass;

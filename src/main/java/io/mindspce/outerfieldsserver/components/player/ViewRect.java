@@ -1,46 +1,70 @@
 package io.mindspce.outerfieldsserver.components.player;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import io.mindspce.outerfieldsserver.components.Component;
-import io.mindspce.outerfieldsserver.components.entity.GlobalPosition;
+import io.mindspce.outerfieldsserver.components.dataclasses.ContainedEntity;
 import io.mindspce.outerfieldsserver.components.logic.PredicateLib;
-import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.entities.Entity;
 import io.mindspce.outerfieldsserver.enums.ComponentType;
-import io.mindspce.outerfieldsserver.enums.EntityType;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
-import io.mindspice.mindlib.data.geometry.IConstRect2;
-import io.mindspice.mindlib.data.geometry.IMutRect2;
-import io.mindspice.mindlib.data.geometry.IRect2;
-import io.mindspice.mindlib.data.geometry.IVector2;
+import io.mindspice.mindlib.data.geometry.*;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 import org.springframework.security.core.parameters.P;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiPredicate;
 
 
 public class ViewRect extends Component<ViewRect> {
     public final IMutRect2 viewRect;
     public boolean emitMutable;
-    public TIntSet inView = new TIntHashSet(10);
-    public long lastTickProc = 0;
+    public List<ContainedEntity> inView = new ArrayList<>(4);
 
     public ViewRect(Entity parentEntity, IVector2 size, IVector2 position, boolean emitMutable) {
         super(parentEntity, ComponentType.VIEW_RECT,
-                List.of(EventType.ENTITY_VIEW_RECT_CHANGED, EventType.ENTITY_VIEW_RECT_ENTERED)
+                List.of(EventType.ENTITY_VIEW_RECT_CHANGED, EventType.ENTITY_VIEW_RECT_ENTERED, EventType.Entity_VIEW_RECT_EXITED)
         );
         viewRect = IRect2.fromCenterMutable(position, size);
 
         registerListener(EventType.ENTITY_POSITION_CHANGED, BiPredicatedBiConsumer.of(
-                (ViewRect vr, Event<EventData.EntityPositionChanged> event) ->
-                        event.eventArea() == areaId() && event.issuerEntityId() != entityId(),
-                ViewRect::onEntityPositionChanged));
+                (ViewRect vr, Event<EventData.EntityPositionChanged> event) -> {
+                    if (containsEntity(event.issuerEntityId())) { return true; }
+                    return event.eventArea() == areaId();
+                },
+                ViewRect::onEntityPositionChanged)
+        );
+        registerListener(EventType.NEW_ENTITY, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, ViewRect::onNewEntity));
+        registerListener(EventType.ENTITY_DESTROYED, BiPredicatedBiConsumer.of(
+                PredicateLib::isSameAreaEvent, (ViewRect vr, Event<Integer> event) -> onExitView(event.issuerEntityId()))
+        );
+    }
+
+    public boolean containsEntity(int id) {
+        for (int i = 0; i < inView.size(); ++i) {
+            if (inView.get(i).id() == id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void removeEntity(int id) {
+        inView.removeIf(e -> e.id() == id);
+    }
+
+    public void updateEntity(int id, IVector2 position) {
+        for (int i = 0; i < inView.size(); ++i) {
+            if (inView.get(i).id() == id) {
+                inView.get(i).position().setXY(position);
+            }
+        }
+    }
+
+    public void onNewEntity(Event<EventData.NewEntity> event) {
+        if (viewRect.contains(event.data().position())) {
+            onEnterView(event.issuerEntityId(), event.data().position());
+        }
     }
 
     public void onSelfPositionChanged(Event<EventData.EntityPositionChanged> event) {
@@ -48,39 +72,43 @@ public class ViewRect extends Component<ViewRect> {
     }
 
     public void onEntityPositionChanged(Event<EventData.EntityPositionChanged> event) {
-        if (viewRect.contains(event.data().newPosition()) && !inView.contains(event.issuerEntityId())) {
-            onEnterView(event.issuerEntityId());
+        if (viewRect.contains(event.data().newPosition()) && !containsEntity(event.issuerEntityId())) {
+            onEnterView(event.issuerEntityId(), event.data().newPosition());
+        } else if (containsEntity(event.issuerEntityId()) && !viewRect.contains(event.data().newPosition())) {
+            onExitView(event.issuerEntityId());
+        } else {
+            updateEntity(event.issuerEntityId(), event.data().newPosition());
         }
     }
 
-    public void updateWithEntityQuery(int[] entityIds) {
-        for (var known : inView.toArray()) {
-            boolean stillInView = false;
-            for (var id : entityIds) {
-                if (!inView.contains(id)) { onEnterView(id); }
-                if (id == known) { stillInView = true; }
-            }
-            if (!stillInView) { onExitView(known); }
-        }
-    }
+//    public void updateWithEntityQuery(int[] entityIds) {
+//        for (var known : inView.toArray()) {
+//            boolean stillInView = false;
+//            for (var id : entityIds) {
+//                if (!inView.contains(id)) { onEnterView(id); }
+//                if (id == known) { stillInView = true; }
+//            }
+//            if (!stillInView) { onExitView(known); }
+//        }
+//    }
 
     public void onExitView(int id) {
-        inView.remove(id);
+        removeEntity(id);
         emitEvent(Event.entityViewRectExited(this, id));
     }
 
-    public void onEnterView(int id) {
-        inView.add(id);
+    public void onEnterView(int id, IVector2 pos) {
+        inView.add(ContainedEntity.of(id, pos));
         emitEvent(Event.entityViewRectEntered(this, id));
     }
 
-    private void onTickConsumer(Tick tick) {
-        if (tick.tickTime() - lastTickProc > 1000) {
-            if (inView.isEmpty()) { return; }
-            final IRect2 view = IRect2.of(viewRect);
-
-        }
-    }
+//    private void onTickConsumer(Tick tick) {
+//        if (tick.tickTime() - lastTickProc > 1000) {
+//            if (inView.isEmpty()) { return; }
+//            final IRect2 view = IRect2.of(viewRect);
+//
+//        }
+//    }
 
     public void onQueryResponse(Event<int[]> event) {
 
@@ -107,4 +135,6 @@ public class ViewRect extends Component<ViewRect> {
     private IRect2 getData() {
         return emitMutable ? viewRect : IRect2.of(viewRect);
     }
+
+
 }

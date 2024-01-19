@@ -12,7 +12,7 @@ import io.mindspce.outerfieldsserver.area.ChunkJson;
 import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.components.ai.ThoughtModule;
-import io.mindspce.outerfieldsserver.components.npc.TravelController;
+import io.mindspce.outerfieldsserver.components.npc.NPCMovement;
 import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.core.systems.WorldSystem;
@@ -157,15 +157,15 @@ public class NPCTests {
                 moveOutside
         );
 
-        TravelController travelController = ComponentType.TRAVEL_CONTROLLER.castOrNull(
+        NPCMovement NPCMovement = ComponentType.TRAVEL_CONTROLLER.castOrNull(
                 entity.getComponent(ComponentType.TRAVEL_CONTROLLER).getFirst()
         );
 
-        if (travelController == null) {
+        if (NPCMovement == null) {
             System.out.println("Null controller");
         } else {
-            thoughtModule.registerOutputHook(EventType.NPC_TRAVEL_TO, travelController::onMoveTo, true);
-            travelController.registerOutputHook(EventType.NPC_ARRIVED_AT_LOC, thoughtModule::onEvent, false);
+            thoughtModule.registerOutputHook(EventType.NPC_TRAVEL_TO, NPCMovement::onMoveTo, true);
+            NPCMovement.registerOutputHook(EventType.NPC_ARRIVED_AT_LOC, thoughtModule::onEvent, false);
         }
 
         entity.addComponent(thoughtModule);
@@ -212,15 +212,15 @@ public class NPCTests {
                 concurrent
         );
 
-        TravelController travelController = ComponentType.TRAVEL_CONTROLLER.castOrNull(
+        NPCMovement NPCMovement = ComponentType.TRAVEL_CONTROLLER.castOrNull(
                 entity.getComponent(ComponentType.TRAVEL_CONTROLLER).getFirst()
         );
 
-        if (travelController == null) {
+        if (NPCMovement == null) {
             System.out.println("Null controller");
         } else {
-            thoughtModule.registerOutputHook(EventType.NPC_TRAVEL_TO, travelController::onMoveTo, true);
-            travelController.registerOutputHook(EventType.NPC_ARRIVED_AT_LOC, thoughtModule::onEvent, false);
+            thoughtModule.registerOutputHook(EventType.NPC_TRAVEL_TO, NPCMovement::onMoveTo, true);
+            NPCMovement.registerOutputHook(EventType.NPC_ARRIVED_AT_LOC, thoughtModule::onEvent, false);
         }
 
         entity.addComponent(thoughtModule);

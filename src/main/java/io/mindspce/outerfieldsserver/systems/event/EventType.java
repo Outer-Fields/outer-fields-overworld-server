@@ -11,7 +11,6 @@ import io.mindspce.outerfieldsserver.enums.AreaId;
 import io.mindspce.outerfieldsserver.enums.ClothingItem;
 import io.mindspce.outerfieldsserver.systems.EventData;
 import io.mindspce.outerfieldsserver.ai.task.Task;
-import io.mindspice.mindlib.data.collections.lists.primative.IntList;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
@@ -59,11 +58,11 @@ public enum EventType {
     ENTITY_STATE_UPDATE(EventData.EntityStateUpdate.class, x -> x instanceof EventData.EntityStateUpdate),
     ENTITY_POSITION_UPDATE(IVector2.class, x -> x instanceof IVector2),
     ENTITY_PROPERTY_UPDATE(Pair.class, x -> x instanceof Pair),
+    ENTITY_DESTROYED(Integer.class, x -> x instanceof Integer),
 
     // PLAYER SUBSYSTEM EVENTS
     PLAYER_VALID_MOVEMENT(IVector2.class, x -> x instanceof IVector2),
     PLAYER_INVALID_MOVEMENT(EventData.EntityPositionChanged.class, x -> x instanceof EventData.EntityPositionChanged),
-
 
     // Serialization
     SERIALIZED_ENTITY_REQUEST(Integer.class, x -> x instanceof Integer),
@@ -93,7 +92,6 @@ public enum EventType {
     ENTITY_GRID_QUERY(IRect2.class, x -> x instanceof IRect2),
     ENTITY_GRID_RESPONSE(int[].class, x -> x instanceof int[]),
 
-
     // LOCATION
     LOCATION_NEW(LocationEntity.class, x -> x instanceof LocationEntity),
     LOCATION_REMOVE(Integer.class, x -> x instanceof Integer),
@@ -106,6 +104,7 @@ public enum EventType {
     // RANDOM
     KEY_VALUE_EVENT(Pair.class, x -> x instanceof Pair),
     DO_TASK(Task.class, x -> x instanceof Task),
+    UPDATE_LISTENING(Boolean.class, x -> x instanceof Boolean),
 
     // NPC
     NPC_ARRIVED_AT_LOC(EventData.NpcLocationArrival.class, x -> x instanceof EventData.NpcLocationArrival),

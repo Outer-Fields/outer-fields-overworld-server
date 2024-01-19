@@ -335,6 +335,11 @@ public record Event<T>(
         return new Event<>(EventType.TILE_DATA_QUERY, area, component, query);
     }
 
+    public static Event<Boolean> updateListening(int entityId, ComponentType componentType, boolean isEnable) {
+        return new Event<>(EventType.UPDATE_LISTENING, AreaId.GLOBAL, -1,-1,ComponentType.ANY,
+                EntityType.ANY, entityId, -1, componentType, isEnable);
+    }
+
     public static class Builder<T> {
         EventType eventType;
         AreaId eventArea;
