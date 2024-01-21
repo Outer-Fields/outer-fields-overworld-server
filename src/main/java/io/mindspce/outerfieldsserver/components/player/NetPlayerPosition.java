@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 
-public class PlayerMovement extends Component<PlayerMovement> {
+public class NetPlayerPosition extends Component<NetPlayerPosition> {
     private final GridArray<DynamicTileRef> localGrid;
     private final IRect2 viewRect;
     private final IMutLine2 mVector;
@@ -25,7 +25,7 @@ public class PlayerMovement extends Component<PlayerMovement> {
     private final Consumer<IVector2> validatedConsumer;
     private final IMutLine2 testVector;
 
-    public PlayerMovement(Entity parentEntity, IVector2 startPos, GridArray<DynamicTileRef> localGrid, IRect2 viewRect,
+    public NetPlayerPosition(Entity parentEntity, IVector2 startPos, GridArray<DynamicTileRef> localGrid, IRect2 viewRect,
             Consumer<IVector2> correctionConsumer, Consumer<IVector2> validatedConsumer) {
         super(parentEntity, ComponentType.NET_PLAYER_POSITION, List.of(EventType.PLAYER_VALID_MOVEMENT, EventType.PLAYER_INVALID_MOVEMENT));
         this.localGrid = localGrid;
@@ -35,7 +35,7 @@ public class PlayerMovement extends Component<PlayerMovement> {
         mVector = ILine2.ofMutable(startPos, startPos);
         testVector = ILine2.ofMutable(startPos, startPos);
 
-        registerListener(EventType.NETWORK_IN_PLAYER_POSITION, PlayerMovement::onPlayerMovementIn);
+        registerListener(EventType.NETWORK_IN_PLAYER_POSITION, NetPlayerPosition::onPlayerMovementIn);
     }
 
     public void onPlayerMovementIn(Event<NetInPlayerPosition> event) {
@@ -48,6 +48,7 @@ public class PlayerMovement extends Component<PlayerMovement> {
         }
         //mVector.shiftLine(event.data().x(), event.data().y()
         // );
+
         testVector.shiftLine(event.data().x(), event.data().y());
         boolean validColl = PlayerAuthority.validateCollision(localGrid.get(2, 2).getAreaRef(), localGrid, viewRect, testVector);
 

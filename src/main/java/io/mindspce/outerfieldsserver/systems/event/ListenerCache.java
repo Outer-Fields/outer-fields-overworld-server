@@ -39,6 +39,7 @@ public abstract class ListenerCache<T extends Component<T>> {
 
     private void linkToSystem(EventType eventType, Component<?> component) {
         if (onAddEventListener != null) {
+            ;
             onAddEventListener.accept(eventType, component);
         }
     }
@@ -231,6 +232,7 @@ public abstract class ListenerCache<T extends Component<T>> {
     }
 
     public void disableListening() {
+        System.out.println("\n\n\nDisabled Listener: " + this);
         isListening = false;
     }
 

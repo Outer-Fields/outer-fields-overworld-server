@@ -30,7 +30,7 @@ public class ComponentSystem extends Component<ComponentSystem> {
                 ComponentType.SUB_SYSTEM,
                 components.stream().flatMap(c -> c.emittedEvents().stream()).distinct().toList()
         );
-
+        enableListening();
         for (var comp : components) {
             for (EventType event : EventType.values()) {
                 if (comp.isListenerFor(event)) {
@@ -45,6 +45,7 @@ public class ComponentSystem extends Component<ComponentSystem> {
 
     @Override
     public void onEvent(Event<?> event) {
+
         onEventConsumer.accept(event);
     }
 

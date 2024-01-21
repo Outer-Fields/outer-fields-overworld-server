@@ -141,6 +141,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
                             Thread.onSpinWait();
                         }
                     }
+
                     if (systemEvents.get(nextEvent.eventType().ordinal())) {
                         handleSystemEvent(nextEvent);
                         continue;
@@ -361,6 +362,7 @@ public abstract class SystemListener implements EventListener<SystemListener> {
                 // TODO log this? might not be error as we dont track entity ids before issuing?
                 return;
             }
+
             for (int i = 0; i < listeners.size(); ++i) {
                 var listener = listeners.get(i);
                 if (listener.isListenerFor(event.eventType())) {

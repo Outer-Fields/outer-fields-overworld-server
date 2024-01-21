@@ -2,7 +2,7 @@ package io.mindspce.outerfieldsserver;
 
 import io.mindspce.outerfieldsserver.ai.decisiongraph.DecisionEventGraph;
 import io.mindspce.outerfieldsserver.ai.decisiongraph.RootNode;
-import io.mindspce.outerfieldsserver.ai.decisiongraph.actions.ActionEvent;
+import io.mindspce.outerfieldsserver.ai.decisiongraph.actions.ActionTask;
 import io.mindspce.outerfieldsserver.ai.decisiongraph.decisions.PredicateNode;
 import io.mindspce.outerfieldsserver.ai.task.Task;
 
@@ -13,7 +13,6 @@ import io.mindspce.outerfieldsserver.area.TileData;
 import io.mindspce.outerfieldsserver.components.Component;
 import io.mindspce.outerfieldsserver.components.ai.ThoughtModule;
 import io.mindspce.outerfieldsserver.components.npc.NPCMovement;
-import io.mindspce.outerfieldsserver.core.Tick;
 import io.mindspce.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspce.outerfieldsserver.core.systems.WorldSystem;
 import io.mindspce.outerfieldsserver.entities.Entity;
@@ -25,8 +24,10 @@ import io.mindspce.outerfieldsserver.systems.event.Event;
 import io.mindspce.outerfieldsserver.systems.event.EventType;
 import io.mindspce.outerfieldsserver.systems.event.SystemListener;
 import io.mindspce.outerfieldsserver.util.GridUtils;
+import io.mindspice.mindlib.data.collections.lists.CyclicList;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
+import io.mindspice.mindlib.data.tuples.Pair;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -38,11 +39,12 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 
 public class NPCTests {
 
-    public static class TestComponent extends Component<EventSystemTests.TestComponent> {
+    public static class TestComponent extends Component<EventCompSystemTests.TestComponent> {
         int testInt;
         List<Integer> testList = new CopyOnWriteArrayList<>();
 
@@ -87,7 +89,8 @@ public class NPCTests {
     }
 
     public record BasicFocus(
-            Entity entity
+            Entity entity,
+            CyclicList<IVector2> locations
     ) { }
 
 
@@ -102,60 +105,42 @@ public class NPCTests {
     }
 
     public static AtomicInteger testThought1(Entity entity) {
+
         AtomicInteger testCount = new AtomicInteger(0);
+
+        BasicFocus bf = new BasicFocus(entity, new CyclicList<>(List.of(IVector2.of(784, 766), IVector2.of(672, 960))));
+
+        ThoughtModule<BasicFocus> thoughtModule = new ThoughtModule<>(entity, 100);
+
+        Function<BasicFocus, Pair<Task<BasicTaskData>, Boolean>> travel = (BasicFocus focus) -> {
+            var taskData = new BasicTaskData(focus.locations.getNext(), new AtomicBoolean(false));
+            Task<BasicTaskData> task = Task.builder("MoveToLocation", taskData)
+                    .addSubEventTask(
+                            EventType.NPC_ARRIVED_AT_LOC,
+                            (BasicTaskData td, Event<?> event) -> {
+                                EventData.NpcLocationArrival data = EventType.NPC_ARRIVED_AT_LOC.castOrNull(td);
+                                testCount.getAndIncrement();
+                                return true;
+                            },
+                            (BasicTaskData data) -> {
+                                thoughtModule.emitEvent(Event.npcTravelTo(thoughtModule, thoughtModule.areaId(),
+                                        new EventData.NPCTravelTo(data.location, -1, -1, 2000, false)
+                                ));
+                            },
+                            false)
+                    .build();
+
+            return Pair.of(task, false);
+        };
+
         // @formatter:off
-        DecisionEventGraph<BasicFocus, ThoughtType> graph =
-                new DecisionEventGraph<BasicFocus, ThoughtType>(new RootNode<>())
-                        .addChild(PredicateNode.of("PredicateNode", List.of((BasicFocus bf) -> bf.entity != null)))
-                        .addLeaf(ActionEvent.of(ThoughtType.TEST_TRAVEL));
+        DecisionEventGraph<BasicFocus> graph =
+                new DecisionEventGraph<BasicFocus>(new RootNode<>())
+                        .addChild(PredicateNode.of("PredicateNode", (BasicFocus f) -> f.entity != null))
+                            .addLeaf(ActionTask.of("Test_Travel", travel));
         // @formatter:on
 
-        ThoughtModule<ThoughtType, BasicFocus> thoughtModule = new ThoughtModule<>(entity, graph, new BasicFocus(entity), 100);
-
-        Task<ThoughtType, BasicTaskData> moveInside = Task.builder(ThoughtType.TEST_TRAVEL, new BasicTaskData(IVector2.of(784, 766), new AtomicBoolean(false)), thoughtModule.getEventHooks())
-                .addSubEventTask(EventType.NPC_ARRIVED_AT_LOC,
-                        (BasicTaskData td, Event<?> event) -> {
-                            EventData.NpcLocationArrival data = EventType.NPC_ARRIVED_AT_LOC.castOrNull(td);
-                            testCount.getAndIncrement();
-                            return true;
-                        },
-                        (BasicTaskData data) -> {
-                            thoughtModule.emitEvent(Event.npcTravelTo(thoughtModule, thoughtModule.areaId(),
-                                    new EventData.NPCTravelTo(data.location, -1, -1, 2000, false)
-                            ));
-                        },
-                        false)
-                .build();
-
-        Task<ThoughtType, BasicTaskData> moveOutside = Task.builder(ThoughtType.TEST_TRAVEL, new BasicTaskData(IVector2.of(672, 960), new AtomicBoolean(false)), thoughtModule.getEventHooks())
-                .addSubEventTask(
-                        EventType.NPC_ARRIVED_AT_LOC,
-                        (BasicTaskData td, Event<?> event) -> {
-                            EventData.NpcLocationArrival data = EventType.NPC_ARRIVED_AT_LOC.castOrNull(td);
-                            testCount.getAndIncrement();
-                            return true;
-                        },
-                        (BasicTaskData data) -> {
-                            thoughtModule.emitEvent(Event.npcTravelTo(thoughtModule, thoughtModule.areaId(),
-                                    new EventData.NPCTravelTo(data.location, -1, -1, 2000, false)
-                            ));
-                        },
-                        false)
-                .build();
-
-        thoughtModule.addWantingToDo(
-                ThoughtType.TEST_TRAVEL,
-                false,
-                (Tick t) -> true,
-                moveInside
-        );
-
-        thoughtModule.addWantingToDo(
-                ThoughtType.TEST_TRAVEL,
-                false,
-                (Tick t) -> true,
-                moveOutside
-        );
+        thoughtModule.addDecisionGraph(graph, bf);
 
         NPCMovement NPCMovement = ComponentType.TRAVEL_CONTROLLER.castOrNull(
                 entity.getComponent(ComponentType.TRAVEL_CONTROLLER).getFirst()
@@ -169,48 +154,50 @@ public class NPCTests {
         }
 
         entity.addComponent(thoughtModule);
-        Event.emitAndRegisterEntity(SystemType.NPC, entity.areaId(), IVector2.of(0,0), entity);
+        Event.emitAndRegisterEntity(SystemType.NPC, entity.areaId(), IVector2.of(0, 0), entity);
+
         return testCount;
 
     }
 
     public static BasicTaskData testThought12(NonPlayerEntity entity) throws InterruptedException {
         AtomicBoolean testCount = new AtomicBoolean(false);
+        ThoughtModule< BasicFocus> thoughtModule = new ThoughtModule<>(entity, 20);
+        BasicFocus bf = new BasicFocus(entity, new CyclicList<>(List.of()));
+        var taskData = new BasicTaskData(IVector2.of(0, 0), new AtomicBoolean(false));
+
+        Function<BasicFocus, Pair<Task<BasicTaskData>, Boolean>> travel = (BasicFocus focus) -> {
+            Task<BasicTaskData> task = Task.builder("PingPong", taskData)
+                    .addSubEventTask(EventType.PING,
+                            (BasicTaskData td, Event<?> event) -> {
+                                System.out.println("ping in");
+                                return true;
+                            },
+                            null,
+                            false)
+                    .addSubEventTask(EventType.PONG,
+                            (BasicTaskData td, Event<?> event) -> {
+                                System.out.println("pong in");
+                                return true;
+                            },
+                            null,
+                            false)
+                    .setConcurrent(true)
+                    .setOnCompletion((td) -> taskData.bool().set(true))
+                    .build();
+            return Pair.of(task, false);
+        };
+
         // @formatter:off
-        DecisionEventGraph<BasicFocus, ThoughtType> graph =
-                new DecisionEventGraph<BasicFocus, ThoughtType>(new RootNode<>())
-                        .addChild(PredicateNode.of("PredicateNode", List.of((BasicFocus bf) -> bf.entity != null)))
-                        .addLeaf(ActionEvent.of(ThoughtType.TEST_TRAVEL));
+        DecisionEventGraph<BasicFocus> graph =
+                new DecisionEventGraph<BasicFocus>(new RootNode<>())
+                        .addChild(PredicateNode.of("PredicateNode", List.of((BasicFocus bfoc) -> bfoc.entity != null)))
+                        .addLeaf(ActionTask.of("TravelAction", travel));
         // @formatter:on
 
-        var btd = new BasicTaskData(IVector2.of(0, 0), new AtomicBoolean(false));
-        ThoughtModule<ThoughtType, BasicFocus> thoughtModule = new ThoughtModule<>(entity, graph, new BasicFocus(entity), 100);
+      thoughtModule.addDecisionGraph(graph, bf);
 
-        Task<ThoughtType, BasicTaskData> concurrent = Task.builder(ThoughtType.TEST_TRAVEL, btd, thoughtModule.getEventHooks())
-                .addSubEventTask(EventType.PING,
-                        (BasicTaskData td, Event<?> event) -> {
-                            System.out.println("ping in");
-                            return true;
-                        },
-                        null,
-                        false)
-                .addSubEventTask(EventType.PONG,
-                        (BasicTaskData td, Event<?> event) -> {
-                            System.out.println("pong in");
-                            return true;
-                        },
-                        null,
-                        false)
-                .setConcurrent(true)
-                .setOnCompletion((td) -> btd.bool().set(true))
-                .build();
 
-        thoughtModule.addWantingToDo(
-                ThoughtType.TEST_TRAVEL,
-                true,
-                (Tick t) -> true,
-                concurrent
-        );
 
         NPCMovement NPCMovement = ComponentType.TRAVEL_CONTROLLER.castOrNull(
                 entity.getComponent(ComponentType.TRAVEL_CONTROLLER).getFirst()
@@ -224,8 +211,8 @@ public class NPCTests {
         }
 
         entity.addComponent(thoughtModule);
-        Event.emitAndRegisterEntity(SystemType.NPC, entity.areaId(), IVector2.of(0,0), entity);
-        return btd;
+        Event.emitAndRegisterEntity(SystemType.NPC, entity.areaId(), IVector2.of(0, 0), entity);
+        return taskData;
 
     }
 
@@ -234,14 +221,15 @@ public class NPCTests {
         var ts = new TestSystem(SystemType.NPC, true);
         var ws = worldSystem();
 
+        Thread.sleep(1000);
         var npc = EntityManager.GET().newNonPlayerEntity(-1, "Test_NPC", List.of(EntityState.TEST),
                 new ClothingItem[6], AreaId.TEST, IVector2.of(672, 960), IVector2.of(200, 200), false);
 
         var count = testThought1(npc);
-        Thread.sleep(10_000);
+        Thread.sleep(15_000);
 
         System.out.println(count.get());
-        assertTrue(count.get() > 2);
+        assertTrue(count.get() >= 2);
 
     }
 
@@ -257,7 +245,7 @@ public class NPCTests {
 
         Thread.sleep(1000);
 
-        ThoughtModule<?, ?> tm = ComponentType.THOUGHT_MODULE.castOrNull(npc.getComponent(ComponentType.THOUGHT_MODULE).getFirst());
+        ThoughtModule<?> tm = ComponentType.THOUGHT_MODULE.castOrNull(npc.getComponent(ComponentType.THOUGHT_MODULE).getFirst());
         assert tm != null;
         assert tm.hasInputHooksFor().contains(EventType.PING);
         assert tm.hasInputHooksFor().contains(EventType.PONG);

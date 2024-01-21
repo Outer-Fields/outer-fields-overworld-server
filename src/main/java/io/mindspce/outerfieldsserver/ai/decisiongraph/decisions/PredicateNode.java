@@ -16,8 +16,12 @@ public class PredicateNode<T> extends Node<T> {
         this.decisions = decisions;
     }
 
-    public static <T> PredicateNode<T> of(String name, List<Predicate<T>> decisions) {
-        return new PredicateNode<>(name, decisions);
+    public static <T> PredicateNode<T> of(String name, List<Predicate<T>> predicates) {
+        return new PredicateNode<>(name, predicates);
+    }
+
+    public static <T> PredicateNode<T> of(String name, Predicate<T> predicate) {
+        return new PredicateNode<>(name, List.of(predicate));
     }
 
     @Override

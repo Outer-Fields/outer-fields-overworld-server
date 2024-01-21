@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public class QuestSystemTests {
+public class QuestCompSystemTests {
 
     public QuestSystem questSystem() {
         return new QuestSystem(true);

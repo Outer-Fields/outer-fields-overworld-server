@@ -100,7 +100,7 @@ public class ComponentFactory {
         return viewRect;
     }
 
-    public static class System {
+    public static class CompSystem {
 
         public static void attachPlayerEntityComponents(PlayerEntity entity, IVector2 currPosition, AreaId currArea,
                 List<EntityState> initStates, ClothingItem[] initOutFit, WebSocketSession webSocketSession) {
@@ -115,13 +115,13 @@ public class ComponentFactory {
             PlayerSession playerSession = new PlayerSession(entity, webSocketSession);
             KnownEntities knownEntities = new KnownEntities(entity);
             PlayerNetOut playerNetOut = new PlayerNetOut(entity, playerSession, viewRect, knownEntities);
-            PlayerMovement playerMovement = new PlayerMovement(entity, currPosition, localTileGrid.tileGrid(),
+            NetPlayerPosition netPlayerPosition = new NetPlayerPosition(entity, currPosition, localTileGrid.tileGrid(),
                     viewRect.getRect(), playerNetOut::authCorrection, globalPosition::updatePosition
             );
 
             ComponentSystem playerNetInSystem = new ComponentSystem(
                     entity,
-                    List.of(playerMovement, globalPosition, viewRect, localTileGrid, playerSession, knownEntities, playerNetOut),
+                    List.of(netPlayerPosition, globalPosition, viewRect, localTileGrid, playerSession, knownEntities, playerNetOut),
                     EventProcMode.PASS_THROUGH
             ).withComponentName("PlayerNetworkController");
 
@@ -141,6 +141,7 @@ public class ComponentFactory {
             viewRect.registerOutputHook(EventType.ENTITY_VIEW_RECT_CHANGED, knownEntities::onSelfViewRectChanged, false);
 
             entity.addComponents(List.of(playerNetInSystem, stateComp, outfit, characterSerializer, playerNetOut));
+
         }
 
         public static void attachBaseNPCComponents(NonPlayerEntity entity, IVector2 currPosition,
@@ -166,6 +167,7 @@ public class ComponentFactory {
             globalPosition.registerOutputHook(EventType.ENTITY_POSITION_CHANGED, viewRect::onSelfPositionChanged, false);
 
             entity.addComponents(List.of(NPCMovement, stateComp, outfit, characterSerializer));
+
         }
     }
 

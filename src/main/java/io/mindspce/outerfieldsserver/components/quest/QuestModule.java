@@ -90,22 +90,23 @@ public class QuestModule<T> extends Component<QuestModule<T>> {
         return completed;
     }
 
+
+    // TODO register listeners
     public void addSubEventTask(EventType eventType, BiPredicate<T, Event<?>> completionEventPredicate,
             Consumer<T> onStartConsumer, boolean suspendable) {
-        taskList.add(SubTask.ofOnEvent(eventType, questData, onStartConsumer, completionEventPredicate, suspendable,
-                this::registerInputHook, this::clearInputHooksFor));
+        taskList.add(SubTask.ofOnEvent(eventType, questData, onStartConsumer, completionEventPredicate, suspendable));
     }
 
     public void addSubTickTask(BiPredicate<T, Tick> completionTickPredicate, Consumer<T> onStartConsumer,
             boolean suspendable) {
         taskList.add(SubTask.ofOnTick(questData, onStartConsumer, completionTickPredicate,
-                suspendable, this::registerInputHook, this::clearInputHooksFor));
+                suspendable));
     }
 
     public void addSubEventTickTask(EventType eventType, BiPredicate<T, Event<?>> completionEventPredicate,
             BiPredicate<T, Tick> completionTickPredicate, Consumer<T> onStartConsumer, boolean suspendable) {
         taskList.add(SubTask.ofEventAndTick(eventType, questData, onStartConsumer, completionEventPredicate,
-                completionTickPredicate, suspendable, this::registerInputHook, this::clearInputHooksFor));
+                completionTickPredicate, suspendable));
     }
 
 }

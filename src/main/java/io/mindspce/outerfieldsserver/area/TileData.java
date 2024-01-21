@@ -1,6 +1,5 @@
 package io.mindspce.outerfieldsserver.area;
 
-import io.mindspce.outerfieldsserver.entities.LootEntity;
 import io.mindspice.mindlib.data.geometry.IVector2;
 
 

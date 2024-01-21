@@ -21,7 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public class EventSystemTests {
+public class EventCompSystemTests {
 
     public static class TestSystem extends SystemListener {
         public TestSystem(SystemType systemType, boolean doStart) {
