@@ -1,0 +1,185 @@
+package io.mindspice.outerfieldsserver.factory;
+
+import io.mindspice.outerfieldsserver.components.player.*;
+import io.mindspice.outerfieldsserver.components.world.ChunkMap;
+import io.mindspice.outerfieldsserver.components.world.CollisionGrid;
+import io.mindspice.outerfieldsserver.components.world.EntityGrid;
+import io.mindspice.outerfieldsserver.components.world.SimpleObject;
+import io.mindspice.outerfieldsserver.entities.ChunkEntity;
+import io.mindspice.outerfieldsserver.components.entity.EntityStateComp;
+import io.mindspice.outerfieldsserver.components.entity.GlobalPosition;
+import io.mindspice.outerfieldsserver.components.npc.NPCMovement;
+import io.mindspice.outerfieldsserver.components.primatives.ComponentSystem;
+import io.mindspice.outerfieldsserver.components.primatives.SimpleEmitter;
+import io.mindspice.outerfieldsserver.components.primatives.SimpleListener;
+import io.mindspice.outerfieldsserver.components.serialization.CharacterSerializer;
+import io.mindspice.outerfieldsserver.core.WorldSettings;
+import io.mindspice.outerfieldsserver.entities.Entity;
+import io.mindspice.outerfieldsserver.entities.NonPlayerEntity;
+import io.mindspice.outerfieldsserver.entities.PositionalEntity;
+import io.mindspice.outerfieldsserver.entities.PlayerEntity;
+import io.mindspice.outerfieldsserver.enums.*;
+import io.mindspice.outerfieldsserver.systems.event.EventType;
+import io.mindspice.mindlib.data.geometry.IConcurrentPQuadTree;
+import io.mindspice.mindlib.data.geometry.IPolygon2;
+import io.mindspice.mindlib.data.geometry.IRect2;
+import io.mindspice.mindlib.data.geometry.IVector2;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.util.List;
+
+
+public class ComponentFactory {
+
+    public static GlobalPosition addGlobalPosition(Entity entity) {
+        if (entity.hasAttachedComponent(ComponentType.GLOBAL_POSITION)) {
+            //TODO debug log this
+            return ComponentType.GLOBAL_POSITION.castOrNull(
+                    entity.getComponent(ComponentType.GLOBAL_POSITION).getFirst());
+        }
+        GlobalPosition globalPosition = new GlobalPosition(entity);
+        entity.addComponent(globalPosition);
+        return globalPosition;
+    }
+
+    public static SimpleListener addSimpleListener(Entity entity) {
+        SimpleListener listener = new SimpleListener(entity);
+        entity.addComponent(listener);
+        return listener;
+    }
+
+    public static SimpleEmitter addSimpleEmitter(Entity entity, List<EventType> emittedEvents) {
+        SimpleEmitter simpleEmitter = new SimpleEmitter(entity, emittedEvents);
+        entity.addComponent(simpleEmitter);
+        return simpleEmitter;
+    }
+
+    public static <T> SimpleObject<T> addSimpleObject(Entity entity, T object, List<EventType> emittedEvents) {
+        SimpleObject<T> simpleObject = new SimpleObject<>(entity, object, emittedEvents);
+        entity.addComponent(simpleObject);
+        return simpleObject;
+    }
+
+    public static ChunkMap addChunkMap(Entity entity, ChunkEntity[][] chunkEntities) {
+        ChunkMap chunkMap = new ChunkMap(entity, chunkEntities);
+        entity.addComponent(chunkMap);
+        return chunkMap;
+    }
+
+    public static EntityGrid addEntityGrid(Entity entity, int initialSetSize, IRect2 areaRect, int maxPerQuad) {
+        EntityGrid grid = new EntityGrid(entity, initialSetSize, areaRect, maxPerQuad);
+        entity.addComponent(grid);
+        return grid;
+    }
+
+    public static CollisionGrid addCollisionGrid(Entity entity, IConcurrentPQuadTree<IPolygon2> quadTree) {
+        CollisionGrid grid = new CollisionGrid(entity, quadTree);
+        entity.addComponent(grid);
+        return grid;
+    }
+
+//    public static AreaEntities addTrackedEntities(Entity entity, List<Entity> trackedEntities) {
+//        var tracker = new AreaEntities(entity, trackedEntities);
+//        entity.addComponent(tracker);
+//        return tracker;
+//    }
+//
+//    public static AreaEntities addTrackedEntities(Entity entity) {
+//        var tracker = new AreaEntities(entity);
+//        entity.addComponent(tracker);
+//        return tracker;
+//    }
+
+    public static ViewRect addViewRect(PositionalEntity entity, IVector2 size, IVector2 position, boolean emitMutable) {
+        GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castOrNull(
+                entity.getComponent(ComponentType.GLOBAL_POSITION).getFirst()
+        );
+        if (globalPosition == null) {
+            throw new IllegalStateException("Entity must have an existing GlobalPosition component to add ViewRect, " +
+                    "Use AreaMonitor for static entities");
+        }
+        ViewRect viewRect = new ViewRect(entity, size, position, emitMutable);
+        globalPosition.registerOutputHook(EventType.ENTITY_POSITION_CHANGED, viewRect::onSelfPositionChanged, false);
+        return viewRect;
+    }
+
+    public static class CompSystem {
+
+        public static void attachPlayerEntityComponents(PlayerEntity entity, IVector2 currPosition, AreaId currArea,
+                List<EntityState> initStates, ClothingItem[] initOutFit, WebSocketSession webSocketSession) {
+
+            GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castOrNull(
+                    entity.getComponent(ComponentType.GLOBAL_POSITION).getFirst()
+            );
+            if (globalPosition == null) { throw new IllegalStateException("Entity must have an existing GlobalPosition component"); }
+
+            ViewRect viewRect = new ViewRect(entity, WorldSettings.GET().playerViewWithBuffer(), currPosition, true);
+            LocalTileGrid localTileGrid = new LocalTileGrid(entity, 5, currArea);
+            PlayerSession playerSession = new PlayerSession(entity, webSocketSession);
+            KnownEntities knownEntities = new KnownEntities(entity);
+            PlayerNetOut playerNetOut = new PlayerNetOut(entity, playerSession, viewRect, knownEntities);
+            NetPlayerPosition netPlayerPosition = new NetPlayerPosition(entity, currPosition, localTileGrid.tileGrid(),
+                    viewRect.getRect(), playerNetOut::authCorrection, globalPosition::updatePosition
+            );
+
+            ComponentSystem playerNetInSystem = new ComponentSystem(
+                    entity,
+                    List.of(netPlayerPosition, globalPosition, viewRect, localTileGrid, playerSession, knownEntities, playerNetOut),
+                    EventProcMode.PASS_THROUGH
+            ).withComponentName("PlayerNetworkController");
+
+            EntityStateComp stateComp = new EntityStateComp(entity, initStates);
+            CharacterOutfit outfit = new CharacterOutfit(entity, initOutFit);
+            CharacterSerializer characterSerializer = new CharacterSerializer(
+                    entity,
+                    globalPosition::currPosition,
+                    stateComp::currStates,
+                    outfit::currOutfit
+            );
+
+            globalPosition.registerOutputHook(EventType.ENTITY_POSITION_CHANGED, viewRect::onSelfPositionChanged, false);
+            globalPosition.registerOutputHook(EventType.ENTITY_POSITION_CHANGED, localTileGrid::onSelfPositionChanged, false);
+            globalPosition.registerOutputHook(EventType.ENTITY_AREA_CHANGED, localTileGrid::onSelfAreaChanged, false);
+            globalPosition.registerOutputHook(EventType.ENTITY_AREA_CHANGED, knownEntities::onPlayerAreaChanged, false);
+            viewRect.registerOutputHook(EventType.ENTITY_VIEW_RECT_CHANGED, knownEntities::onSelfViewRectChanged, false);
+
+            entity.addComponents(List.of(playerNetInSystem, stateComp, outfit, characterSerializer, playerNetOut));
+
+        }
+
+        public static void attachBaseNPCComponents(NonPlayerEntity entity, IVector2 currPosition,
+                List<EntityState> initStates, ClothingItem[] initOutFit, IVector2 viewRectSize) {
+
+            GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castOrNull(
+                    entity.getComponent(ComponentType.GLOBAL_POSITION).getFirst()
+            );
+            if (globalPosition == null) { throw new IllegalStateException("Entity must have an existing GlobalPosition component"); }
+
+            ViewRect viewRect = new ViewRect(entity, viewRectSize, currPosition, true);
+            NPCMovement NPCMovement = new NPCMovement(entity, currPosition, globalPosition::currPosition);
+            EntityStateComp stateComp = new EntityStateComp(entity, initStates);
+            CharacterOutfit outfit = new CharacterOutfit(entity, initOutFit);
+            CharacterSerializer characterSerializer = new CharacterSerializer(
+                    entity,
+                    globalPosition::currPosition,
+                    stateComp::currStates,
+                    outfit::currOutfit
+            );
+
+            NPCMovement.registerOutputHook(EventType.ENTITY_POSITION_UPDATE, globalPosition::onPositionUpdate, true);
+            globalPosition.registerOutputHook(EventType.ENTITY_POSITION_CHANGED, viewRect::onSelfPositionChanged, false);
+
+            entity.addComponents(List.of(NPCMovement, stateComp, outfit, viewRect, characterSerializer));
+
+        }
+    }
+
+    public static void attachNPCAttackComponents(NonPlayerEntity entity) {
+        ViewRect viewRect = ComponentType.VIEW_RECT.castOrNull(entity.getComponent(ComponentType.VIEW_RECT).getFirst());
+        if (viewRect == null) { throw new IllegalStateException("Entity must have existing ViewRect"); }
+
+
+    }
+
+
+}

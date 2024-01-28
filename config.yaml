@@ -1,0 +1,41 @@
+---
+isPaused: false
+advancedDebug: false
+gameLogging: true
+gameLogPath: "/home/mindspice/code/Java/Okra/okra-game-server/GameLogs/"
+botExecThreads: 1
+lobbyExecThreads: 1
+gameExecThreads: 1
+pausedMsg: "none"
+queueSetLevelDifferential: 35
+dbURI:  "http://192.168.10.30:8080"
+dbUser:  "db_user"
+dbPass:  "#F#LzKood9M7P#z4"
+adminPort: 0
+adminPass:  "test"
+adminCert:  "test"
+adminCertPass: "test"
+authServiceUri: "http://192.168.10.10"
+authServicePort: 8080
+authServiceUser: "auth_user"
+authServicePass: "$QrARP2456fM^M8u"
+itemServiceUri: "http://192.168.10.40"
+itemServicePort: 8080
+itemServiceUser: "item_user"
+itemServicePass: "KH$2*DiE^9@pPWvj"
+maxActionDeckLevel: 2.875
+actionDeckBounds: [6,8]
+maxAbilityDeckLevel: 2.875
+abilityDeckBounds: [6,8]
+maxPowerDeckLevel: 2.875
+powerDeckBounds: [3,4]
+logBotActions: false
+botQueueWait: 100
+projectMessages: [["test","test"],["test2", "test2"]]
+maxFreeGames: -1
+freeGameRewards: true
+freeGameBotOnly: true
+
+projectAds: []
+otherAds: []
+
