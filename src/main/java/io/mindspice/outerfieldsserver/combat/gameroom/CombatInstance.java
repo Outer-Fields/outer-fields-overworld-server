@@ -1,7 +1,7 @@
 package io.mindspice.outerfieldsserver.combat.gameroom;
 
 import io.mindspice.outerfieldsserver.combat.gameroom.state.ActiveRoundState;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.game.NetStatus;
 import io.mindspice.outerfieldsserver.util.Log;
 import io.mindspice.outerfieldsserver.util.gamelogger.GameLogger;
@@ -15,7 +15,7 @@ import java.util.List;
 public class CombatInstance extends MatchInstance implements Runnable {
 
     // init the player state and combat managers before join to room, this allows easy insertion of bots
-    public CombatInstance(PlayerGameState p1GameState, PlayerGameState p2GameState) {
+    public CombatInstance(PlayerMatchState p1GameState, PlayerMatchState p2GameState) {
         super(p1GameState, p2GameState, true);
     }
 

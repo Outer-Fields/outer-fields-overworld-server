@@ -256,7 +256,7 @@ public class Pawn {
     /* GETTERS */
 
     public List<ActiveEffect> getStatusEffects() {
-        return statusEffects;
+        return Collections.unmodifiableList(statusEffects);
 
     }
 

@@ -4,7 +4,7 @@ import io.mindspice.outerfieldsserver.combat.enums.PawnIndex;
 import io.mindspice.outerfieldsserver.combat.gameroom.action.ActionReturn;
 import io.mindspice.outerfieldsserver.combat.gameroom.pawn.Pawn;
 import io.mindspice.outerfieldsserver.combat.gameroom.state.PawnInterimState;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 import io.mindspice.outerfieldsserver.core.Settings;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.NetMsg;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.game.*;
@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 
 public class NetCombatManager {
 
-    protected final PlayerGameState player;
-    protected final PlayerGameState enemy;
+    protected final PlayerMatchState player;
+    protected final PlayerMatchState enemy;
     protected final boolean doGameLog;
     protected final UUID roomId;
 
-    public NetCombatManager(PlayerGameState player, PlayerGameState enemy) {
+    public NetCombatManager(PlayerMatchState player, PlayerMatchState enemy) {
         this.player = player;
         this.enemy = enemy;
         doGameLog = Settings.GET().gameLogging;
@@ -31,7 +31,7 @@ public class NetCombatManager {
 
     }
 
-    private String getInfo(List<PawnInterimState> pis, PlayerGameState tPlayer) {
+    private String getInfo(List<PawnInterimState> pis, PlayerMatchState tPlayer) {
         return pis.stream()
                 .map(p -> tPlayer.getPawn(p.getPawnIndex()).getStatsLog())
                 .collect(Collectors.joining("\n"));

@@ -3,8 +3,8 @@ package io.mindspice.outerfieldsserver.util.gamelogger;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.mindspice.mindlib.util.JsonUtils;
 import io.mindspice.outerfieldsserver.combat.enums.PawnIndex;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
-import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetGameAction;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
+import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetCombatAction;
 import io.mindspice.outerfieldsserver.util.Log;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class GameLogger {
         roundRecords.put(roomId, roundRecord);
     }
 
-    public void addRoundRecord(PlayerGameState player1, PlayerGameState player2) {
+    public void addRoundRecord(PlayerMatchState player1, PlayerMatchState player2) {
         UUID roomId = player1.getPlayer().getGameRoom().getRoomId();
         int round = player1.getPlayer().getGameRoom().getRound();
         List<JsonNode> player1PawnRecords = player1.getPawns().stream().map(p -> JsonUtils.toNode(p.getPawnRecord())).toList();
@@ -50,7 +50,7 @@ public class GameLogger {
         roundRecords.put(roomId, record);
     }
 
-    public void addActionMsgIn(UUID roomId, int playerId, NetGameAction nga) {
+    public void addActionMsgIn(UUID roomId, int playerId, NetCombatAction nga) {
         RoundRecord record = roundRecords.get(roomId);
         if (record == null) {
            // Log.SERVER.error(this.getClass(), "Round record not found for RoomId:" + roomId);

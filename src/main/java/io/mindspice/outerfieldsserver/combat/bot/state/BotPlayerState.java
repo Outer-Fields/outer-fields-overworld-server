@@ -5,9 +5,9 @@ import io.mindspice.outerfieldsserver.combat.bot.BotTurn;
 import io.mindspice.outerfieldsserver.combat.bot.behavior.BehaviorGraph;
 import io.mindspice.outerfieldsserver.combat.enums.*;
 import io.mindspice.outerfieldsserver.combat.gameroom.MatchInstance;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
-import io.mindspice.outerfieldsserver.combat.schema.PawnSet;
-import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetGameAction;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
+import io.mindspice.outerfieldsserver.data.PawnSet;
+import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetCombatAction;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.game.NetTurnResponse;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.game.NetTurnUpdate;
 import io.mindspice.outerfieldsserver.entities.PlayerEntity;
@@ -21,12 +21,12 @@ import java.util.concurrent.TimeUnit;
 
 
 // Must be added to the game room after the remote player has readied and submitted their PawnSet
-public class BotPlayerState extends PlayerGameState {
-    private PlayerGameState enemyState;
+public class BotPlayerState extends PlayerMatchState {
+    private PlayerMatchState enemyState;
     private ScheduledExecutorService botExecutor;
 
     // Main constructor for bot vs player games
-    public BotPlayerState(BotPlayer botPlayer, PlayerGameState enemyPlayer, PawnSet pawnSet,
+    public BotPlayerState(BotPlayer botPlayer, PlayerMatchState enemyPlayer, PawnSet pawnSet,
             ScheduledExecutorService botExecutor) {
         super(botPlayer, pawnSet);
         this.enemyState = enemyPlayer;
@@ -45,7 +45,7 @@ public class BotPlayerState extends PlayerGameState {
         this.botExecutor = botExecutor;
     }
 
-    public void setEnemyPlayer(PlayerGameState enemyPlayer) {
+    public void setEnemyPlayer(PlayerMatchState enemyPlayer) {
         this.enemyState = enemyPlayer;
     }
 
@@ -90,7 +90,7 @@ public class BotPlayerState extends PlayerGameState {
 
     public void doAction(PlayerAction action, PawnIndex playerIndex, PawnIndex enemyIndex) {
         //    System.out.println("Doing Action: " + action + "\t| " + playerIndex + "->" +enemyIndex);
-        NetGameAction nga = new NetGameAction(
+        NetCombatAction nga = new NetCombatAction(
                 action,
                 playerIndex,
                 enemyIndex
@@ -108,7 +108,7 @@ public class BotPlayerState extends PlayerGameState {
 //    }
 
     // fake bot response, add message directly to gameroom queue
-    public void sendFauxMsg(NetGameAction nga) {
+    public void sendFauxMsg(NetCombatAction nga) {
         try {
             super.getPlayer().getGameRoom().addMsg(super.getId(), nga);
         } catch (Exception e) {
@@ -120,7 +120,7 @@ public class BotPlayerState extends PlayerGameState {
         return super.getPlayer().getGameRoom();
     }
 
-    public PlayerGameState getEnemyState() {
+    public PlayerMatchState getEnemyState() {
         return enemyState;
     }
 

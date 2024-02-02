@@ -7,7 +7,7 @@ import io.mindspice.outerfieldsserver.combat.gameroom.action.ActionReturn;
 import io.mindspice.outerfieldsserver.combat.gameroom.action.StatMap;
 import io.mindspice.outerfieldsserver.combat.gameroom.action.logic.*;
 import io.mindspice.outerfieldsserver.combat.gameroom.effect.Effect;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 import io.mindspice.outerfieldsserver.util.CardUtil;
 
 import static io.mindspice.outerfieldsserver.combat.enums.ActionClass.*;
@@ -494,7 +494,7 @@ public enum WeaponCard implements Card {
     }
 
     @Override
-    public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+    public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
         return playCard(player, target, playerIdx, targetIdx, stats);
     }
 

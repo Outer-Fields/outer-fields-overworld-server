@@ -1,7 +1,10 @@
 package io.mindspice.outerfieldsserver.core.singletons;
 
+import io.mindspice.mindlib.util.DebugUtils;
+import io.mindspice.outerfieldsserver.core.ActiveCombat;
 import io.mindspice.outerfieldsserver.core.HttpServiceClient;
 import io.mindspice.outerfieldsserver.core.systems.*;
+import io.mindspice.outerfieldsserver.data.LootDropItem;
 import io.mindspice.outerfieldsserver.entities.*;
 import io.mindspice.outerfieldsserver.area.ChunkJson;
 import io.mindspice.outerfieldsserver.core.WorldSettings;
@@ -12,30 +15,31 @@ import io.mindspice.mindlib.data.collections.lists.primative.IntList;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
-import io.mindspice.outerfieldsserver.systems.event.Event;
-import io.mindspice.outerfieldsserver.systems.event.EventType;
-import io.mindspice.outerfieldsserver.systems.event.SystemListener;
+import io.mindspice.outerfieldsserver.systems.event.*;
 import org.jctools.maps.NonBlockingHashMapLong;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.StampedLock;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 
 public class EntityManager {
+
     private static final EntityManager INSTANCE = new EntityManager();
     private final ConcurrentIndexCache<Entity> entityCache = new ConcurrentIndexCache<>(1000, false);
     private final Map<EntityType, IntList> entityMap = new EnumMap<>(EntityType.class);
     public final StampedLock entityLock = new StampedLock();
+
     private final List<SystemListener> systemListeners = new CopyOnWriteArrayList<>();
     private final ScheduledExecutorService tickExec = Executors.newSingleThreadScheduledExecutor();
+    private final PriorityBlockingQueue<TimedEvent> timedEventQueue = new PriorityBlockingQueue<>(20, Comparator.comparing(TimedEvent::time));
     private long lastTickMilli = System.currentTimeMillis();
+
+    // For Shell
     private Consumer<String> eventMonitor;
     private boolean monitorEvents = false;
     private Set<Pair<EventType, Predicate<Event<?>>>> monitoredEvents = new HashSet<>();
@@ -56,6 +60,11 @@ public class EntityManager {
         emitEvent(new Event<>(EventType.TICK, AreaId.GLOBAL, -1, -1, ComponentType.ANY,
                 EntityType.ANY, -1, -1, ComponentType.ANY, tick));
         lastTickMilli = currTime;
+        TimedEvent timedEvent = timedEventQueue.peek();
+        while (timedEvent != null && timedEvent.time() <= lastTickMilli) {
+            emitEvent(timedEventQueue.poll().event());
+            timedEvent = timedEventQueue.peek();
+        }
     }
 
     public void linkEventMonitor(Consumer<String> monitor) {
@@ -69,7 +78,6 @@ public class EntityManager {
     public void toggleEventMonitoring(boolean bool) {
         monitorEvents = !monitorEvents;
         System.out.println(monitorEvents);
-        System.out.println("toggled");
     }
 
     public boolean addMonitoredEvent(EventType eventType, Predicate<Event<?>> predicate) {
@@ -94,7 +102,12 @@ public class EntityManager {
     }
 
     public List<Entity> allEntities() {
-        return entityCache.getAsList().stream().filter(Objects::nonNull).toList();
+        long stamp = entityLock.tryOptimisticRead();
+        List<Entity> entities;
+        do {
+            entities = entityCache.getAsList().stream().filter(Objects::nonNull).toList();
+        } while (!entityLock.validate(stamp));
+        return entities;
     }
 
     public <T> List<T> getEntitiesOfType(EntityType entityType, List<T> returnList) {
@@ -117,26 +130,21 @@ public class EntityManager {
         return returnList;
     }
 
-    public <T> T getEntity(int entityId) {
+    public <T> T entityById(int entityId) {
         long stamp = -1;
-        T entity;
+        T entity = null;
         do {
             stamp = entityLock.tryOptimisticRead();
             Entity tmpEnt = entityCache.get(entityId);
-            entity = tmpEnt.entityType().castOrNull(tmpEnt);
-            if (entity == null) {
-                //TODO log this
+            if (tmpEnt != null) {
+                entity = tmpEnt.entityType().castOrNull(tmpEnt);
             }
         } while (!entityLock.validate(stamp));
         return entity;
     }
 
-    public Entity entityById(int id) {
-        return entityCache.get(id);
-    }
-
     public AreaEntity areaById(AreaId areaId) {
-        return areaId.entity;
+        return areaId.areaEntity;
     }
 
     public SystemListener systemListenerByType(SystemType type) {
@@ -159,9 +167,27 @@ public class EntityManager {
         systemListeners.add(system);
     }
 
+    public void destroyEntity(int entityId) {
+        Entity entity = entityById(entityId);
+        if (entity == null) { return; }
+        entityCache.remove(entity.entityId());
+
+        long stamp = entityLock.writeLock();
+        try {
+            entityMap.get(entity.entityType()).removeFirstValueOf(entityId);
+        } finally {
+            entityLock.unlockWrite(stamp);
+        }
+    }
+
     public void emitEvent(Event<?> event) {
-        if (event.eventType() != EventType.TICK) { System.out.println(event); }
-        ;
+        if (event.eventType() != EventType.TICK) {
+            System.out.println(event);
+        }
+        if (event.eventType() == EventType.ENTITY_DESTROY) {
+            destroyEntity(event.recipientEntityId());
+        }
+
         if (monitorEvents && eventMonitor != null) {
             monitoredEvents.forEach(e -> {
                 if (e.first().equals(event.eventType()) && e.second().test(event)) {
@@ -220,20 +246,27 @@ public class EntityManager {
         }
     }
 
+    public void submitTimedEvent(TimedEvent timedEvent) {
+        timedEventQueue.add(timedEvent);
+    }
+
+    private void addToEntityMap(EntityType entityType, int EntityId) {
+        long stamp = entityLock.writeLock();
+        try {
+            entityMap.get(entityType).add(EntityId);
+        } finally {
+            entityLock.unlockWrite(stamp);
+        }
+    }
+
     public ChunkEntity newChunkEntity(AreaId areaId, IVector2 chunkIndex, ChunkJson chunkJson) {
         int id = entityCache.getAndReserveNextIndex();
         ChunkEntity chunkEntity = new ChunkEntity(id, areaId, chunkIndex, chunkJson);
         entityCache.putAtReservedIndex(id, chunkEntity);
 
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(EntityType.CHUNK).add(id);
-            return chunkEntity;
-        } finally {
-            entityLock.unlockWrite(stamp);
-        }
-
-        // Doesnt need to register is handled internally on world system
+        addToEntityMap(EntityType.CHUNK, id);
+        // Doesn't need to register is handled internally on world system
+        return chunkEntity;
     }
 
     public ShellEntity getShellEntity() {
@@ -241,12 +274,10 @@ public class EntityManager {
             int id = entityCache.getAndReserveNextIndex();
             shellEntity = new ShellEntity(id);
             entityCache.putAtReservedIndex(id, shellEntity);
-            long stamp = entityLock.writeLock();
-            try {
-                entityMap.get(EntityType.ANY).add(id);
-            } finally {
-                entityLock.unlockWrite(stamp);
-            }
+
+            addToEntityMap(EntityType.ANY, id);
+            Event.emitAndRegisterPositionalEntity(SystemType.QUEST, AreaId.NONE, IVector2.negOne(), shellEntity);
+
         }
         return shellEntity;
     }
@@ -256,18 +287,12 @@ public class EntityManager {
         int id = entityCache.getAndReserveNextIndex();
         AreaEntity areaEntity = new AreaEntity(id, areaId, areaSize, chunkSize, staticLocations, List.of());
         areaId.setEntityId(id);
-        areaId.setEntity(areaEntity);
+        areaId.setAreaEntity(areaEntity);
         entityCache.putAtReservedIndex(id, areaEntity);
 
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(EntityType.AREA).add(id);
-            return areaEntity;
-        } finally {
-            entityLock.unlockWrite(stamp);
-        }
+        addToEntityMap(EntityType.AREA, id);
         // Doesnt need to register is handled internally on world system
-
+        return areaEntity;
     }
 
     public PlayerEntity newPlayerEntity(int playerId, String playerName, List<EntityState> initState,
@@ -277,14 +302,11 @@ public class EntityManager {
         PlayerEntity playerEntity = new PlayerEntity(id, playerId, playerName, initState, outfit, currArea, currPos, session);
         entityCache.putAtReservedIndex(id, playerEntity);
 
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(EntityType.PLAYER).add(id);
-        } finally {
-            entityLock.unlockWrite(stamp);
-        }
+        addToEntityMap(EntityType.PLAYER, id);
 
-        if (broadcast) { Event.emitAndRegisterEntity(SystemType.PLAYER, currArea, currPos, playerEntity); }
+        if (broadcast) {
+            Event.emitAndRegisterPositionalEntity(SystemType.PLAYER, currArea, currPos, playerEntity);
+        }
         return playerEntity;
     }
 
@@ -295,68 +317,81 @@ public class EntityManager {
         NonPlayerEntity npcEntity = new NonPlayerEntity(id, key, name, initStates, outfit, currArea, currPos, viewRectSize);
         entityCache.putAtReservedIndex(id, npcEntity);
 
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(EntityType.NON_PLAYER).add(id);
-        } finally {
-            entityLock.unlockWrite(stamp);
-        }
+        addToEntityMap(EntityType.NON_PLAYER, id);
 
-        if (broadcast) { Event.emitAndRegisterEntity(SystemType.NPC, currArea, currPos, npcEntity); }
+        if (broadcast) {
+            Event.emitAndRegisterPositionalEntity(SystemType.NPC, currArea, currPos, npcEntity);
+        }
         return npcEntity;
     }
 
+    // TODO non positional entity emit
     public PlayerQuestEntity newPlayerQuestEntity(PlayerQuests quest, int participatingPlayerId, boolean broadcast) {
         int id = entityCache.getAndReserveNextIndex();
         PlayerQuestEntity questEntity = new PlayerQuestEntity(id, quest, participatingPlayerId);
         entityCache.putAtReservedIndex(id, questEntity);
 
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(EntityType.QUEST_PLAYER).add(id);
-        } finally {
-            entityLock.unlockWrite(stamp);
-        }
-
+        addToEntityMap(EntityType.QUEST_PLAYER, id);
         if (broadcast) {
-            Event.emitAndRegisterEntity(SystemType.NPC, AreaId.NONE, IVector2.of(-1, -1), questEntity);
-            emitEvent(Event.newPlayerQuest(questEntity));
+            Event.emitAndRegisterPositionalEntity(SystemType.NPC, AreaId.NONE, IVector2.of(-1, -1), questEntity);
         }
         return questEntity;
     }
 
-    private Entity newSystemEntity(SystemType systemType) {
+    public ContainerEntity newContainerEntity(ContainerType containerType, AreaId areaId, IVector2 position,
+            Map<TokenType, Integer> tokenMap, Map<Long, ItemEntity<?>> itemMap, boolean broadcast) {
         int id = entityCache.getAndReserveNextIndex();
-        SystemEntity systemEntity = new SystemEntity(id, systemType);
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(EntityType.SYSTEM).add(id);
-        } finally {
-            entityLock.unlockWrite(stamp);
-        }
+        ContainerEntity containerEntity = new ContainerEntity(id, containerType, areaId, position, tokenMap, itemMap);
+        entityCache.putAtReservedIndex(id, containerEntity);
 
-        var system = systemListeners.stream().filter(s -> s.systemType() == systemType).findFirst();
-        if (system.isEmpty()) {
-            throw new RuntimeException("Attempted to register entity with null system");
-        }
+        addToEntityMap(EntityType.CONTAINER, id);
 
-        // doesn't need to register this is handled internally
+        if (broadcast) {
+            Event.emitAndRegisterPositionalEntity(SystemType.WORLD, AreaId.NONE, position, containerEntity);
+        }
+        return containerEntity;
+    }
+
+    public LootEntity newLootEntity(AreaId areaId, List<LootDropItem> lootItems,
+            BiFunction<LootEntity, PlayerEntity, List<ItemEntity<?>>> lootCalcFunc) {
+
+        int id = entityCache.getAndReserveNextIndex();
+        LootEntity lootEntity = new LootEntity(id, areaId, lootItems, lootCalcFunc);
+        entityCache.putAtReservedIndex(id, lootEntity);
+
+        addToEntityMap(EntityType.LOOT, id);
+        return lootEntity;
+    }
+
+    public TestEntity newTestEntity(SystemType systemTypeToEmit) {
+        int id = entityCache.getAndReserveNextIndex();
+        TestEntity testEnt = new TestEntity(id, EntityType.TEST, AreaId.TEST);
+        entityCache.putAtReservedIndex(id, testEnt);
+
+        addToEntityMap(EntityType.TEST, id);
+
+        Event.emitAndRegisterPositionalEntity(systemTypeToEmit, AreaId.TEST, IVector2.of(-1, -1), testEnt);
+
+        return testEnt;
+    }
+
+    public TestSystem newTestSystem(SystemType systemType) {
+        int id = entityCache.getAndReserveNextIndex();
+        TestSystem systemEntity = new TestSystem(id, systemType);
+        entityCache.putAtReservedIndex(id, systemEntity);
+
+        addToEntityMap(EntityType.SYSTEM, id);
+        registerSystem(systemEntity);
         return systemEntity;
     }
 
     public CombatSystem newCombatSystem(ScheduledExecutorService combatExec, HttpServiceClient serviceClient,
-            NonBlockingHashMapLong<PlayerEntity> playerTable) {
+            NonBlockingHashMapLong<PlayerEntity> playerTable, Map<UUID, ActiveCombat> combatTable) {
         int id = entityCache.getAndReserveNextIndex();
-        CombatSystem systemEntity = new CombatSystem(id, combatExec, serviceClient, playerTable);
+        CombatSystem systemEntity = new CombatSystem(id, combatExec, serviceClient, playerTable, combatTable);
         entityCache.putAtReservedIndex(id, systemEntity);
 
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(EntityType.SYSTEM).add(id);
-        } finally {
-            entityLock.unlockWrite(stamp);
-        }
-
+        addToEntityMap(EntityType.SYSTEM, id);
         registerSystem(systemEntity);
         return systemEntity;
     }
@@ -366,13 +401,7 @@ public class EntityManager {
         NPCSystem systemEntity = new NPCSystem(id);
         entityCache.putAtReservedIndex(id, systemEntity);
 
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(EntityType.SYSTEM).add(id);
-        } finally {
-            entityLock.unlockWrite(stamp);
-        }
-
+        addToEntityMap(EntityType.SYSTEM, id);
         registerSystem(systemEntity);
         return systemEntity;
     }
@@ -382,13 +411,7 @@ public class EntityManager {
         PlayerSystem systemEntity = new PlayerSystem(id);
         entityCache.putAtReservedIndex(id, systemEntity);
 
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(EntityType.SYSTEM).add(id);
-        } finally {
-            entityLock.unlockWrite(stamp);
-        }
-
+        addToEntityMap(EntityType.SYSTEM, id);
         registerSystem(systemEntity);
         return systemEntity;
     }
@@ -398,13 +421,7 @@ public class EntityManager {
         QuestSystem systemEntity = new QuestSystem(id);
         entityCache.putAtReservedIndex(id, systemEntity);
 
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(EntityType.SYSTEM).add(id);
-        } finally {
-            entityLock.unlockWrite(stamp);
-        }
-
+        addToEntityMap(EntityType.SYSTEM, id);
         registerSystem(systemEntity);
         return systemEntity;
     }
@@ -414,13 +431,7 @@ public class EntityManager {
         WorldSystem systemEntity = new WorldSystem(id, areaMap);
         entityCache.putAtReservedIndex(id, systemEntity);
 
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(EntityType.SYSTEM).add(id);
-        } finally {
-            entityLock.unlockWrite(stamp);
-        }
-
+        addToEntityMap(EntityType.SYSTEM, id);
         registerSystem(systemEntity);
         return systemEntity;
     }

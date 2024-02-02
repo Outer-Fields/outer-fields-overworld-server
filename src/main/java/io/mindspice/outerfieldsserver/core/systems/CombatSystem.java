@@ -4,12 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.mindspice.mindlib.util.JsonUtils;
 import io.mindspice.outerfieldsserver.combat.bot.BotFactory;
+import io.mindspice.outerfieldsserver.combat.bot.BotPlayer;
 import io.mindspice.outerfieldsserver.combat.gameroom.MatchInstance;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.MatchResult;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
+import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetCombatAction;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.lobby.NetQueueResponse;
 import io.mindspice.outerfieldsserver.core.ActiveCombat;
 import io.mindspice.outerfieldsserver.core.HttpServiceClient;
 import io.mindspice.outerfieldsserver.core.Settings;
+import io.mindspice.outerfieldsserver.core.singletons.EntityManager;
+import io.mindspice.outerfieldsserver.data.OverWorldPawnState;
 import io.mindspice.outerfieldsserver.entities.PlayerEntity;
 import io.mindspice.outerfieldsserver.enums.SystemType;
 import io.mindspice.outerfieldsserver.systems.event.Event;
@@ -26,18 +31,31 @@ import java.util.concurrent.*;
 
 public class CombatSystem extends SystemListener {
     private final ScheduledExecutorService combatExec;
-    private final Map<UUID, ActiveCombat> activeCombatTable = new ConcurrentHashMap<>();
+    private final Map<UUID, ActiveCombat> activeCombatTable;
     private final HttpServiceClient serviceClient;
     private final NonBlockingHashMapLong<PlayerEntity> playerTable;
 
-    public CombatSystem(int id, ScheduledExecutorService combatExec,
-            HttpServiceClient serviceClient, NonBlockingHashMapLong<PlayerEntity> playerTable) {
+    public CombatSystem(int id, ScheduledExecutorService combatExec, HttpServiceClient serviceClient,
+            NonBlockingHashMapLong<PlayerEntity> playerTable, Map<UUID, ActiveCombat> combatTable) {
         super(id, SystemType.COMBAT_SYSTEM, true, Utility.msToNano(10));
         this.combatExec = combatExec;
         this.serviceClient = serviceClient;
         this.playerTable = playerTable;
+        this.activeCombatTable = combatTable;
         selfListener.registerInputHook(EventType.COMBAT_INIT_NPC, this::createNPCCombat, true);
         selfListener.registerInputHook(EventType.COMBAT_INIT_PVP, this::createPVPCombat, true);
+        selfListener.registerInputHook(EventType.NETWORK_IN_COMBAT_ACTION, this::onNetCombatAction, true);
+    }
+
+    // Event uses playerId vs entityId for recipient addressing
+
+    public void onNetCombatAction(Event<NetCombatAction> event) {
+        PlayerEntity player = playerTable.get(event.recipientEntityId());
+        if (player == null) {
+            //TODO log this
+            return;
+        }
+        player.oncombatMessage(event.data());
     }
 
     public void createPVPCombat(Event<EventData.CombatInit> event) {
@@ -52,8 +70,8 @@ public class CombatSystem extends SystemListener {
             return;
         }
 
-        PlayerGameState playerState = new PlayerGameState(player, player.getOverworldPawnSet());
-        PlayerGameState enemyState = BotFactory.GET().getBotPlayerState(playerState, event.data().enemyEntityId());
+        PlayerMatchState playerState = new PlayerMatchState(player, player.getOverworldPawnSet());
+        PlayerMatchState enemyState = BotFactory.GET().getBotPlayerState(playerState, event.data().enemyEntityId());
 
         MatchInstance matchInstance = new MatchInstance(playerState, enemyState, true);
 
@@ -67,7 +85,7 @@ public class CombatSystem extends SystemListener {
 
         matchInstance.setReady(enemyState.getId());
 
-        player.send(new NetQueueResponse(true));
+        player.sendJson(new NetQueueResponse(true));
 
         ActiveCombat activeCombat = new ActiveCombat(matchInstance, false, gameProc);
 
@@ -76,11 +94,32 @@ public class CombatSystem extends SystemListener {
 
         activeCombatTable.put(matchInstance.getRoomId(), activeCombat);
         matchInstance.getResultFuture().thenAccept(result -> {
-            // FIXME this needs to relay back to the overworld
+            finalizeNPCCombat(result, matchInstance, gameProc);
         }).exceptionally(ex -> {
             Log.SERVER.error(this.getClass(), "Error on finalize bot match callback");
             return null;
         });
+    }
+
+    private void finalizeNPCCombat(MatchResult matchResult, MatchInstance matchInstance, ScheduledFuture<?> gameProc) {
+        PlayerEntity player1 = playerTable.get(matchInstance.getPlayer1().getId());
+        PlayerEntity player2 = (PlayerEntity) EntityManager.GET().entityById(matchInstance.getPlayer2().getId());
+        player1.updateOverWorldPawnStates(
+                matchResult.player1().getPawns().stream().map(OverWorldPawnState::fromPawn).toList()
+        );
+
+        if (matchResult.losers().contains(matchResult.player1())) { // emit player death (triggers inv drop)
+            EntityManager.GET().emitEvent(Event.characterDeath(
+                    player1.areaId(),
+                    new EventData.CharacterDeath(player1.entityId(), player2.entityId())
+            ));
+        }
+        if (matchResult.losers().contains(matchResult.player1())) { // emit enemy dead (triggers loot)
+            EntityManager.GET().emitEvent(Event.characterDeath(
+                    player2.areaId(),
+                    new EventData.CharacterDeath(player2.entityId(), player1.entityId())
+            ));
+        }
     }
 
     public JsonNode getGameRoomStatusJson(String uuid) {

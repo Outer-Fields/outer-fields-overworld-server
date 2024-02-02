@@ -2,7 +2,7 @@ package io.mindspice.outerfieldsserver.combat.schema.websocket.incoming;
 
 import io.mindspice.outerfieldsserver.combat.cards.PotionCard;
 import io.mindspice.outerfieldsserver.combat.enums.CardPack;
-import io.mindspice.outerfieldsserver.combat.schema.PawnSet;
+import io.mindspice.outerfieldsserver.data.PawnSet;
 
 import java.util.HashMap;
 import java.util.List;

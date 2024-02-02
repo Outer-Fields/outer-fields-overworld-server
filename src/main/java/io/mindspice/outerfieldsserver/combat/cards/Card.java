@@ -6,7 +6,7 @@ import io.mindspice.outerfieldsserver.combat.enums.PawnIndex;
 import io.mindspice.outerfieldsserver.combat.gameroom.action.ActionReturn;
 import io.mindspice.outerfieldsserver.combat.gameroom.pawn.Pawn;
 import io.mindspice.outerfieldsserver.combat.gameroom.state.PawnInterimState;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +18,9 @@ import static io.mindspice.outerfieldsserver.combat.enums.PawnIndex.PAWN2;
 
 public interface Card {
 
-    ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx);
+    ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx);
 
-    default ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx,
+    default ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx,
             PawnIndex targetIdx, CardStats stats) {
 
         ActionReturn actionReturn = new ActionReturn(
@@ -149,11 +149,11 @@ public interface Card {
         return actionReturn;
     }
 
-    default List<PawnInterimState> getSingleInterim(PlayerGameState playerState, PawnIndex targetPawn) {
+    default List<PawnInterimState> getSingleInterim(PlayerMatchState playerState, PawnIndex targetPawn) {
         return new ArrayList<>(List.of(new PawnInterimState(playerState.getPawn(targetPawn))));
     }
 
-    default List<PawnInterimState> getMultiInterim(PlayerGameState stateFocus, PawnIndex targetPawn) {
+    default List<PawnInterimState> getMultiInterim(PlayerMatchState stateFocus, PawnIndex targetPawn) {
         List<PawnInterimState> interimStates = new ArrayList<>();
         interimStates.add(new PawnInterimState(stateFocus.getPawn(targetPawn)));
 
@@ -175,7 +175,7 @@ public interface Card {
         return interimStates;
     }
 
-    default List<PawnInterimState> getSequentialMultiInterim(PlayerGameState stateFocus, PawnIndex targetPawn) {
+    default List<PawnInterimState> getSequentialMultiInterim(PlayerMatchState stateFocus, PawnIndex targetPawn) {
         var orgStates = getMultiInterim(stateFocus, targetPawn);
         var seqStates = new ArrayList<PawnInterimState>();
         seqStates.add(orgStates.get(0));
@@ -189,10 +189,10 @@ public interface Card {
         return seqStates;
     }
 
-    default ActionReturn getSequentialActionReturn(PlayerGameState playerGameState, PawnIndex playerIndex,
-            PlayerGameState targetGameState, PawnIndex targetIndex, String animation) {
+    default ActionReturn getSequentialActionReturn(PlayerMatchState playerMatchState, PawnIndex playerIndex,
+            PlayerMatchState targetGameState, PawnIndex targetIndex, String animation) {
         return new ActionReturn(
-                getSequentialMultiInterim(playerGameState, playerIndex),
+                getSequentialMultiInterim(playerMatchState, playerIndex),
                 getSequentialMultiInterim(targetGameState, targetIndex),
                 animation,
                 getName()
@@ -208,8 +208,8 @@ public interface Card {
         );
     }
 
-    default ActionReturn getMultiActionReturn(PlayerGameState player, PawnIndex playerIdx,
-            PlayerGameState target, PawnIndex targetIdx, String animation) {
+    default ActionReturn getMultiActionReturn(PlayerMatchState player, PawnIndex playerIdx,
+            PlayerMatchState target, PawnIndex targetIdx, String animation) {
         return new ActionReturn(
                 getMultiInterim(player, playerIdx),
                 getMultiInterim(target, targetIdx),

@@ -7,7 +7,7 @@ import io.mindspice.outerfieldsserver.combat.gameroom.action.ActionReturn;
 import io.mindspice.outerfieldsserver.combat.gameroom.action.StatMap;
 import io.mindspice.outerfieldsserver.combat.gameroom.action.logic.*;
 import io.mindspice.outerfieldsserver.combat.gameroom.effect.Effect;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 import io.mindspice.outerfieldsserver.util.CardUtil;
 import io.mindspice.outerfieldsserver.combat.enums.CollectionSet;
 
@@ -1192,7 +1192,7 @@ public enum ActionCard implements Card {
                     "line. Un-faltered by armor.")
             .build()) {
         @Override
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getSequentialActionReturn(player, playerIdx, target, targetIdx, getStats().getAnimation());
             // Do Cost, aborts if player can't afford;
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
@@ -1222,7 +1222,7 @@ public enum ActionCard implements Card {
                     "opponents line. Un-faltered by armor. Gold variant more damage for a higher cost.")
             .build()) {
         @Override
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getSequentialActionReturn(player, playerIdx, target, targetIdx, getStats().getAnimation());
             // Do Cost, aborts if player can't afford;
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
@@ -1485,7 +1485,7 @@ public enum ActionCard implements Card {
     }
 
     @Override
-    public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex
+    public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex
             targetIdx) {
         // Call the default implementation with included stats
         return playCard(player, target, playerIdx, targetIdx, stats);

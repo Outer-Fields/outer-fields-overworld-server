@@ -4,6 +4,9 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
+import io.mindspice.mindlib.data.collections.lists.primative.LongList;
+import io.mindspice.mindlib.data.collections.sets.AtomicBitSet;
 import io.mindspice.outerfieldsserver.components.Component;
 import io.mindspice.outerfieldsserver.components.primatives.SimpleEmitter;
 import io.mindspice.outerfieldsserver.components.primatives.SimpleListener;
@@ -39,7 +42,7 @@ public abstract class SystemListener extends SystemEntity implements EventListen
 
     // Thread safe lookup tables for message delivery
     private final AtomicIntegerArray listeningFor = new AtomicIntegerArray(EventType.values().length);
-    private final AtomicByteSet listeningEntities = new AtomicByteSet(EntityManager.GET().entityCount());
+    private final AtomicBitSet listeningEntities = new AtomicBitSet(EntityManager.GET().entityCount());
 
     // Queue/Executor
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -49,6 +52,20 @@ public abstract class SystemListener extends SystemEntity implements EventListen
     private BitSet systemEvents = new BitSet(EventType.values().length);
     protected final SimpleListener selfListener;
     protected final SimpleEmitter selfEmitter;
+
+    public void onDestroyEntity(Entity entity) {
+        long t = System.nanoTime();
+        int entityId = entity.entityId();
+        listenerRegistry.values().forEach(v -> v.removeIf(c -> c.entityId() == entityId));
+        entityRegistry.remove(entityId);
+        componentTypeRegistry.values().forEach(v -> v.removeIf(c -> c.entityId() == entityId));;
+        componentRegistry.valueCollection().removeIf(c -> c.entityId() == entityId);
+        listeningEntities.set(entityId, false);
+
+        entity.getAttachedComponents().forEach(Component::unregisterAllListeners);
+        long end = System.nanoTime() - t;
+        System.out.println("Destruction Took: " + end);
+    }
 
     public SystemListener(int id, SystemType systemType, boolean doStart) {
         super(id, systemType);
@@ -78,8 +95,10 @@ public abstract class SystemListener extends SystemEntity implements EventListen
         listeningFor.incrementAndGet(EventType.COMPLETABLE_EVENT.ordinal());
         listeningFor.incrementAndGet(EventType.SYSTEM_ENTITIES_QUERY.ordinal());
         listeningFor.incrementAndGet(EventType.SYSTEM_REGISTER_ENTITY.ordinal());
+        listeningFor.incrementAndGet(EventType.ENTITY_DESTROY.ordinal());
         systemEvents.set(EventType.SYSTEM_ENTITIES_QUERY.ordinal());
         systemEvents.set(EventType.SYSTEM_REGISTER_ENTITY.ordinal());
+        systemEvents.set(EventType.ENTITY_DESTROY.ordinal());
     }
 
     @Override
@@ -89,7 +108,7 @@ public abstract class SystemListener extends SystemEntity implements EventListen
 
     @Override
     public boolean isListenerFor(EventType eventType) {
-        return false;
+        return listeningFor.get(eventType.ordinal()) > 0;
     }
 
     @Override
@@ -126,7 +145,7 @@ public abstract class SystemListener extends SystemEntity implements EventListen
     }
 
     public boolean hasListeningEntity(int entityId) {
-        return listeningEntities.get(entityId) > 0;
+        return listeningEntities.get(entityId);
     }
 
     @Override
@@ -182,7 +201,7 @@ public abstract class SystemListener extends SystemEntity implements EventListen
                 Predicate<Entity> pred = (Predicate<Entity>) event.data();
                 List<Entity> rtnEntities = new ArrayList<>();
                 for (int i = 0; i < EntityManager.GET().entityCount(); ++i) {
-                    if (listeningEntities.get(i) > 0) {
+                    if (listeningEntities.get(i)) {
                         Entity entity = EntityManager.GET().entityById(i);
                         if (pred.test(entity)) { rtnEntities.add(entity); }
                     }
@@ -191,8 +210,11 @@ public abstract class SystemListener extends SystemEntity implements EventListen
                         EntityType.ANY, event.issuerEntityId(), event.issuerComponentId(), ComponentType.ANY, rtnEntities));
             }
             case SYSTEM_REGISTER_ENTITY -> {
-                onRegisterComponent((Entity) event.data());
+                Entity entity = (Entity) event.data();
+                listeningEntities.set(entity.entityId());
+                onRegisterComponent(entity);
             }
+            case ENTITY_DESTROY -> onDestroyEntity((Entity) event.data());
         }
 
     }
@@ -220,6 +242,7 @@ public abstract class SystemListener extends SystemEntity implements EventListen
     }
 
     public void onRegisterComponent(Entity entity) {
+        registerComponents(entity.getAttachedComponents());
         entity.registerWithSystem(this);
     }
 
@@ -242,69 +265,72 @@ public abstract class SystemListener extends SystemEntity implements EventListen
 
         if (component.isOnTick()) { tickListeners.add(component); }
 
-        listeningEntities.increment(component.entityId());
-        component.linkSystemUpdates(this::addListeningEvent, this::removeListeningEvent);
-        ;
+        component.linkSystemUpdates(this::addListeningEvent, this::removeListeningEvent, this::registerTickListener);
     }
 
-    public void registerComponents(List<Component<?>> components) {
+    public void registerTickListener(EventListener<?> eventListener){
+        this.tickListeners.add(eventListener);
+    }
+
+    private void registerComponents(List<Component<?>> components) {
         if (components == null) {
             // TODO log this
             System.out.println("Attempted to register null component list");
+            return;
         }
         components.forEach(this::registerComponent);
     }
 
-    public void removeByComponent(Component<?> component) {
-        Iterator<Map.Entry<EventType, List<EventListener<?>>>> itr = listenerRegistry.entrySet().iterator();
-        while (itr.hasNext()) {
-            Map.Entry<EventType, List<EventListener<?>>> listenerList = itr.next();
-            listenerList.getValue().removeIf(l -> l.componentId() == component.componentId());
+//    public void removeByComponent(Component<?> component) {
+//        Iterator<Map.Entry<EventType, List<EventListener<?>>>> itr = listenerRegistry.entrySet().iterator();
+//        while (itr.hasNext()) {
+//            Map.Entry<EventType, List<EventListener<?>>> listenerList = itr.next();
+//            listenerList.getValue().removeIf(l -> l.componentId() == component.componentId());
+//
+//            if (listenerList.getValue().isEmpty()) {
+//                listeningFor.decrementAndGet(listenerList.getKey().ordinal());
+//                itr.remove();
+//            }
+//        }
+//
+//        Iterator<Map.Entry<ComponentType, List<Component<?>>>> itr2 = componentTypeRegistry.entrySet().iterator();
+//        while (itr2.hasNext()) {
+//            Map.Entry<ComponentType, List<Component<?>>> componentList = itr2.next();
+//            componentList.getValue().removeIf(l -> l.componentId() == component.componentId());
+//
+//            if (componentList.getValue().isEmpty()) {
+//                itr2.remove();
+//            }
+//        }
+//
+//        listeningEntities.decrement(component.parentEntity().entityId());
+//        tickListeners.removeIf(l -> l.componentId() == component.componentId());
+//    }
 
-            if (listenerList.getValue().isEmpty()) {
-                listeningFor.decrementAndGet(listenerList.getKey().ordinal());
-                itr.remove();
-            }
-        }
-
-        Iterator<Map.Entry<ComponentType, List<Component<?>>>> itr2 = componentTypeRegistry.entrySet().iterator();
-        while (itr2.hasNext()) {
-            Map.Entry<ComponentType, List<Component<?>>> componentList = itr2.next();
-            componentList.getValue().removeIf(l -> l.componentId() == component.componentId());
-
-            if (componentList.getValue().isEmpty()) {
-                itr2.remove();
-            }
-        }
-
-        listeningEntities.decrement(component.parentEntity().entityId());
-        tickListeners.removeIf(l -> l.componentId() == component.componentId());
-    }
-
-    public void removeByEntityId(int entityId) {
-        entityRegistry.remove(entityId);
-        listeningEntities.set(entityId, 0);
-
-        Iterator<Map.Entry<EventType, List<EventListener<?>>>> itr = listenerRegistry.entrySet().iterator();
-        while (itr.hasNext()) {
-            Map.Entry<EventType, List<EventListener<?>>> listenerList = itr.next();
-            listenerList.getValue().removeIf(l -> l.entityId() == entityId);
-            if (listenerList.getValue().isEmpty()) {
-                listeningFor.decrementAndGet(listenerList.getKey().ordinal());
-                itr.remove();
-            }
-        }
-
-        Iterator<Map.Entry<ComponentType, List<Component<?>>>> itr2 = componentTypeRegistry.entrySet().iterator();
-        while (itr2.hasNext()) {
-            Map.Entry<ComponentType, List<Component<?>>> componentList = itr2.next();
-            componentList.getValue().removeIf(l -> l.entityId() == entityId);
-            if (componentList.getValue().isEmpty()) {
-                itr2.remove();
-            }
-        }
-        tickListeners.removeIf(l -> l.entityId() == entityId);
-    }
+//    public void removeByEntityId(int entityId) {
+//        entityRegistry.remove(entityId);
+//        listeningEntities.set(entityId, 0);
+//
+//        Iterator<Map.Entry<EventType, List<EventListener<?>>>> itr = listenerRegistry.entrySet().iterator();
+//        while (itr.hasNext()) {
+//            Map.Entry<EventType, List<EventListener<?>>> listenerList = itr.next();
+//            listenerList.getValue().removeIf(l -> l.entityId() == entityId);
+//            if (listenerList.getValue().isEmpty()) {
+//                listeningFor.decrementAndGet(listenerList.getKey().ordinal());
+//                itr.remove();
+//            }
+//        }
+//
+//        Iterator<Map.Entry<ComponentType, List<Component<?>>>> itr2 = componentTypeRegistry.entrySet().iterator();
+//        while (itr2.hasNext()) {
+//            Map.Entry<ComponentType, List<Component<?>>> componentList = itr2.next();
+//            componentList.getValue().removeIf(l -> l.entityId() == entityId);
+//            if (componentList.getValue().isEmpty()) {
+//                itr2.remove();
+//            }
+//        }
+//        tickListeners.removeIf(l -> l.entityId() == entityId);
+//    }
 
     private void handleCallBack(Event<?> event) {
         if (!event.isDirect()) {
@@ -341,7 +367,10 @@ public abstract class SystemListener extends SystemEntity implements EventListen
         }
         for (int i = 0; i < listeners.size(); ++i) {
             var listener = listeners.get(i);
-            if (listener.entityId() == event.issuerEntityId()) { continue; }
+            if (listener.entityId() == event.issuerEntityId()) {
+                System.out.println("Skipping event: " + event.eventType() + " |  Reason: Self event");
+                continue;
+            }
             if (!listener.isListening() && event.eventType() != EventType.CALLBACK) { continue; }
             listener.onEvent(event);
         }

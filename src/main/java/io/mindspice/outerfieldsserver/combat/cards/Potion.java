@@ -2,8 +2,8 @@ package io.mindspice.outerfieldsserver.combat.cards;
 
 import io.mindspice.outerfieldsserver.combat.enums.PawnIndex;
 import io.mindspice.outerfieldsserver.combat.gameroom.action.ActionReturn;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 
 public interface Potion {
-   ActionReturn consumePotion(PlayerGameState player, PawnIndex targetPawn);
+   ActionReturn consumePotion(PlayerMatchState player, PawnIndex targetPawn);
 }

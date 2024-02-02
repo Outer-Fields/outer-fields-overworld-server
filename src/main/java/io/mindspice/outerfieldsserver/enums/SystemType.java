@@ -7,5 +7,5 @@ public enum SystemType {
     WORLD,
     PLAYER,
     NPC,
-    QUEST, COMBAT_SYSTEM,
+    QUEST, COMBAT_SYSTEM, TEST,
 }

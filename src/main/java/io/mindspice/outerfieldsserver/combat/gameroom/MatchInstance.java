@@ -6,9 +6,9 @@ import io.mindspice.mindlib.util.JsonUtils;
 import io.mindspice.outerfieldsserver.combat.enums.PawnIndex;
 import io.mindspice.outerfieldsserver.combat.enums.PlayerAction;
 import io.mindspice.outerfieldsserver.combat.gameroom.state.ActiveRoundState;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 import io.mindspice.outerfieldsserver.core.Settings;
-import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetGameAction;
+import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetCombatAction;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.game.NetStatus;
 import io.mindspice.outerfieldsserver.util.Log;
 import io.mindspice.outerfieldsserver.util.gamelogger.GameLogger;
@@ -31,7 +31,7 @@ public class MatchInstance implements Runnable {
     protected volatile boolean gameOver = false;
     protected volatile boolean isStarted = false;
     protected volatile boolean isPaused = false;
-    protected final List<PlayerGameState> disconnPlayers = new CopyOnWriteArrayList<>();
+    protected final List<PlayerMatchState> disconnPlayers = new CopyOnWriteArrayList<>();
     protected final CompletableFuture<MatchResult> resultFuture = new CompletableFuture<>();
     protected final boolean doGameLog;
     protected volatile List<Integer> freeGameIds = List.of();
@@ -42,16 +42,16 @@ public class MatchInstance implements Runnable {
     protected final boolean isCombat;
 
     /* States */
-    protected PlayerGameState player1; // Effectively final, though they do have a setter for testing
-    protected PlayerGameState player2;
+    protected PlayerMatchState player1; // Effectively final, though they do have a setter for testing
+    protected PlayerMatchState player2;
     protected volatile ActiveRoundState activeRound;
 
     /* Queues - Multiple used to avoid players attempting to starve others msgs */
-    protected final ArrayBlockingQueue<NetGameAction> player1MsgQueue = new ArrayBlockingQueue<>(20);
-    protected final ArrayBlockingQueue<NetGameAction> player2MsgQueue = new ArrayBlockingQueue<>(20);
+    protected final ArrayBlockingQueue<NetCombatAction> player1MsgQueue = new ArrayBlockingQueue<>(20);
+    protected final ArrayBlockingQueue<NetCombatAction> player2MsgQueue = new ArrayBlockingQueue<>(20);
 
     // init the player state and combat managers before join to room, this allows easy insertion of bots
-    public MatchInstance(PlayerGameState p1GameState, PlayerGameState p2GameState, boolean isCombat) {
+    public MatchInstance(PlayerMatchState p1GameState, PlayerMatchState p2GameState, boolean isCombat) {
         this.isCombat = isCombat;
         roomId = UUID.randomUUID();
         player1 = p1GameState;
@@ -118,7 +118,7 @@ public class MatchInstance implements Runnable {
         return doGameLog;
     }
 
-    public void addMsg(int id, NetGameAction msg) {
+    public void addMsg(int id, NetCombatAction msg) {
         if (msg == null) {
             Log.ABUSE.info((isCombat ? "CombatRoom: " : "GameRoom: ") + roomId + " | Null packet from Player: " + id);
             Log.SERVER.debug(this.getClass(), (isCombat ? "CombatRoom: " : "GameRoom: ") + roomId + " | Null packet from Player: " + id);
@@ -208,14 +208,14 @@ public class MatchInstance implements Runnable {
 
         if (!player1.getPlayer().isConnected() && !disconnPlayers.contains(player1)) {
             disconnPlayers.add(player1);
-            var time = disconnPlayers.stream().mapToInt(PlayerGameState::getTimedOutAmount).max().orElse(1);
+            var time = disconnPlayers.stream().mapToInt(PlayerMatchState::getTimedOutAmount).max().orElse(1);
             player2.send(new NetStatus(false, true, ((90 * 5) - time) / 5)); // 5 updates a sec
             player1.setReady(false);
             Log.SERVER.info((isCombat ? "CombatRoom: " : "GameRoom: ") + roomId + " | Player disconnected: " + player1.getPlayer().getLoggable());
         }
         if (!player2.getPlayer().isConnected() && !disconnPlayers.contains(player2)) {
             disconnPlayers.add(player2);
-            var time = disconnPlayers.stream().mapToInt(PlayerGameState::getTimedOutAmount).max().orElse(1);
+            var time = disconnPlayers.stream().mapToInt(PlayerMatchState::getTimedOutAmount).max().orElse(1);
             player1.send(new NetStatus(false, true, ((90 * 5) - time) / 5));
             player2.setReady(false);
             Log.SERVER.info((isCombat ? "CombatRoom: " : "GameRoom: ") + roomId + " | Player disconnected: " + player2.getPlayer().getLoggable());
@@ -300,17 +300,17 @@ public class MatchInstance implements Runnable {
     }
 
     public void processActionQueue() {
-        ArrayBlockingQueue<NetGameAction> packetQueue = getActiveQueue();
+        ArrayBlockingQueue<NetCombatAction> packetQueue = getActiveQueue();
         if (packetQueue.isEmpty()) { return; }
         for (int i = 0; i < packetQueue.size(); ++i) {
-            NetGameAction nga = packetQueue.poll();
+            NetCombatAction nga = packetQueue.poll();
             if (doGameLog) { GameLogger.GET().addActionMsgIn(roomId, getActivePlayerId(), nga); }
             if (!validate(getActivePlayerId(), nga)) { return; }
             activeRound.getActiveTurn().doAction(nga);
         }
     }
 
-    protected PlayerGameState getPlayer(int id) {
+    protected PlayerMatchState getPlayer(int id) {
         if (player1.getId() == id) {
             return player1;
         } else {
@@ -322,7 +322,7 @@ public class MatchInstance implements Runnable {
         return activeRound.getActivePlayerId() == id;
     }
 
-    protected ArrayBlockingQueue<NetGameAction> getActiveQueue() {
+    protected ArrayBlockingQueue<NetCombatAction> getActiveQueue() {
         if (activeRound.getActivePlayerId() == player1.getId()) {
             if (!player2MsgQueue.isEmpty()) {
                 Log.SERVER.debug(this.getClass(), "GameRoom:" + roomId + " | PlayerId: " + player1.getId()
@@ -346,7 +346,7 @@ public class MatchInstance implements Runnable {
         return activeRound.getActivePlayerId() == player1.getId() ? player1.getId() : player2.getId();
     }
 
-    protected PlayerGameState getGameStateById(int playerId) {
+    protected PlayerMatchState getGameStateById(int playerId) {
         if (player1.getId() == playerId) { return player1; }
         return player2;
     }
@@ -355,7 +355,7 @@ public class MatchInstance implements Runnable {
         return gameOver;
     }
 
-    protected boolean validate(int playerId, NetGameAction nga) {
+    protected boolean validate(int playerId, NetCombatAction nga) {
         if (nga == null) {
             Log.ABUSE.info((isCombat ? "CombatRoom: " : "GameRoom: ") + roomId + " | Null packet from playerId: " + playerId);
             Log.SERVER.debug(this.getClass(), (isCombat ? "CombatRoom: " : "GameRoom: ") + roomId + " | Null packet from playerId: " + playerId);
@@ -386,7 +386,7 @@ public class MatchInstance implements Runnable {
             resultFuture.complete(MatchResult.unReadied(this.roomId, player1, player2));
         }
 
-        PlayerGameState winningPlayer = activeRound.getWinningPlayer();
+        PlayerMatchState winningPlayer = activeRound.getWinningPlayer();
 
         MatchResult result = MatchResult.singleWinner(
                 roomId,
@@ -406,8 +406,8 @@ public class MatchInstance implements Runnable {
         return resultFuture;
     }
 
-    protected void disconnLoss(PlayerGameState losingPlayer) {
-        PlayerGameState winningPlayer = (losingPlayer == player1 ? player2 : player1);
+    protected void disconnLoss(PlayerMatchState losingPlayer) {
+        PlayerMatchState winningPlayer = (losingPlayer == player1 ? player2 : player1);
         if (winningPlayer.getPlayer().isConnected()) {
             MatchResult result = MatchResult.singleWinner(
                     roomId,
@@ -451,7 +451,7 @@ public class MatchInstance implements Runnable {
         return node;
     }
 
-    protected JsonNode getPlayerJson(PlayerGameState player) {
+    protected JsonNode getPlayerJson(PlayerMatchState player) {
         return new JsonUtils.ObjectBuilder()
                 .put("id", player.getId())
                 .put("name", player.getName())
@@ -485,19 +485,19 @@ public class MatchInstance implements Runnable {
         isStarted = true;
     }
 
-    public PlayerGameState getPlayer1() {
+    public PlayerMatchState getPlayer1() {
         return player1;
     }
 
-    public PlayerGameState getPlayer2() {
+    public PlayerMatchState getPlayer2() {
         return player2;
     }
 
-    public void setPlayer1(PlayerGameState player1) {
+    public void setPlayer1(PlayerMatchState player1) {
         this.player1 = player1;
     }
 
-    public void setPlayer2(PlayerGameState player2) {
+    public void setPlayer2(PlayerMatchState player2) {
         this.player2 = player2;
     }
 
@@ -509,11 +509,11 @@ public class MatchInstance implements Runnable {
         return round;
     }
 
-    public ArrayBlockingQueue<NetGameAction> getPlayer1MsgQueue() {
+    public ArrayBlockingQueue<NetCombatAction> getPlayer1MsgQueue() {
         return player1MsgQueue;
     }
 
-    public ArrayBlockingQueue<NetGameAction> getPlayer2MsgQueue() {
+    public ArrayBlockingQueue<NetCombatAction> getPlayer2MsgQueue() {
         return player2MsgQueue;
     }
 

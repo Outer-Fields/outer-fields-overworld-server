@@ -1,7 +1,7 @@
 package io.mindspice.outerfieldsserver.combat.schema.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.mindspice.outerfieldsserver.combat.schema.PawnLoadOut;
+import io.mindspice.outerfieldsserver.data.PawnLoadOut;
 
 
 public record SaveSetReq(

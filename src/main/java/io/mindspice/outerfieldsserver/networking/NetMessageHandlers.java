@@ -22,7 +22,7 @@ public interface NetMessageHandlers {
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         int posX = (int) buffer.getLong();
         int posY = (int) buffer.getLong();
-        NetInPlayerPosition netIn = new NetInPlayerPosition(msg.pid(), posX, posY, msg.timestamp());
+        NetInPlayerPosition netIn = new NetInPlayerPosition(msg.playerId(), posX, posY, msg.timestamp());
         EntityManager.GET().emitEvent(Event.netInPlayerPosition(msg.entityId(), netIn));
     }
 }

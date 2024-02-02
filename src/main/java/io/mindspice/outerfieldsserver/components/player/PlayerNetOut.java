@@ -24,7 +24,7 @@ public class PlayerNetOut extends Component<PlayerNetOut> {
     private final ViewRect viewrect;
     private final KnownEntities knownEntities;
     private final IntList positionData = new IntList(50 * 3);
-    private EntityProto.GamePacket.Builder gamePacket = EntityProto.GamePacket.newBuilder();
+    private EntityProto.GamePacketOut.Builder gamePacket = EntityProto.GamePacketOut.newBuilder();
     private boolean haveData = false;
 
     public PlayerNetOut(Entity parentEntity, PlayerSession playerSession, ViewRect viewRect, KnownEntities knownEntities) {
@@ -126,7 +126,7 @@ public class PlayerNetOut extends Component<PlayerNetOut> {
         }
         // System.out.println(gamePacket);
         playerSession.send(gamePacket.build().toByteArray());
-        gamePacket = EntityProto.GamePacket.newBuilder();
+        gamePacket = EntityProto.GamePacketOut.newBuilder();
         positionData.clear();
         haveData = false;
 

@@ -1,7 +1,6 @@
 package io.mindspice.outerfieldsserver.enums;
 
 import io.mindspice.outerfieldsserver.entities.*;
-import io.mindspice.outerfieldsserver.entities.*;
 import jakarta.annotation.Nullable;
 
 import java.util.Objects;
@@ -9,6 +8,7 @@ import java.util.function.Predicate;
 
 
 public enum EntityType {
+    TEST(-2, TestEntity.class, x -> x instanceof TestEntity),
     ANY(-1, Object.class, Objects::nonNull),
     PLAYER(0, Object.class, x -> x instanceof PlayerEntity),
     NON_PLAYER(1, Object.class, Objects::nonNull),
@@ -19,7 +19,8 @@ public enum EntityType {
     QUEST_PLAYER(6, PlayerQuestEntity.class, x -> x instanceof PlayerQuestEntity),
     QUEST_WORLD(7, WorldQuestEntity.class, x -> x instanceof WorldQuestEntity),
     ITEM(8, ItemEntity.class, x -> x instanceof ItemEntity),
-    LOOT(9, LootEntity.class, x -> x instanceof LootEntity);
+    LOOT(9, LootEntity.class, x -> x instanceof LootEntity),
+    CONTAINER(10, ContainerEntity.class, x -> x instanceof ContainerEntity);
 
     public final int value;
     public final Class<?> dataClass;
@@ -35,9 +36,9 @@ public enum EntityType {
         return validator.test(dataObj);
     }
 
-
     @Nullable
     public <T> T castOrNull(Object dataObj) {
+        if (dataObj == null) { return null; }
         if (validate(dataObj)) {
             @SuppressWarnings("unchecked")
             T casted = (T) dataObj;

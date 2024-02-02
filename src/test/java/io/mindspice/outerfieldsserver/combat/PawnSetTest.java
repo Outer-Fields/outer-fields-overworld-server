@@ -3,7 +3,7 @@ package io.mindspice.outerfieldsserver.combat;
 import io.mindspice.outerfieldsserver.combat.cards.AbilityCard;
 import io.mindspice.outerfieldsserver.combat.cards.ActionCard;
 import io.mindspice.outerfieldsserver.combat.cards.PowerCard;
-import io.mindspice.outerfieldsserver.combat.schema.PawnSet;
+import io.mindspice.outerfieldsserver.data.PawnSet;
 import org.junit.jupiter.api.Test;
 
 

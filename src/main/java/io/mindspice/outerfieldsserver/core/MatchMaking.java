@@ -7,8 +7,8 @@ import io.mindspice.outerfieldsserver.combat.bot.BotFactory;
 import io.mindspice.outerfieldsserver.combat.bot.state.BotPlayerState;
 import io.mindspice.outerfieldsserver.combat.gameroom.MatchInstance;
 import io.mindspice.outerfieldsserver.combat.gameroom.MatchResult;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
-import io.mindspice.outerfieldsserver.combat.schema.PawnSet;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
+import io.mindspice.outerfieldsserver.data.PawnSet;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.game.NetGameOver;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.game.NetKeepAlive;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.game.NetQueueJoinResponse;
@@ -31,15 +31,15 @@ public class MatchMaking {
     private final BotFactory botFactory = BotFactory.GET();
     private final HttpServiceClient serviceClient;
     private final NonBlockingHashMapLong<PlayerEntity> playerTable;
-    private final Map<UUID, ActiveCombat> activeMatches = new ConcurrentHashMap<>();
+    private final Map<UUID, ActiveCombat> activeCombatTable;
     private final ScheduledExecutorService combatExec;
 
-    public MatchMaking(ScheduledExecutorService combatExec,
-            NonBlockingHashMapLong<PlayerEntity> playerTable,
-            HttpServiceClient serviceClient) {
+    public MatchMaking(ScheduledExecutorService combatExec, NonBlockingHashMapLong<PlayerEntity> playerTable,
+            HttpServiceClient serviceClient, Map<UUID, ActiveCombat> combatTable) {
         this.combatExec = combatExec;
         this.playerTable = playerTable;
         this.serviceClient = serviceClient;
+        this.activeCombatTable = combatTable;
 
 
     }
@@ -120,7 +120,7 @@ public class MatchMaking {
                             p.getValue().getConnection().close();
                         });
 
-                playerTable.forEach((key, value) -> value.send(new NetKeepAlive()));
+                playerTable.forEach((key, value) -> value.sendJson(new NetKeepAlive()));
             } catch (Exception e) {
                 Log.SERVER.error(this.getClass(), "Error running player table clean up", e);
             }
@@ -182,14 +182,14 @@ public class MatchMaking {
                         continue;
                     }
                     if (e.getValue().expired(now)) {
-                        player1.player().send(new NetQueueResponse(false));
+                        player1.player().sendJson(new NetQueueResponse(false));
                         if (e.getValue().isPlayer1Ready()) {
                             matchQueue.add(player1);
                         } else {
                             player1.player().setQueueCoolDown();
                         }
                         if (!e.getValue().isBotMatch()) {
-                            player2.player().send(new NetQueueResponse(false));
+                            player2.player().sendJson(new NetQueueResponse(false));
                             if (e.getValue().isPlayer2Ready()) {
                                 matchQueue.add(player2);
                             } else {
@@ -215,15 +215,15 @@ public class MatchMaking {
                 "Pre Match:" + matchId + "PlayerIds:" + player1.player().getIp() + " | " + player2.player().getPlayerId()
         );
         preGameQueue.put(matchId, new PreGameQueue(player1, player2));
-        player1.player().send(new NetQueueResponse(matchId));
-        player2.player().send(new NetQueueResponse(matchId));
+        player1.player().sendJson(new NetQueueResponse(matchId));
+        player2.player().sendJson(new NetQueueResponse(matchId));
     }
 
     private void queueMatchWithBot(QueuedPlayer player1) {
         String matchId = UUID.randomUUID().toString();
         Log.SERVER.debug(this.getClass(), "Pre Match With Bot:" + matchId + "PlayerId:" + player1.player().getPlayerId());
         preGameQueue.put(matchId, new PreGameQueue(player1));
-        player1.player().send(new NetQueueResponse(matchId));
+        player1.player().sendJson(new NetQueueResponse(matchId));
     }
 
     private void createMatch(QueuedPlayer player1, QueuedPlayer player2) {
@@ -245,21 +245,21 @@ public class MatchMaking {
             );
         }
 
-        PlayerGameState p1State;
+        PlayerMatchState p1State;
         if (player1.isFreeGame()) {
-            p1State = new PlayerGameState(player1.player(), PawnSet.getRandomPawnSet(freeLevel));
+            p1State = new PlayerMatchState(player1.player(), PawnSet.getRandomPawnSet(freeLevel));
         } else {
-            p1State = new PlayerGameState(player1.player(), player1.pawnSet());
+            p1State = new PlayerMatchState(player1.player(), player1.pawnSet());
         }
 
-        PlayerGameState p2State;
+        PlayerMatchState p2State;
         if (player2.isFreeGame()) {
-            p2State = new PlayerGameState(player2.player(), PawnSet.getRandomPawnSet(freeLevel));
+            p2State = new PlayerMatchState(player2.player(), PawnSet.getRandomPawnSet(freeLevel));
         } else {
-            p2State = new PlayerGameState(player2.player(), player2.pawnSet());
+            p2State = new PlayerMatchState(player2.player(), player2.pawnSet());
         }
 
-        PlayerGameState firstPlayer = ThreadLocalRandom.current()
+        PlayerMatchState firstPlayer = ThreadLocalRandom.current()
                 .nextInt(0, 100) < 49
                 ? p1State : p2State;
 
@@ -277,8 +277,8 @@ public class MatchMaking {
                 200,
                 TimeUnit.MILLISECONDS);
 
-        player1.player().send(new NetQueueResponse(true));
-        player2.player().send(new NetQueueResponse(true));
+        player1.player().sendJson(new NetQueueResponse(true));
+        player2.player().sendJson(new NetQueueResponse(true));
 
         Log.SERVER.debug(this.getClass(),
                 "Initiated gameroom:" + matchInstance.getRoomId() + " for playerIds:"
@@ -286,7 +286,7 @@ public class MatchMaking {
         );
 
         ActiveCombat activeCombat = new ActiveCombat(matchInstance, true, gameProc);
-        activeMatches.put(matchInstance.getRoomId(), activeCombat);
+        activeCombatTable.put(matchInstance.getRoomId(), activeCombat);
 
         matchInstance.getResultFuture().thenAccept(result -> {
             finalizeMatch(result, matchInstance, gameProc);
@@ -302,20 +302,20 @@ public class MatchMaking {
             Log.SERVER.debug(this.getClass(), "Aborted creating game due to paused Server");
             return;
         }
-        PlayerGameState p1State;
+        PlayerMatchState p1State;
         int player1Lvl = player1.isFreeGame() ? PawnSet.getRandomLevel() : player1.setLevel();
         if (player1.isFreeGame()) {
             serviceClient.gameAPI().incFreeGamesPlayed(player1.player().getPlayerId());
-            p1State = new PlayerGameState(player1.player(), PawnSet.getRandomPawnSet(player1Lvl));
+            p1State = new PlayerMatchState(player1.player(), PawnSet.getRandomPawnSet(player1Lvl));
         } else {
-            p1State = new PlayerGameState(player1.player(), player1.pawnSet());
+            p1State = new PlayerMatchState(player1.player(), player1.pawnSet());
         }
 
         BotPlayerState bState = player1.player().getWinRatio() >= 0.6
                 ? botFactory.getBotPlayerState(p1State, player1Lvl)
                 : botFactory.getHighLvlBotPlayerState(p1State);
 
-        PlayerGameState firstPlayer = ThreadLocalRandom.current()
+        PlayerMatchState firstPlayer = ThreadLocalRandom.current()
                 .nextInt(0, 100) < 49
                 ? p1State : bState;
 
@@ -332,13 +332,13 @@ public class MatchMaking {
 
         matchInstance.setReady(bState.getId());
 
-        player1.player().send(new NetQueueResponse(true));
+        player1.player().sendJson(new NetQueueResponse(true));
         ActiveCombat activeCombat = new ActiveCombat(matchInstance, true, gameProc);
 
         Log.SERVER.debug(this.getClass(), "Initiated bot gameroom:" + matchInstance.getRoomId()
                 + " for playerIds:" + player1.player().getPlayerId());
 
-        activeMatches.put(matchInstance.getRoomId(), activeCombat);
+        activeCombatTable.put(matchInstance.getRoomId(), activeCombat);
         matchInstance.getResultFuture().thenAccept(result -> {
             finalizeMatch(result, matchInstance, gameProc);
         }).exceptionally(ex -> {
@@ -351,7 +351,7 @@ public class MatchMaking {
         try {
 
             gameProc.cancel(false);
-            activeMatches.remove(matchInstance.getRoomId());
+            activeCombatTable.remove(matchInstance.getRoomId());
             matchResult.player1().getPlayer().setInCombat(false);
             matchResult.player1().getPlayer().setGameRoom(null);
             matchResult.player2().getPlayer().setInCombat(false);

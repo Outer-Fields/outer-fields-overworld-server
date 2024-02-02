@@ -1,18 +1,16 @@
 package io.mindspice.outerfieldsserver.systems.event;
 
+import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetCombatAction;
 import io.mindspice.outerfieldsserver.components.Component;
+import io.mindspice.outerfieldsserver.core.networking.incoming.NetInPlayerAction;
 import io.mindspice.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
 import io.mindspice.outerfieldsserver.core.singletons.EntityManager;
-import io.mindspice.outerfieldsserver.entities.Entity;
-import io.mindspice.outerfieldsserver.entities.PlayerQuestEntity;
-import io.mindspice.outerfieldsserver.entities.ShellEntity;
-import io.mindspice.outerfieldsserver.entities.WorldQuestEntity;
+import io.mindspice.outerfieldsserver.entities.*;
 import io.mindspice.outerfieldsserver.enums.*;
 import io.mindspice.mindlib.data.collections.lists.primative.IntList;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
-import io.mindspice.outerfieldsserver.enums.*;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -111,7 +109,7 @@ public record Event<T>(
     }
 
     public boolean isDirect() {
-        return recipientEntityId != -1 || recipientComponentId != -1;
+        return recipientEntityId != -1;
     }
 
     public boolean isDirectComponent() {
@@ -124,6 +122,10 @@ public record Event<T>(
 
     public static <T> Builder<T> builder(EventType eventType, Component<?> issuingComponent) {
         return new Builder<>(eventType, issuingComponent);
+    }
+
+    public static <T> Builder<T> builder(EventType eventType) {
+        return new Builder<>(eventType);
     }
 
     public static <U> Event<U> responseEvent(Component<?> component, Event<?> ogEvent, EventType respEventType, U respData) {
@@ -170,7 +172,7 @@ public record Event<T>(
     public static <T> Event<T> fromShell(EventType eventType, ComponentType recipientCompType, int recipId, T data) {
         ShellEntity shell = EntityManager.GET().getShellEntity();
         return new Event<>(eventType, AreaId.GLOBAL, shell.entityId(),
-                shell.getComponent(ComponentType.SIMPLER_LISTENER).getFirst().componentId(),
+                shell.getComponent(ComponentType.SIMPLER_LISTENER).componentId(),
                 ComponentType.ANY, EntityType.ANY, recipId, -1, recipientCompType, data);
     }
 
@@ -178,7 +180,7 @@ public record Event<T>(
             AreaId areaid, int recipId, T data) {
         ShellEntity shell = EntityManager.GET().getShellEntity();
         return new Event<>(eventType, areaid, shell.entityId(),
-                shell.getComponent(ComponentType.SIMPLER_LISTENER).getFirst().componentId(),
+                shell.getComponent(ComponentType.SIMPLER_LISTENER).componentId(),
                 ComponentType.ANY, EntityType.ANY, recipId, -1, recipientCompType, data);
 
     }
@@ -186,12 +188,12 @@ public record Event<T>(
     public static <T> Event<T> toShell(Component<?> component, EventType eventType, T data) {
         ShellEntity shell = EntityManager.GET().getShellEntity();
         return new Event<>(eventType, component.areaId(), component, shell.entityId(),
-                shell.getComponent(ComponentType.SIMPLER_LISTENER).getFirst().componentId(), ComponentType.ANY, data);
+                shell.getComponent(ComponentType.SIMPLER_LISTENER).componentId(), ComponentType.ANY, data);
     }
 
-    public static Event<EventData.NewEntity> newEntity(EventData.NewEntity newEntityData) {
-        return new Event<>(EventType.NEW_ENTITY, newEntityData.area(), -1, -1, ComponentType.ANY,
-                newEntityData.entity().entityType(), -1, -1, ComponentType.ANY, newEntityData);
+    public static Event<EventData.NewPositionalEntity> newPositionalEntity(EventData.NewPositionalEntity newPositionalEntityData) {
+        return new Event<>(EventType.NEW_POSITIONAL_ENTITY, newPositionalEntityData.area(), -1, -1, ComponentType.ANY,
+                newPositionalEntityData.entity().entityType(), -1, -1, ComponentType.ANY, newPositionalEntityData);
     }
 
     public static Event<Consumer<?>> directComponentCallback(Component<?> component, AreaId areaId, ComponentType recCompType,
@@ -219,8 +221,8 @@ public record Event<T>(
                 EntityType.ANY, -1, -1, ComponentType.ANY, entity);
     }
 
-    public static void emitAndRegisterEntity(SystemType systemType, AreaId currArea, IVector2 currPos, Entity entity) {
-        EntityManager.GET().emitEvent(Event.newEntity(new EventData.NewEntity(currArea, currPos, entity)));
+    public static void emitAndRegisterPositionalEntity(SystemType systemType, AreaId currArea, IVector2 currPos, Entity entity) {
+        EntityManager.GET().emitEvent(Event.newPositionalEntity(new EventData.NewPositionalEntity(currArea, currPos, entity)));
         EntityManager.GET().emitEventToSystem(systemType, Event.systemRegisterEntity(entity));
 
     }
@@ -231,6 +233,26 @@ public record Event<T>(
         return new Event<>(
                 EventType.NETWORK_IN_PLAYER_POSITION, AreaId.GLOBAL, -1, -1, ComponentType.ANY,
                 EntityType.ANY, recipientId, -1, ComponentType.NET_PLAYER_POSITION, data);
+    }
+
+    public static Event<List<NetInPlayerAction>> netInPlayerAction(int recipientId, List<NetInPlayerAction> data) {
+        return new Event<>(
+                EventType.NETWORK_IN_PLAYER_ACTION, AreaId.GLOBAL, -1, -1, ComponentType.ANY,
+                EntityType.ANY, recipientId, -1, ComponentType.NET_PLAYER_POSITION, data);
+    }
+
+    // This uses playerId vs entityId for recipient addressing
+    public static Event<NetCombatAction> netInCombatAction(int recipientId, NetCombatAction data) {
+        return new Event<>(
+                EventType.NETWORK_IN_COMBAT_ACTION, AreaId.GLOBAL, -1, -1, ComponentType.ANY,
+                EntityType.ANY, recipientId, -1, ComponentType.NET_PLAYER_POSITION, data);
+    }
+
+    // CHARACTER
+
+    public static Event<EventData.CharacterDeath> characterDeath(AreaId area, EventData.CharacterDeath characterDeath) {
+        return new Event<>(EventType.CHARACTER_DEATH, area, -1, -1, ComponentType.ANY,
+                EntityType.ANY, -1, -1, ComponentType.ANY, characterDeath);
     }
 
     // SPECIFIC EVENTS
@@ -393,14 +415,45 @@ public record Event<T>(
                 component, -1, -1, ComponentType.ANY, data);
     }
 
+    public static Event<Boolean> entitySetActive(Component<?> component, AreaId areaId, int recipEntityId, boolean isActive) {
+        return new Event<>(EventType.ENTITY_SET_ACTIVE, areaId, component, recipEntityId, isActive);
+    }
+
+    public static Event<Integer> entityVisibilityQuery(Component<?> component, AreaId areaId, int recipEntityId) {
+        return new Event<>(EventType.ENTITY_VISIBILITY_QUERY, areaId, component, recipEntityId, recipEntityId);
+    }
+
+    public static Event<Integer> entityIsActiveQuery(Component<?> component, AreaId areaId, int recipEntityId) {
+        return new Event<>(EventType.ENTITY_IS_ACTIVE_QUERY, areaId, component, recipEntityId, recipEntityId);
+    }
+
+    public static Event<Pair<Integer, Boolean>> entityIsActiveChanged(Component<?> component, AreaId areaId, Pair<Integer, Boolean> data) {
+        return new Event<>(EventType.ENTITY_IS_ACTIVE_CHANGED, areaId, component, data);
+    }
+
+    public static Event<EventData.EntityVisibility> entityVisibilityChange(Component<?> comp, AreaId area,
+            EventData.EntityVisibility data) {
+        return new Event<>(EventType.ENTITY_VISIBILITY_CHANGED, area, comp, data);
+    }
+
+    public static Event<EventData.VisibilityUpdate> entityVisibilityUpdate(Component<?> comp, AreaId area,
+            int recipEntityId, EventData.VisibilityUpdate data) {
+        return new Event<>(EventType.ENTITY_VISIBILITY_CHANGED, area, comp, recipEntityId, data);
+    }
+
+    public static Event<Entity> destroyEntity(Entity entity){
+        return new Event<>(EventType.ENTITY_DESTROY, entity.areaId(), -1, -1,
+                ComponentType.ANY, EntityType.ANY, entity.entityId(), -1, ComponentType.ANY, entity);
+    }
+
     // BUILDER
 
 
     public static class Builder<T> {
         EventType eventType;
         AreaId eventArea;
-        int issuerEntityId;
-        long issuerComponentId;
+        int issuerEntityId = -1;
+        long issuerComponentId = -1;
         ComponentType issuerCompType = ComponentType.ANY;
         EntityType issuerEntityType = EntityType.ANY;
         int recipientEntityId = -1;
@@ -467,6 +520,10 @@ public record Event<T>(
         public Event<T> build() {
             if (data == null) {
                 throw new IllegalStateException("Data must be set");
+            }
+
+            if (eventArea == null) {
+                throw new IllegalStateException("Event area must be set");
             }
 
             if (eventType == EventType.CALLBACK) {

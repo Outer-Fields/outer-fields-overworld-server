@@ -14,23 +14,21 @@ import io.mindspice.mindlib.data.tuples.Pair;
 import java.util.*;
 
 
-public class AreaEntity extends Entity {
-    private final IRect2 areaSize;
+public class AreaEntity extends MapEntity {
     private final IVector2 chunkSize;
     private final IConcurrentPQuadTree<IPolygon2> collisionGrid;
     private ChunkMap chunkMap;
     private final EntityGrid entityGrid;
 
     public AreaEntity(int id, AreaId arenaName, IRect2 areaSize, IVector2 chunkSize,
-            List<Pair<LocationEntity, IVector2>> initLocations, List<Pair<ItemEntity, IVector2>> initItems) {
-        super(id, EntityType.AREA, arenaName);
+            List<Pair<LocationEntity, IVector2>> initLocations) {
+        super(id, EntityType.AREA, arenaName, areaSize);
         this.areaSize = areaSize;
         this.chunkSize = chunkSize;
-        this.entityGrid = ComponentFactory.addEntityGrid(this, 100, areaSize, 6);
+        this.entityGrid = ComponentFactory.addEntityGrid(this, areaSize, 6);
         this.collisionGrid = ComponentFactory.addCollisionGrid(this, new IConcurrentPQuadTree<>(areaSize, 6)).collisionGrid;
-
         initLocations.forEach(l -> entityGrid.addActiveEntity(l.first(), l.second()));
-        initItems.forEach(i -> entityGrid.addActiveEntity(i.first(), i.second()));
+
     }
 
     public void setChunkMap(ChunkEntity[][] chunkMap) {
@@ -57,7 +55,6 @@ public class AreaEntity extends Entity {
     public ChunkEntity getChunkByIndex(IVector2 index) {
         return chunkMap.getChunkByIndex(index);
     }
-
 
     public void addCollisionToGrid(List<IPolygon2> collisionPolys) {
         collisionPolys.forEach(poly -> collisionGrid.insert(poly, poly));

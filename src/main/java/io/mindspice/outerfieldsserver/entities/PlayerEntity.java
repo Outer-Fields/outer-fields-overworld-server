@@ -7,11 +7,13 @@ import io.mindspice.databaseservice.client.schema.Results;
 import io.mindspice.outerfieldsserver.combat.enums.CardDomain;
 import io.mindspice.outerfieldsserver.combat.gameroom.MatchInstance;
 import io.mindspice.outerfieldsserver.components.player.PlayerNetOut;
+import io.mindspice.outerfieldsserver.core.networking.proto.EntityProto;
 import io.mindspice.outerfieldsserver.data.PlayerData;
-import io.mindspice.outerfieldsserver.combat.schema.PawnSet;
-import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetGameAction;
+import io.mindspice.outerfieldsserver.data.PawnSet;
+import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetCombatAction;
 import io.mindspice.outerfieldsserver.components.player.PlayerSession;
 import io.mindspice.outerfieldsserver.core.Settings;
+import io.mindspice.outerfieldsserver.data.OverWorldPawnState;
 import io.mindspice.outerfieldsserver.enums.*;
 import io.mindspice.outerfieldsserver.factory.ComponentFactory;
 import io.mindspice.mindlib.data.geometry.IVector2;
@@ -39,7 +41,8 @@ public class PlayerEntity extends CharacterEntity {
     private final boolean isBot = false;
     private final AbuseFilters abuseFilters = new AbuseFilters();
 
-    /* Abuse filters */
+    /* OverWorld Pawns */
+    public volatile List<OverWorldPawnState> overWorldPawnStates;
 
     public PlayerEntity(int entityId, int playerId, String playerName, List<EntityState> initStates,
             ClothingItem[] initOutfit, AreaId currArea, IVector2 currPosition, WebSocketSession webSocketSession) {
@@ -51,7 +54,11 @@ public class PlayerEntity extends CharacterEntity {
                 this, currPosition, currArea, initStates, initOutfit, webSocketSession
         );
 
-        playerSession = ((PlayerNetOut) getComponent(ComponentType.PLAYER_NET_OUT).getFirst()).playerSession();
+        playerSession = ((PlayerNetOut) getComponent(ComponentType.PLAYER_NET_OUT)).playerSession();
+    }
+
+    public void onCombatResult() {
+
     }
 
     public int playerId() { return playerId; }
@@ -73,6 +80,10 @@ public class PlayerEntity extends CharacterEntity {
         } catch (JsonProcessingException e) {
             return "Error serializing to string";
         }
+    }
+
+    public void updateOverWorldPawnStates(List<OverWorldPawnState> pawnStates) {
+        this.overWorldPawnStates = pawnStates;
     }
 
     public PlayerSession playerSession() {
@@ -122,7 +133,7 @@ public class PlayerEntity extends CharacterEntity {
     }
 
     // Requests and messages
-    public void onMessage(NetGameAction msg) {
+    public void oncombatMessage(NetCombatAction msg) {
         if (abuseFilters.wsTimeout()) {
             playerSession.close();
             // TODO timeout player table?
@@ -137,8 +148,22 @@ public class PlayerEntity extends CharacterEntity {
         abuseFilters.setLastMsgTime(Instant.now().getEpochSecond());
     }
 
-    public void send(Object obj) {
-        // playerSession.send(obj);
+    public void sendJson(Object obj) {
+        try {
+            String jsonString = JsonUtils.writeString(obj);
+            byte[] protoBytes = EntityProto.CombatJson.newBuilder()
+                    .setJson(jsonString)
+                    .build()
+                    .toByteArray();
+
+            playerSession.send(protoBytes);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendBytes(byte[] bytes) {
+        playerSession.send(bytes);
     }
 
     public void setFullPlayerData(PlayerData playerData) {

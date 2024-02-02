@@ -23,7 +23,7 @@ public class LocalTileGrid extends Component<LocalTileGrid> {
         this.localTileGrid = new GridArray<>(size, size);
         for (int x = 0; x < size; ++x) {
             for (int y = 0; y < size; ++y) {
-                localTileGrid.set(x, y, new DynamicTileRef(areaId.entity, IVector2.of(-x, -y)));
+                localTileGrid.set(x, y, new DynamicTileRef(areaId.areaEntity, IVector2.of(-x, -y)));
             }
         }
 

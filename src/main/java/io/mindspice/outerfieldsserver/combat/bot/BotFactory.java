@@ -2,12 +2,11 @@ package io.mindspice.outerfieldsserver.combat.bot;
 
 
 import io.mindspice.outerfieldsserver.combat.bot.state.BotPlayerState;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 import io.mindspice.outerfieldsserver.data.PlayerData;
-import io.mindspice.outerfieldsserver.combat.schema.PawnSet;
+import io.mindspice.outerfieldsserver.data.PawnSet;
 import io.mindspice.outerfieldsserver.entities.PlayerEntity;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -25,13 +24,13 @@ public class BotFactory {
         return INSTANCE;
     }
 
-    public BotPlayerState getBotPlayerState(PlayerGameState enemyPlayerState, int enemyPawnSetLevel) {
+    public BotPlayerState getBotPlayerState(PlayerMatchState enemyPlayerState, int enemyPawnSetLevel) {
         PawnSet botPawnSet = PawnSet.getRandomPawnSet(enemyPawnSetLevel);
         BotPlayer botPlayer = new BotPlayer();
         botPlayer.setFullPlayerData(new PlayerData("Bot"));
         return new BotPlayerState(botPlayer, enemyPlayerState, botPawnSet, botExecutor);
     }
-    public BotPlayerState getHighLvlBotPlayerState(PlayerGameState enemyPlayerState) {
+    public BotPlayerState getHighLvlBotPlayerState(PlayerMatchState enemyPlayerState) {
         PawnSet botPawnSet = PawnSet.getRandomPawnSet2();
         BotPlayer botPlayer = new BotPlayer();
         botPlayer.setFullPlayerData(new PlayerData("Bot"));
@@ -43,7 +42,7 @@ public class BotFactory {
         return new BotPlayerState(botPlayer, botPawnSet, botExecutor);
     }
 
-    public BotPlayerState getCombatBot(PlayerGameState playerState, int enemyId){
+    public BotPlayerState getCombatBot(PlayerMatchState playerState, int enemyId){
         return getBotPlayerState(playerState, 150); // FIXME this needs to use the id to look up a preset for the bots cards
     }
 

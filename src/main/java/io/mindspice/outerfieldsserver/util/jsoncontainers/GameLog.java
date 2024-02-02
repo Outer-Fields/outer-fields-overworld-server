@@ -4,7 +4,7 @@ import io.mindspice.outerfieldsserver.combat.enums.PawnIndex;
 import io.mindspice.outerfieldsserver.combat.enums.StatType;
 import io.mindspice.outerfieldsserver.combat.gameroom.effect.ActiveEffect;
 import io.mindspice.outerfieldsserver.combat.gameroom.pawn.Pawn;
-import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetGameAction;
+import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetCombatAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +20,13 @@ public class GameLog {
   public static class ActionLog {
       public int round;
       public int playerId;
-      public NetGameAction netGameAction;
+      public NetCombatAction netCombatAction;
 
 
-      public ActionLog(int playerId, int round, NetGameAction nga) {
+      public ActionLog(int playerId, int round, NetCombatAction nga) {
           this.playerId = playerId;
           this.round = round;
-          this.netGameAction = nga;
+          this.netCombatAction = nga;
       }
   }
 

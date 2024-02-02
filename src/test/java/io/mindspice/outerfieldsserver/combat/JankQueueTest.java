@@ -65,14 +65,14 @@ public class JankQueueTest {
                         continue;
                     }
                     if (e.getValue().expired(now)) {
-                        player1.player().send(new NetQueueResponse(false));
+                        player1.player().sendJson(new NetQueueResponse(false));
                         if (e.getValue().isPlayer1Ready()) {
                             matchQueue.add(player1);
                         } else {
                             player1.player().setQueueCoolDown();
                         }
                         if (!e.getValue().isBotMatch()) {
-                            player2.player().send(new NetQueueResponse(false));
+                            player2.player().sendJson(new NetQueueResponse(false));
                             if (e.getValue().isPlayer2Ready()) {
                                 matchQueue.add(player2);
                             } else {

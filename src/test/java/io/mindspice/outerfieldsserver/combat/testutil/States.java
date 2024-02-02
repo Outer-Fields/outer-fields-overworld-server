@@ -13,8 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public class States {
 
     public static MatchInstance getReadiedGameRoom() {
-        ScheduledExecutorService botExec = Executors.newScheduledThreadPool(2);
-        BotFactory botFactory = new BotFactory(botExec);
+        BotFactory botFactory = BotFactory.GET();
         GameTests.TestPlayer p1 = new GameTests.TestPlayer(1);
         GameTests.TestPlayer p2 = new GameTests.TestPlayer(2);
         p1.setFullPlayerData(new PlayerData("Player1"));

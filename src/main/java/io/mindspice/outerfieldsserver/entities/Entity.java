@@ -3,6 +3,7 @@ package io.mindspice.outerfieldsserver.entities;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.mindspice.outerfieldsserver.components.Component;
+import io.mindspice.outerfieldsserver.components.serialization.Visibility;
 import io.mindspice.outerfieldsserver.enums.AreaId;
 import io.mindspice.outerfieldsserver.enums.ComponentType;
 import io.mindspice.outerfieldsserver.enums.EntityType;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
 
 
 /**
@@ -58,6 +58,7 @@ public abstract class Entity {
         componentList = new CopyOnWriteArrayList<>(components);
     }
 
+
     public Entity(int id, EntityType entityType, AreaId areaId, IVector2 chunkIndex) {
         this.id = id;
         this.entityType = entityType;
@@ -72,17 +73,14 @@ public abstract class Entity {
         }
 
         componentList.forEach(c -> {
-            if (c.equals(component)) {
+            if (c.componentType == (component.componentType)) {
                 throw new IllegalStateException("Attempted to add same component twice on Entity: " + id
                         + " | EntityType: " + entityType + " | Compoent: " + component);
-            }
-            if (c.componentType == component.componentType) {
-                //TODO log this
             }
         });
 
         if (systemRegistry != null) {
-            System.out.println("Registed component with system: " + component.componentType);
+            System.out.println("Registered component with system: " + component.componentType);
             systemRegistry.registerComponent(component);
         }
         componentList.add(component);
@@ -102,6 +100,10 @@ public abstract class Entity {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public EntityType entityType() {
         return entityType;
     }
@@ -116,6 +118,13 @@ public abstract class Entity {
 
     public SystemType registeredWith() {
         return systemRegistry == null ? SystemType.NONE : systemRegistry.systemType();
+    }
+
+    public void registerWithSystem(SystemListener system){
+        if (systemRegistry != null) {
+            throw new IllegalStateException("Attempted to register entity with system twice");
+        }
+        this.systemRegistry = system;
     }
 
     public boolean isListenerFor(EventType eventType) {
@@ -135,11 +144,11 @@ public abstract class Entity {
     }
 
     public List<Component<?>> getAttachedComponents() {
-        return List.copyOf(componentList);
+        return componentList == null ? List.of() :  List.copyOf(componentList);
     }
 
-    public List<Component<?>> getComponent(ComponentType componentType) {
-        return componentList.stream().filter(c -> c.componentType() == componentType).toList();
+    public Component<?> getComponent(ComponentType componentType) {
+        return componentList.stream().filter(c -> c.componentType() == componentType).findFirst().orElse(null);
     }
 
     public long[] getComponentTypeIds(ComponentType componentType) {
@@ -180,9 +189,7 @@ public abstract class Entity {
         }
     }
 
-    public void registerWithSystem(SystemListener systemRegistry) {
-        systemRegistry.registerComponents(componentList);
-        this.systemRegistry = systemRegistry;
-    }
+
+
 
 }

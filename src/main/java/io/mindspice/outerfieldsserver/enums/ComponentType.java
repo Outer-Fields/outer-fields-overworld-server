@@ -1,16 +1,21 @@
 package io.mindspice.outerfieldsserver.enums;
 
 import io.mindspice.outerfieldsserver.components.Component;
+import io.mindspice.outerfieldsserver.components.items.ContainedItems;
+import io.mindspice.outerfieldsserver.components.player.PlayerItemsAndFunds;
+import io.mindspice.outerfieldsserver.components.item.LootDrop;
 import io.mindspice.outerfieldsserver.components.ai.DecisionTree;
 import io.mindspice.outerfieldsserver.components.ai.ThoughtModule;
 import io.mindspice.outerfieldsserver.components.monitors.AreaMonitor;
 import io.mindspice.outerfieldsserver.components.npc.NPCMovement;
+import io.mindspice.outerfieldsserver.components.npc.CharSpawnController;
 import io.mindspice.outerfieldsserver.components.player.*;
 import io.mindspice.outerfieldsserver.components.primatives.ComponentSystem;
 import io.mindspice.outerfieldsserver.components.primatives.SimpleEmitter;
 import io.mindspice.outerfieldsserver.components.primatives.SimpleListener;
 import io.mindspice.outerfieldsserver.components.quest.QuestModule;
 import io.mindspice.outerfieldsserver.components.serialization.CharacterSerializer;
+import io.mindspice.outerfieldsserver.components.serialization.Visibility;
 import io.mindspice.outerfieldsserver.components.world.*;
 import io.mindspice.outerfieldsserver.components.entity.EntityProperties;
 import io.mindspice.outerfieldsserver.components.entity.EntityStateComp;
@@ -33,7 +38,7 @@ public enum ComponentType {
     SIMPLE_EMITTER(SimpleEmitter.class, x -> x instanceof SimpleEmitter),
     SIMPLE_OBJECT(SimpleObject.class, x -> x instanceof SimpleObject<?>),
     CHUNK_MAP(ChunkMap.class, x -> x instanceof ChunkMap),
-    ACTIVE_ENTITIES(EntityGrid.class, x -> x instanceof EntityGrid),
+    ACTIVE_ENTITIES(ActiveEntities.class, x -> x instanceof ActiveEntities),
     COLLISION_GRID(CollisionGrid.class, x -> x instanceof CollisionGrid),
     KNOWN_ENTITIES(KnownEntities.class, x -> x instanceof KnownEntities),
     PLAYER_ENTITY_UPDATE_DATA(PlayerEntityUpdateData.class, x -> x instanceof PlayerEntityUpdateData),
@@ -48,7 +53,14 @@ public enum ComponentType {
     DECISION_TREE(DecisionTree.class, x -> x instanceof DecisionTree),
     CHARACTER_SERIALIZER(CharacterSerializer.class, x -> x instanceof CharacterSerializer),
     NPC_MOVEMENT(NPCMovement.class, x -> x instanceof NPCMovement),
-    QUEST_MODULE(QuestModule.class, x -> x instanceof QuestModule);
+    QUEST_MODULE(QuestModule.class, x -> x instanceof QuestModule),
+    PLAYER_ACTIONS(PlayerActions.class, x -> x instanceof PlayerActions),
+    SPAWN_CONTROLLER(CharSpawnController.class, x -> x instanceof CharSpawnController),
+    LOOT_DROP(LootDrop.class, x -> x instanceof LootDrop),
+    PLAYER_ITEMS_AND_FUNDS(PlayerItemsAndFunds.class, x -> x instanceof PlayerItemsAndFunds),
+    CONTAINED_ITEMS(ContainedItems.class, x -> x instanceof ContainedItems),
+    VISIBILITY(Visibility.class, x -> x instanceof Visibility),
+    ENTITY_GRID(EntityGrid.class, x -> x instanceof EntityGrid);
 
     public final Class<?> componentClass;
     private final Predicate<Object> validator;

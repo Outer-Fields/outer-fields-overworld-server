@@ -5167,6 +5167,12 @@ public final class EntityProto {
      * @return The value.
      */
     int getValue();
+
+    /**
+     * <code>int32 amount = 5;</code>
+     * @return The amount.
+     */
+    int getAmount();
   }
   /**
    * Protobuf type {@code Action}
@@ -5247,6 +5253,17 @@ public final class EntityProto {
       return value_;
     }
 
+    public static final int AMOUNT_FIELD_NUMBER = 5;
+    private int amount_ = 0;
+    /**
+     * <code>int32 amount = 5;</code>
+     * @return The amount.
+     */
+    @Override
+    public int getAmount() {
+      return amount_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @Override
     public final boolean isInitialized() {
@@ -5273,6 +5290,9 @@ public final class EntityProto {
       if (value_ != 0) {
         output.writeInt32(4, value_);
       }
+      if (amount_ != 0) {
+        output.writeInt32(5, amount_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -5298,6 +5318,10 @@ public final class EntityProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(4, value_);
       }
+      if (amount_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, amount_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -5321,6 +5345,8 @@ public final class EntityProto {
           != other.getKey()) return false;
       if (getValue()
           != other.getValue()) return false;
+      if (getAmount()
+          != other.getAmount()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -5341,6 +5367,8 @@ public final class EntityProto {
       hash = (53 * hash) + getKey();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
       hash = (53 * hash) + getValue();
+      hash = (37 * hash) + AMOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + getAmount();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -5476,6 +5504,7 @@ public final class EntityProto {
         isPlayer_ = false;
         key_ = 0;
         value_ = 0;
+        amount_ = 0;
         return this;
       }
 
@@ -5520,6 +5549,9 @@ public final class EntityProto {
         }
         if (((from_bitField0_ & 0x00000008) != 0)) {
           result.value_ = value_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.amount_ = amount_;
         }
       }
 
@@ -5579,6 +5611,9 @@ public final class EntityProto {
         if (other.getValue() != 0) {
           setValue(other.getValue());
         }
+        if (other.getAmount() != 0) {
+          setAmount(other.getAmount());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -5625,6 +5660,11 @@ public final class EntityProto {
                 bitField0_ |= 0x00000008;
                 break;
               } // case 32
+              case 40: {
+                amount_ = input.readInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -5769,6 +5809,38 @@ public final class EntityProto {
         onChanged();
         return this;
       }
+
+      private int amount_ ;
+      /**
+       * <code>int32 amount = 5;</code>
+       * @return The amount.
+       */
+      @Override
+      public int getAmount() {
+        return amount_;
+      }
+      /**
+       * <code>int32 amount = 5;</code>
+       * @param value The amount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAmount(int value) {
+
+        amount_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 amount = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAmount() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        amount_ = 0;
+        onChanged();
+        return this;
+      }
       @Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -5828,6 +5900,558 @@ public final class EntityProto {
 
     @Override
     public Action getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CombatJsonOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:CombatJson)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string json = 1;</code>
+     * @return The json.
+     */
+    String getJson();
+    /**
+     * <code>string json = 1;</code>
+     * @return The bytes for json.
+     */
+    com.google.protobuf.ByteString
+        getJsonBytes();
+  }
+  /**
+   * Protobuf type {@code CombatJson}
+   */
+  public static final class CombatJson extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:CombatJson)
+      CombatJsonOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CombatJson.newBuilder() to construct.
+    private CombatJson(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CombatJson() {
+      json_ = "";
+    }
+
+    @Override
+    @SuppressWarnings({"unused"})
+    protected Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CombatJson();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return EntityProto.internal_static_CombatJson_descriptor;
+    }
+
+    @Override
+    protected FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return EntityProto.internal_static_CombatJson_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              CombatJson.class, Builder.class);
+    }
+
+    public static final int JSON_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile Object json_ = "";
+    /**
+     * <code>string json = 1;</code>
+     * @return The json.
+     */
+    @Override
+    public String getJson() {
+      Object ref = json_;
+      if (ref instanceof String) {
+        return (String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        String s = bs.toStringUtf8();
+        json_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string json = 1;</code>
+     * @return The bytes for json.
+     */
+    @Override
+    public com.google.protobuf.ByteString
+        getJsonBytes() {
+      Object ref = json_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (String) ref);
+        json_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(json_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, json_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(json_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, json_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof CombatJson)) {
+        return super.equals(obj);
+      }
+      CombatJson other = (CombatJson) obj;
+
+      if (!getJson()
+          .equals(other.getJson())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + JSON_FIELD_NUMBER;
+      hash = (53 * hash) + getJson().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static CombatJson parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static CombatJson parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static CombatJson parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static CombatJson parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static CombatJson parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static CombatJson parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static CombatJson parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static CombatJson parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static CombatJson parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static CombatJson parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static CombatJson parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static CombatJson parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(CombatJson prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @Override
+    protected Builder newBuilderForType(
+        BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code CombatJson}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:CombatJson)
+        CombatJsonOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return EntityProto.internal_static_CombatJson_descriptor;
+      }
+
+      @Override
+      protected FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return EntityProto.internal_static_CombatJson_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                CombatJson.class, Builder.class);
+      }
+
+      // Construct using EntityProto.CombatJson.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          BuilderParent parent) {
+        super(parent);
+
+      }
+      @Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        json_ = "";
+        return this;
+      }
+
+      @Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return EntityProto.internal_static_CombatJson_descriptor;
+      }
+
+      @Override
+      public CombatJson getDefaultInstanceForType() {
+        return CombatJson.getDefaultInstance();
+      }
+
+      @Override
+      public CombatJson build() {
+        CombatJson result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @Override
+      public CombatJson buildPartial() {
+        CombatJson result = new CombatJson(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(CombatJson result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.json_ = json_;
+        }
+      }
+
+      @Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return super.setField(field, value);
+      }
+      @Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof CombatJson) {
+          return mergeFrom((CombatJson)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(CombatJson other) {
+        if (other == CombatJson.getDefaultInstance()) return this;
+        if (!other.getJson().isEmpty()) {
+          json_ = other.json_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                json_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private Object json_ = "";
+      /**
+       * <code>string json = 1;</code>
+       * @return The json.
+       */
+      public String getJson() {
+        Object ref = json_;
+        if (!(ref instanceof String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          String s = bs.toStringUtf8();
+          json_ = s;
+          return s;
+        } else {
+          return (String) ref;
+        }
+      }
+      /**
+       * <code>string json = 1;</code>
+       * @return The bytes for json.
+       */
+      public com.google.protobuf.ByteString
+          getJsonBytes() {
+        Object ref = json_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (String) ref);
+          json_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string json = 1;</code>
+       * @param value The json to set.
+       * @return This builder for chaining.
+       */
+      public Builder setJson(
+          String value) {
+        if (value == null) { throw new NullPointerException(); }
+        json_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string json = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearJson() {
+        json_ = getDefaultInstance().getJson();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string json = 1;</code>
+       * @param value The bytes for json to set.
+       * @return This builder for chaining.
+       */
+      public Builder setJsonBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        json_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      @Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:CombatJson)
+    }
+
+    // @@protoc_insertion_point(class_scope:CombatJson)
+    private static final CombatJson DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new CombatJson();
+    }
+
+    public static CombatJson getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CombatJson>
+        PARSER = new com.google.protobuf.AbstractParser<CombatJson>() {
+      @Override
+      public CombatJson parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<CombatJson> parser() {
+      return PARSER;
+    }
+
+    @Override
+    public com.google.protobuf.Parser<CombatJson> getParserForType() {
+      return PARSER;
+    }
+
+    @Override
+    public CombatJson getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -6760,8 +7384,8 @@ public final class EntityProto {
 
   }
 
-  public interface GamePacketOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:GamePacket)
+  public interface GamePacketOutOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:GamePacketOut)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -6898,20 +7522,35 @@ public final class EntityProto {
      * <code>.AuthCorrection authCorrection = 6;</code>
      */
     AuthCorrectionOrBuilder getAuthCorrectionOrBuilder();
+
+    /**
+     * <code>.CombatJson combatJson = 7;</code>
+     * @return Whether the combatJson field is set.
+     */
+    boolean hasCombatJson();
+    /**
+     * <code>.CombatJson combatJson = 7;</code>
+     * @return The combatJson.
+     */
+    CombatJson getCombatJson();
+    /**
+     * <code>.CombatJson combatJson = 7;</code>
+     */
+    CombatJsonOrBuilder getCombatJsonOrBuilder();
   }
   /**
-   * Protobuf type {@code GamePacket}
+   * Protobuf type {@code GamePacketOut}
    */
-  public static final class GamePacket extends
+  public static final class GamePacketOut extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:GamePacket)
-      GamePacketOrBuilder {
+      // @@protoc_insertion_point(message_implements:GamePacketOut)
+      GamePacketOutOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use GamePacket.newBuilder() to construct.
-    private GamePacket(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use GamePacketOut.newBuilder() to construct.
+    private GamePacketOut(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private GamePacket() {
+    private GamePacketOut() {
       entities_ = java.util.Collections.emptyList();
       positionUpdates_ = java.util.Collections.emptyList();
       entityChanges_ = java.util.Collections.emptyList();
@@ -6923,20 +7562,20 @@ public final class EntityProto {
     @SuppressWarnings({"unused"})
     protected Object newInstance(
         UnusedPrivateParameter unused) {
-      return new GamePacket();
+      return new GamePacketOut();
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return EntityProto.internal_static_GamePacket_descriptor;
+      return EntityProto.internal_static_GamePacketOut_descriptor;
     }
 
     @Override
     protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return EntityProto.internal_static_GamePacket_fieldAccessorTable
+      return EntityProto.internal_static_GamePacketOut_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              GamePacket.class, Builder.class);
+              GamePacketOut.class, Builder.class);
     }
 
     private int bitField0_;
@@ -7171,6 +7810,32 @@ public final class EntityProto {
       return authCorrection_ == null ? AuthCorrection.getDefaultInstance() : authCorrection_;
     }
 
+    public static final int COMBATJSON_FIELD_NUMBER = 7;
+    private CombatJson combatJson_;
+    /**
+     * <code>.CombatJson combatJson = 7;</code>
+     * @return Whether the combatJson field is set.
+     */
+    @Override
+    public boolean hasCombatJson() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>.CombatJson combatJson = 7;</code>
+     * @return The combatJson.
+     */
+    @Override
+    public CombatJson getCombatJson() {
+      return combatJson_ == null ? CombatJson.getDefaultInstance() : combatJson_;
+    }
+    /**
+     * <code>.CombatJson combatJson = 7;</code>
+     */
+    @Override
+    public CombatJsonOrBuilder getCombatJsonOrBuilder() {
+      return combatJson_ == null ? CombatJson.getDefaultInstance() : combatJson_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @Override
     public final boolean isInitialized() {
@@ -7202,6 +7867,9 @@ public final class EntityProto {
       }
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeMessage(6, getAuthCorrection());
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeMessage(7, getCombatJson());
       }
       getUnknownFields().writeTo(output);
     }
@@ -7236,6 +7904,10 @@ public final class EntityProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getAuthCorrection());
       }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(7, getCombatJson());
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -7246,10 +7918,10 @@ public final class EntityProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof GamePacket)) {
+      if (!(obj instanceof GamePacketOut)) {
         return super.equals(obj);
       }
-      GamePacket other = (GamePacket) obj;
+      GamePacketOut other = (GamePacketOut) obj;
 
       if (!getEntitiesList()
           .equals(other.getEntitiesList())) return false;
@@ -7265,6 +7937,11 @@ public final class EntityProto {
       if (hasAuthCorrection()) {
         if (!getAuthCorrection()
             .equals(other.getAuthCorrection())) return false;
+      }
+      if (hasCombatJson() != other.hasCombatJson()) return false;
+      if (hasCombatJson()) {
+        if (!getCombatJson()
+            .equals(other.getCombatJson())) return false;
       }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
@@ -7301,49 +7978,53 @@ public final class EntityProto {
         hash = (37 * hash) + AUTHCORRECTION_FIELD_NUMBER;
         hash = (53 * hash) + getAuthCorrection().hashCode();
       }
+      if (hasCombatJson()) {
+        hash = (37 * hash) + COMBATJSON_FIELD_NUMBER;
+        hash = (53 * hash) + getCombatJson().hashCode();
+      }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static GamePacket parseFrom(
+    public static GamePacketOut parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static GamePacket parseFrom(
+    public static GamePacketOut parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static GamePacket parseFrom(
+    public static GamePacketOut parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static GamePacket parseFrom(
+    public static GamePacketOut parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static GamePacket parseFrom(byte[] data)
+    public static GamePacketOut parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static GamePacket parseFrom(
+    public static GamePacketOut parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static GamePacket parseFrom(java.io.InputStream input)
+    public static GamePacketOut parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static GamePacket parseFrom(
+    public static GamePacketOut parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -7351,26 +8032,26 @@ public final class EntityProto {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static GamePacket parseDelimitedFrom(java.io.InputStream input)
+    public static GamePacketOut parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static GamePacket parseDelimitedFrom(
+    public static GamePacketOut parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static GamePacket parseFrom(
+    public static GamePacketOut parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static GamePacket parseFrom(
+    public static GamePacketOut parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -7383,7 +8064,7 @@ public final class EntityProto {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(GamePacket prototype) {
+    public static Builder newBuilder(GamePacketOut prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -7399,26 +8080,26 @@ public final class EntityProto {
       return builder;
     }
     /**
-     * Protobuf type {@code GamePacket}
+     * Protobuf type {@code GamePacketOut}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:GamePacket)
-        GamePacketOrBuilder {
+        // @@protoc_insertion_point(builder_implements:GamePacketOut)
+        GamePacketOutOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return EntityProto.internal_static_GamePacket_descriptor;
+        return EntityProto.internal_static_GamePacketOut_descriptor;
       }
 
       @Override
       protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return EntityProto.internal_static_GamePacket_fieldAccessorTable
+        return EntityProto.internal_static_GamePacketOut_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                GamePacket.class, Builder.class);
+                GamePacketOut.class, Builder.class);
       }
 
-      // Construct using EntityProto.GamePacket.newBuilder()
+      // Construct using EntityProto.GamePacketOut.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -7437,6 +8118,7 @@ public final class EntityProto {
           getAuthResponsesFieldBuilder();
           getActionsFieldBuilder();
           getAuthCorrectionFieldBuilder();
+          getCombatJsonFieldBuilder();
         }
       }
       @Override
@@ -7483,23 +8165,28 @@ public final class EntityProto {
           authCorrectionBuilder_.dispose();
           authCorrectionBuilder_ = null;
         }
+        combatJson_ = null;
+        if (combatJsonBuilder_ != null) {
+          combatJsonBuilder_.dispose();
+          combatJsonBuilder_ = null;
+        }
         return this;
       }
 
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return EntityProto.internal_static_GamePacket_descriptor;
+        return EntityProto.internal_static_GamePacketOut_descriptor;
       }
 
       @Override
-      public GamePacket getDefaultInstanceForType() {
-        return GamePacket.getDefaultInstance();
+      public GamePacketOut getDefaultInstanceForType() {
+        return GamePacketOut.getDefaultInstance();
       }
 
       @Override
-      public GamePacket build() {
-        GamePacket result = buildPartial();
+      public GamePacketOut build() {
+        GamePacketOut result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -7507,15 +8194,15 @@ public final class EntityProto {
       }
 
       @Override
-      public GamePacket buildPartial() {
-        GamePacket result = new GamePacket(this);
+      public GamePacketOut buildPartial() {
+        GamePacketOut result = new GamePacketOut(this);
         buildPartialRepeatedFields(result);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartialRepeatedFields(GamePacket result) {
+      private void buildPartialRepeatedFields(GamePacketOut result) {
         if (entitiesBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             entities_ = java.util.Collections.unmodifiableList(entities_);
@@ -7563,7 +8250,7 @@ public final class EntityProto {
         }
       }
 
-      private void buildPartial0(GamePacket result) {
+      private void buildPartial0(GamePacketOut result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000020) != 0)) {
@@ -7571,6 +8258,12 @@ public final class EntityProto {
               ? authCorrection_
               : authCorrectionBuilder_.build();
           to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.combatJson_ = combatJsonBuilder_ == null
+              ? combatJson_
+              : combatJsonBuilder_.build();
+          to_bitField0_ |= 0x00000002;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -7609,16 +8302,16 @@ public final class EntityProto {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof GamePacket) {
-          return mergeFrom((GamePacket)other);
+        if (other instanceof GamePacketOut) {
+          return mergeFrom((GamePacketOut)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(GamePacket other) {
-        if (other == GamePacket.getDefaultInstance()) return this;
+      public Builder mergeFrom(GamePacketOut other) {
+        if (other == GamePacketOut.getDefaultInstance()) return this;
         if (entitiesBuilder_ == null) {
           if (!other.entities_.isEmpty()) {
             if (entities_.isEmpty()) {
@@ -7752,6 +8445,9 @@ public final class EntityProto {
         if (other.hasAuthCorrection()) {
           mergeAuthCorrection(other.getAuthCorrection());
         }
+        if (other.hasCombatJson()) {
+          mergeCombatJson(other.getCombatJson());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -7850,6 +8546,13 @@ public final class EntityProto {
                 bitField0_ |= 0x00000020;
                 break;
               } // case 50
+              case 58: {
+                input.readMessage(
+                    getCombatJsonFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 58
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -9187,6 +9890,127 @@ public final class EntityProto {
         }
         return authCorrectionBuilder_;
       }
+
+      private CombatJson combatJson_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          CombatJson, CombatJson.Builder, CombatJsonOrBuilder> combatJsonBuilder_;
+      /**
+       * <code>.CombatJson combatJson = 7;</code>
+       * @return Whether the combatJson field is set.
+       */
+      public boolean hasCombatJson() {
+        return ((bitField0_ & 0x00000040) != 0);
+      }
+      /**
+       * <code>.CombatJson combatJson = 7;</code>
+       * @return The combatJson.
+       */
+      public CombatJson getCombatJson() {
+        if (combatJsonBuilder_ == null) {
+          return combatJson_ == null ? CombatJson.getDefaultInstance() : combatJson_;
+        } else {
+          return combatJsonBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.CombatJson combatJson = 7;</code>
+       */
+      public Builder setCombatJson(CombatJson value) {
+        if (combatJsonBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          combatJson_ = value;
+        } else {
+          combatJsonBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.CombatJson combatJson = 7;</code>
+       */
+      public Builder setCombatJson(
+          CombatJson.Builder builderForValue) {
+        if (combatJsonBuilder_ == null) {
+          combatJson_ = builderForValue.build();
+        } else {
+          combatJsonBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.CombatJson combatJson = 7;</code>
+       */
+      public Builder mergeCombatJson(CombatJson value) {
+        if (combatJsonBuilder_ == null) {
+          if (((bitField0_ & 0x00000040) != 0) &&
+            combatJson_ != null &&
+            combatJson_ != CombatJson.getDefaultInstance()) {
+            getCombatJsonBuilder().mergeFrom(value);
+          } else {
+            combatJson_ = value;
+          }
+        } else {
+          combatJsonBuilder_.mergeFrom(value);
+        }
+        if (combatJson_ != null) {
+          bitField0_ |= 0x00000040;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.CombatJson combatJson = 7;</code>
+       */
+      public Builder clearCombatJson() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        combatJson_ = null;
+        if (combatJsonBuilder_ != null) {
+          combatJsonBuilder_.dispose();
+          combatJsonBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.CombatJson combatJson = 7;</code>
+       */
+      public CombatJson.Builder getCombatJsonBuilder() {
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return getCombatJsonFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.CombatJson combatJson = 7;</code>
+       */
+      public CombatJsonOrBuilder getCombatJsonOrBuilder() {
+        if (combatJsonBuilder_ != null) {
+          return combatJsonBuilder_.getMessageOrBuilder();
+        } else {
+          return combatJson_ == null ?
+              CombatJson.getDefaultInstance() : combatJson_;
+        }
+      }
+      /**
+       * <code>.CombatJson combatJson = 7;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          CombatJson, CombatJson.Builder, CombatJsonOrBuilder>
+          getCombatJsonFieldBuilder() {
+        if (combatJsonBuilder_ == null) {
+          combatJsonBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              CombatJson, CombatJson.Builder, CombatJsonOrBuilder>(
+                  getCombatJson(),
+                  getParentForChildren(),
+                  isClean());
+          combatJson_ = null;
+        }
+        return combatJsonBuilder_;
+      }
       @Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -9200,23 +10024,23 @@ public final class EntityProto {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:GamePacket)
+      // @@protoc_insertion_point(builder_scope:GamePacketOut)
     }
 
-    // @@protoc_insertion_point(class_scope:GamePacket)
-    private static final GamePacket DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:GamePacketOut)
+    private static final GamePacketOut DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new GamePacket();
+      DEFAULT_INSTANCE = new GamePacketOut();
     }
 
-    public static GamePacket getDefaultInstance() {
+    public static GamePacketOut getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<GamePacket>
-        PARSER = new com.google.protobuf.AbstractParser<GamePacket>() {
+    private static final com.google.protobuf.Parser<GamePacketOut>
+        PARSER = new com.google.protobuf.AbstractParser<GamePacketOut>() {
       @Override
-      public GamePacket parsePartialFrom(
+      public GamePacketOut parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -9235,17 +10059,1208 @@ public final class EntityProto {
       }
     };
 
-    public static com.google.protobuf.Parser<GamePacket> parser() {
+    public static com.google.protobuf.Parser<GamePacketOut> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<GamePacket> getParserForType() {
+    public com.google.protobuf.Parser<GamePacketOut> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public GamePacket getDefaultInstanceForType() {
+    public GamePacketOut getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface GamePacketInOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:GamePacketIn)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>.PositionUpdate positionUpdate = 1;</code>
+     * @return Whether the positionUpdate field is set.
+     */
+    boolean hasPositionUpdate();
+    /**
+     * <code>.PositionUpdate positionUpdate = 1;</code>
+     * @return The positionUpdate.
+     */
+    PositionUpdate getPositionUpdate();
+    /**
+     * <code>.PositionUpdate positionUpdate = 1;</code>
+     */
+    PositionUpdateOrBuilder getPositionUpdateOrBuilder();
+
+    /**
+     * <code>repeated .Action actions = 2;</code>
+     */
+    java.util.List<Action>
+        getActionsList();
+    /**
+     * <code>repeated .Action actions = 2;</code>
+     */
+    Action getActions(int index);
+    /**
+     * <code>repeated .Action actions = 2;</code>
+     */
+    int getActionsCount();
+    /**
+     * <code>repeated .Action actions = 2;</code>
+     */
+    java.util.List<? extends ActionOrBuilder>
+        getActionsOrBuilderList();
+    /**
+     * <code>repeated .Action actions = 2;</code>
+     */
+    ActionOrBuilder getActionsOrBuilder(
+        int index);
+
+    /**
+     * <code>.CombatJson combatJson = 3;</code>
+     * @return Whether the combatJson field is set.
+     */
+    boolean hasCombatJson();
+    /**
+     * <code>.CombatJson combatJson = 3;</code>
+     * @return The combatJson.
+     */
+    CombatJson getCombatJson();
+    /**
+     * <code>.CombatJson combatJson = 3;</code>
+     */
+    CombatJsonOrBuilder getCombatJsonOrBuilder();
+  }
+  /**
+   * Protobuf type {@code GamePacketIn}
+   */
+  public static final class GamePacketIn extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:GamePacketIn)
+      GamePacketInOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use GamePacketIn.newBuilder() to construct.
+    private GamePacketIn(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private GamePacketIn() {
+      actions_ = java.util.Collections.emptyList();
+    }
+
+    @Override
+    @SuppressWarnings({"unused"})
+    protected Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GamePacketIn();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return EntityProto.internal_static_GamePacketIn_descriptor;
+    }
+
+    @Override
+    protected FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return EntityProto.internal_static_GamePacketIn_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              GamePacketIn.class, Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int POSITIONUPDATE_FIELD_NUMBER = 1;
+    private PositionUpdate positionUpdate_;
+    /**
+     * <code>.PositionUpdate positionUpdate = 1;</code>
+     * @return Whether the positionUpdate field is set.
+     */
+    @Override
+    public boolean hasPositionUpdate() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>.PositionUpdate positionUpdate = 1;</code>
+     * @return The positionUpdate.
+     */
+    @Override
+    public PositionUpdate getPositionUpdate() {
+      return positionUpdate_ == null ? PositionUpdate.getDefaultInstance() : positionUpdate_;
+    }
+    /**
+     * <code>.PositionUpdate positionUpdate = 1;</code>
+     */
+    @Override
+    public PositionUpdateOrBuilder getPositionUpdateOrBuilder() {
+      return positionUpdate_ == null ? PositionUpdate.getDefaultInstance() : positionUpdate_;
+    }
+
+    public static final int ACTIONS_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private java.util.List<Action> actions_;
+    /**
+     * <code>repeated .Action actions = 2;</code>
+     */
+    @Override
+    public java.util.List<Action> getActionsList() {
+      return actions_;
+    }
+    /**
+     * <code>repeated .Action actions = 2;</code>
+     */
+    @Override
+    public java.util.List<? extends ActionOrBuilder>
+        getActionsOrBuilderList() {
+      return actions_;
+    }
+    /**
+     * <code>repeated .Action actions = 2;</code>
+     */
+    @Override
+    public int getActionsCount() {
+      return actions_.size();
+    }
+    /**
+     * <code>repeated .Action actions = 2;</code>
+     */
+    @Override
+    public Action getActions(int index) {
+      return actions_.get(index);
+    }
+    /**
+     * <code>repeated .Action actions = 2;</code>
+     */
+    @Override
+    public ActionOrBuilder getActionsOrBuilder(
+        int index) {
+      return actions_.get(index);
+    }
+
+    public static final int COMBATJSON_FIELD_NUMBER = 3;
+    private CombatJson combatJson_;
+    /**
+     * <code>.CombatJson combatJson = 3;</code>
+     * @return Whether the combatJson field is set.
+     */
+    @Override
+    public boolean hasCombatJson() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>.CombatJson combatJson = 3;</code>
+     * @return The combatJson.
+     */
+    @Override
+    public CombatJson getCombatJson() {
+      return combatJson_ == null ? CombatJson.getDefaultInstance() : combatJson_;
+    }
+    /**
+     * <code>.CombatJson combatJson = 3;</code>
+     */
+    @Override
+    public CombatJsonOrBuilder getCombatJsonOrBuilder() {
+      return combatJson_ == null ? CombatJson.getDefaultInstance() : combatJson_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(1, getPositionUpdate());
+      }
+      for (int i = 0; i < actions_.size(); i++) {
+        output.writeMessage(2, actions_.get(i));
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeMessage(3, getCombatJson());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getPositionUpdate());
+      }
+      for (int i = 0; i < actions_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, actions_.get(i));
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getCombatJson());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof GamePacketIn)) {
+        return super.equals(obj);
+      }
+      GamePacketIn other = (GamePacketIn) obj;
+
+      if (hasPositionUpdate() != other.hasPositionUpdate()) return false;
+      if (hasPositionUpdate()) {
+        if (!getPositionUpdate()
+            .equals(other.getPositionUpdate())) return false;
+      }
+      if (!getActionsList()
+          .equals(other.getActionsList())) return false;
+      if (hasCombatJson() != other.hasCombatJson()) return false;
+      if (hasCombatJson()) {
+        if (!getCombatJson()
+            .equals(other.getCombatJson())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasPositionUpdate()) {
+        hash = (37 * hash) + POSITIONUPDATE_FIELD_NUMBER;
+        hash = (53 * hash) + getPositionUpdate().hashCode();
+      }
+      if (getActionsCount() > 0) {
+        hash = (37 * hash) + ACTIONS_FIELD_NUMBER;
+        hash = (53 * hash) + getActionsList().hashCode();
+      }
+      if (hasCombatJson()) {
+        hash = (37 * hash) + COMBATJSON_FIELD_NUMBER;
+        hash = (53 * hash) + getCombatJson().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static GamePacketIn parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static GamePacketIn parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static GamePacketIn parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static GamePacketIn parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static GamePacketIn parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static GamePacketIn parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static GamePacketIn parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static GamePacketIn parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static GamePacketIn parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static GamePacketIn parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static GamePacketIn parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static GamePacketIn parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(GamePacketIn prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @Override
+    protected Builder newBuilderForType(
+        BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code GamePacketIn}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:GamePacketIn)
+        GamePacketInOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return EntityProto.internal_static_GamePacketIn_descriptor;
+      }
+
+      @Override
+      protected FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return EntityProto.internal_static_GamePacketIn_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                GamePacketIn.class, Builder.class);
+      }
+
+      // Construct using EntityProto.GamePacketIn.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getPositionUpdateFieldBuilder();
+          getActionsFieldBuilder();
+          getCombatJsonFieldBuilder();
+        }
+      }
+      @Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        positionUpdate_ = null;
+        if (positionUpdateBuilder_ != null) {
+          positionUpdateBuilder_.dispose();
+          positionUpdateBuilder_ = null;
+        }
+        if (actionsBuilder_ == null) {
+          actions_ = java.util.Collections.emptyList();
+        } else {
+          actions_ = null;
+          actionsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000002);
+        combatJson_ = null;
+        if (combatJsonBuilder_ != null) {
+          combatJsonBuilder_.dispose();
+          combatJsonBuilder_ = null;
+        }
+        return this;
+      }
+
+      @Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return EntityProto.internal_static_GamePacketIn_descriptor;
+      }
+
+      @Override
+      public GamePacketIn getDefaultInstanceForType() {
+        return GamePacketIn.getDefaultInstance();
+      }
+
+      @Override
+      public GamePacketIn build() {
+        GamePacketIn result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @Override
+      public GamePacketIn buildPartial() {
+        GamePacketIn result = new GamePacketIn(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(GamePacketIn result) {
+        if (actionsBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0)) {
+            actions_ = java.util.Collections.unmodifiableList(actions_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.actions_ = actions_;
+        } else {
+          result.actions_ = actionsBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(GamePacketIn result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.positionUpdate_ = positionUpdateBuilder_ == null
+              ? positionUpdate_
+              : positionUpdateBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.combatJson_ = combatJsonBuilder_ == null
+              ? combatJson_
+              : combatJsonBuilder_.build();
+          to_bitField0_ |= 0x00000002;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return super.setField(field, value);
+      }
+      @Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof GamePacketIn) {
+          return mergeFrom((GamePacketIn)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(GamePacketIn other) {
+        if (other == GamePacketIn.getDefaultInstance()) return this;
+        if (other.hasPositionUpdate()) {
+          mergePositionUpdate(other.getPositionUpdate());
+        }
+        if (actionsBuilder_ == null) {
+          if (!other.actions_.isEmpty()) {
+            if (actions_.isEmpty()) {
+              actions_ = other.actions_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureActionsIsMutable();
+              actions_.addAll(other.actions_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.actions_.isEmpty()) {
+            if (actionsBuilder_.isEmpty()) {
+              actionsBuilder_.dispose();
+              actionsBuilder_ = null;
+              actions_ = other.actions_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              actionsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getActionsFieldBuilder() : null;
+            } else {
+              actionsBuilder_.addAllMessages(other.actions_);
+            }
+          }
+        }
+        if (other.hasCombatJson()) {
+          mergeCombatJson(other.getCombatJson());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getPositionUpdateFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                Action m =
+                    input.readMessage(
+                        Action.parser(),
+                        extensionRegistry);
+                if (actionsBuilder_ == null) {
+                  ensureActionsIsMutable();
+                  actions_.add(m);
+                } else {
+                  actionsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getCombatJsonFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private PositionUpdate positionUpdate_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          PositionUpdate, PositionUpdate.Builder, PositionUpdateOrBuilder> positionUpdateBuilder_;
+      /**
+       * <code>.PositionUpdate positionUpdate = 1;</code>
+       * @return Whether the positionUpdate field is set.
+       */
+      public boolean hasPositionUpdate() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>.PositionUpdate positionUpdate = 1;</code>
+       * @return The positionUpdate.
+       */
+      public PositionUpdate getPositionUpdate() {
+        if (positionUpdateBuilder_ == null) {
+          return positionUpdate_ == null ? PositionUpdate.getDefaultInstance() : positionUpdate_;
+        } else {
+          return positionUpdateBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.PositionUpdate positionUpdate = 1;</code>
+       */
+      public Builder setPositionUpdate(PositionUpdate value) {
+        if (positionUpdateBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          positionUpdate_ = value;
+        } else {
+          positionUpdateBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.PositionUpdate positionUpdate = 1;</code>
+       */
+      public Builder setPositionUpdate(
+          PositionUpdate.Builder builderForValue) {
+        if (positionUpdateBuilder_ == null) {
+          positionUpdate_ = builderForValue.build();
+        } else {
+          positionUpdateBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.PositionUpdate positionUpdate = 1;</code>
+       */
+      public Builder mergePositionUpdate(PositionUpdate value) {
+        if (positionUpdateBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0) &&
+            positionUpdate_ != null &&
+            positionUpdate_ != PositionUpdate.getDefaultInstance()) {
+            getPositionUpdateBuilder().mergeFrom(value);
+          } else {
+            positionUpdate_ = value;
+          }
+        } else {
+          positionUpdateBuilder_.mergeFrom(value);
+        }
+        if (positionUpdate_ != null) {
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.PositionUpdate positionUpdate = 1;</code>
+       */
+      public Builder clearPositionUpdate() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        positionUpdate_ = null;
+        if (positionUpdateBuilder_ != null) {
+          positionUpdateBuilder_.dispose();
+          positionUpdateBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.PositionUpdate positionUpdate = 1;</code>
+       */
+      public PositionUpdate.Builder getPositionUpdateBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getPositionUpdateFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.PositionUpdate positionUpdate = 1;</code>
+       */
+      public PositionUpdateOrBuilder getPositionUpdateOrBuilder() {
+        if (positionUpdateBuilder_ != null) {
+          return positionUpdateBuilder_.getMessageOrBuilder();
+        } else {
+          return positionUpdate_ == null ?
+              PositionUpdate.getDefaultInstance() : positionUpdate_;
+        }
+      }
+      /**
+       * <code>.PositionUpdate positionUpdate = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          PositionUpdate, PositionUpdate.Builder, PositionUpdateOrBuilder>
+          getPositionUpdateFieldBuilder() {
+        if (positionUpdateBuilder_ == null) {
+          positionUpdateBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              PositionUpdate, PositionUpdate.Builder, PositionUpdateOrBuilder>(
+                  getPositionUpdate(),
+                  getParentForChildren(),
+                  isClean());
+          positionUpdate_ = null;
+        }
+        return positionUpdateBuilder_;
+      }
+
+      private java.util.List<Action> actions_ =
+        java.util.Collections.emptyList();
+      private void ensureActionsIsMutable() {
+        if (!((bitField0_ & 0x00000002) != 0)) {
+          actions_ = new java.util.ArrayList<Action>(actions_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          Action, Action.Builder, ActionOrBuilder> actionsBuilder_;
+
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public java.util.List<Action> getActionsList() {
+        if (actionsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(actions_);
+        } else {
+          return actionsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public int getActionsCount() {
+        if (actionsBuilder_ == null) {
+          return actions_.size();
+        } else {
+          return actionsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Action getActions(int index) {
+        if (actionsBuilder_ == null) {
+          return actions_.get(index);
+        } else {
+          return actionsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Builder setActions(
+          int index, Action value) {
+        if (actionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureActionsIsMutable();
+          actions_.set(index, value);
+          onChanged();
+        } else {
+          actionsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Builder setActions(
+          int index, Action.Builder builderForValue) {
+        if (actionsBuilder_ == null) {
+          ensureActionsIsMutable();
+          actions_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          actionsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Builder addActions(Action value) {
+        if (actionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureActionsIsMutable();
+          actions_.add(value);
+          onChanged();
+        } else {
+          actionsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Builder addActions(
+          int index, Action value) {
+        if (actionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureActionsIsMutable();
+          actions_.add(index, value);
+          onChanged();
+        } else {
+          actionsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Builder addActions(
+          Action.Builder builderForValue) {
+        if (actionsBuilder_ == null) {
+          ensureActionsIsMutable();
+          actions_.add(builderForValue.build());
+          onChanged();
+        } else {
+          actionsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Builder addActions(
+          int index, Action.Builder builderForValue) {
+        if (actionsBuilder_ == null) {
+          ensureActionsIsMutable();
+          actions_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          actionsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Builder addAllActions(
+          Iterable<? extends Action> values) {
+        if (actionsBuilder_ == null) {
+          ensureActionsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, actions_);
+          onChanged();
+        } else {
+          actionsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Builder clearActions() {
+        if (actionsBuilder_ == null) {
+          actions_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          actionsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Builder removeActions(int index) {
+        if (actionsBuilder_ == null) {
+          ensureActionsIsMutable();
+          actions_.remove(index);
+          onChanged();
+        } else {
+          actionsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Action.Builder getActionsBuilder(
+          int index) {
+        return getActionsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public ActionOrBuilder getActionsOrBuilder(
+          int index) {
+        if (actionsBuilder_ == null) {
+          return actions_.get(index);  } else {
+          return actionsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public java.util.List<? extends ActionOrBuilder>
+           getActionsOrBuilderList() {
+        if (actionsBuilder_ != null) {
+          return actionsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(actions_);
+        }
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Action.Builder addActionsBuilder() {
+        return getActionsFieldBuilder().addBuilder(
+            Action.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public Action.Builder addActionsBuilder(
+          int index) {
+        return getActionsFieldBuilder().addBuilder(
+            index, Action.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .Action actions = 2;</code>
+       */
+      public java.util.List<Action.Builder>
+           getActionsBuilderList() {
+        return getActionsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          Action, Action.Builder, ActionOrBuilder>
+          getActionsFieldBuilder() {
+        if (actionsBuilder_ == null) {
+          actionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              Action, Action.Builder, ActionOrBuilder>(
+                  actions_,
+                  ((bitField0_ & 0x00000002) != 0),
+                  getParentForChildren(),
+                  isClean());
+          actions_ = null;
+        }
+        return actionsBuilder_;
+      }
+
+      private CombatJson combatJson_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          CombatJson, CombatJson.Builder, CombatJsonOrBuilder> combatJsonBuilder_;
+      /**
+       * <code>.CombatJson combatJson = 3;</code>
+       * @return Whether the combatJson field is set.
+       */
+      public boolean hasCombatJson() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>.CombatJson combatJson = 3;</code>
+       * @return The combatJson.
+       */
+      public CombatJson getCombatJson() {
+        if (combatJsonBuilder_ == null) {
+          return combatJson_ == null ? CombatJson.getDefaultInstance() : combatJson_;
+        } else {
+          return combatJsonBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.CombatJson combatJson = 3;</code>
+       */
+      public Builder setCombatJson(CombatJson value) {
+        if (combatJsonBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          combatJson_ = value;
+        } else {
+          combatJsonBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.CombatJson combatJson = 3;</code>
+       */
+      public Builder setCombatJson(
+          CombatJson.Builder builderForValue) {
+        if (combatJsonBuilder_ == null) {
+          combatJson_ = builderForValue.build();
+        } else {
+          combatJsonBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.CombatJson combatJson = 3;</code>
+       */
+      public Builder mergeCombatJson(CombatJson value) {
+        if (combatJsonBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) != 0) &&
+            combatJson_ != null &&
+            combatJson_ != CombatJson.getDefaultInstance()) {
+            getCombatJsonBuilder().mergeFrom(value);
+          } else {
+            combatJson_ = value;
+          }
+        } else {
+          combatJsonBuilder_.mergeFrom(value);
+        }
+        if (combatJson_ != null) {
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.CombatJson combatJson = 3;</code>
+       */
+      public Builder clearCombatJson() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        combatJson_ = null;
+        if (combatJsonBuilder_ != null) {
+          combatJsonBuilder_.dispose();
+          combatJsonBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.CombatJson combatJson = 3;</code>
+       */
+      public CombatJson.Builder getCombatJsonBuilder() {
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return getCombatJsonFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.CombatJson combatJson = 3;</code>
+       */
+      public CombatJsonOrBuilder getCombatJsonOrBuilder() {
+        if (combatJsonBuilder_ != null) {
+          return combatJsonBuilder_.getMessageOrBuilder();
+        } else {
+          return combatJson_ == null ?
+              CombatJson.getDefaultInstance() : combatJson_;
+        }
+      }
+      /**
+       * <code>.CombatJson combatJson = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          CombatJson, CombatJson.Builder, CombatJsonOrBuilder>
+          getCombatJsonFieldBuilder() {
+        if (combatJsonBuilder_ == null) {
+          combatJsonBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              CombatJson, CombatJson.Builder, CombatJsonOrBuilder>(
+                  getCombatJson(),
+                  getParentForChildren(),
+                  isClean());
+          combatJson_ = null;
+        }
+        return combatJsonBuilder_;
+      }
+      @Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:GamePacketIn)
+    }
+
+    // @@protoc_insertion_point(class_scope:GamePacketIn)
+    private static final GamePacketIn DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new GamePacketIn();
+    }
+
+    public static GamePacketIn getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<GamePacketIn>
+        PARSER = new com.google.protobuf.AbstractParser<GamePacketIn>() {
+      @Override
+      public GamePacketIn parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<GamePacketIn> parser() {
+      return PARSER;
+    }
+
+    @Override
+    public com.google.protobuf.Parser<GamePacketIn> getParserForType() {
+      return PARSER;
+    }
+
+    @Override
+    public GamePacketIn getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -9287,15 +11302,25 @@ public final class EntityProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_Action_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_CombatJson_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_CombatJson_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_GameEntity_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_GameEntity_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_GamePacket_descriptor;
+    internal_static_GamePacketOut_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_GamePacket_fieldAccessorTable;
+      internal_static_GamePacketOut_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_GamePacketIn_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_GamePacketIn_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -9317,18 +11342,23 @@ public final class EntityProto {
       "\n\004posY\030\002 \001(\005\"H\n\014EntityChange\022\n\n\002id\030\001 \001(\005" +
       "\022\014\n\004name\030\002 \001(\t\022\016\n\006outfit\030\003 \003(\005\022\016\n\006states" +
       "\030\004 \003(\005\"9\n\014AuthResponse\022\013\n\003key\030\001 \001(\005\022\r\n\005v" +
-      "alid\030\002 \001(\010\022\r\n\005value\030\003 \001(\003\"B\n\006Action\022\n\n\002i" +
+      "alid\030\002 \001(\010\022\r\n\005value\030\003 \001(\003\"R\n\006Action\022\n\n\002i" +
       "d\030\001 \001(\005\022\020\n\010isPlayer\030\002 \001(\010\022\013\n\003key\030\003 \001(\005\022\r" +
-      "\n\005value\030\004 \001(\005\"o\n\nGameEntity\022%\n\tcharacter" +
-      "\030\001 \001(\0132\020.CharacterEntityH\000\022+\n\014locationIt" +
-      "em\030\002 \001(\0132\023.LocationItemEntityH\000B\r\n\013entit" +
-      "y_type\"\344\001\n\nGamePacket\022\035\n\010entities\030\001 \003(\0132" +
-      "\013.GameEntity\022(\n\017positionUpdates\030\002 \003(\0132\017." +
-      "PositionUpdate\022$\n\rentityChanges\030\003 \003(\0132\r." +
-      "EntityChange\022$\n\rauthResponses\030\004 \003(\0132\r.Au" +
-      "thResponse\022\030\n\007actions\030\005 \003(\0132\007.Action\022\'\n\016" +
-      "authCorrection\030\006 \001(\0132\017.AuthCorrectionb\006p" +
-      "roto3"
+      "\n\005value\030\004 \001(\005\022\016\n\006amount\030\005 \001(\005\"\032\n\nCombatJ" +
+      "son\022\014\n\004json\030\001 \001(\t\"o\n\nGameEntity\022%\n\tchara" +
+      "cter\030\001 \001(\0132\020.CharacterEntityH\000\022+\n\014locati" +
+      "onItem\030\002 \001(\0132\023.LocationItemEntityH\000B\r\n\013e" +
+      "ntity_type\"\210\002\n\rGamePacketOut\022\035\n\010entities" +
+      "\030\001 \003(\0132\013.GameEntity\022(\n\017positionUpdates\030\002" +
+      " \003(\0132\017.PositionUpdate\022$\n\rentityChanges\030\003" +
+      " \003(\0132\r.EntityChange\022$\n\rauthResponses\030\004 \003" +
+      "(\0132\r.AuthResponse\022\030\n\007actions\030\005 \003(\0132\007.Act" +
+      "ion\022\'\n\016authCorrection\030\006 \001(\0132\017.AuthCorrec" +
+      "tion\022\037\n\ncombatJson\030\007 \001(\0132\013.CombatJson\"r\n" +
+      "\014GamePacketIn\022\'\n\016positionUpdate\030\001 \001(\0132\017." +
+      "PositionUpdate\022\030\n\007actions\030\002 \003(\0132\007.Action" +
+      "\022\037\n\ncombatJson\030\003 \001(\0132\013.CombatJsonb\006proto" +
+      "3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -9375,19 +11405,31 @@ public final class EntityProto {
     internal_static_Action_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Action_descriptor,
-        new String[] { "Id", "IsPlayer", "Key", "Value", });
-    internal_static_GameEntity_descriptor =
+        new String[] { "Id", "IsPlayer", "Key", "Value", "Amount", });
+    internal_static_CombatJson_descriptor =
       getDescriptor().getMessageTypes().get(7);
+    internal_static_CombatJson_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_CombatJson_descriptor,
+        new String[] { "Json", });
+    internal_static_GameEntity_descriptor =
+      getDescriptor().getMessageTypes().get(8);
     internal_static_GameEntity_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_GameEntity_descriptor,
         new String[] { "Character", "LocationItem", "EntityType", });
-    internal_static_GamePacket_descriptor =
-      getDescriptor().getMessageTypes().get(8);
-    internal_static_GamePacket_fieldAccessorTable = new
+    internal_static_GamePacketOut_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_GamePacketOut_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_GamePacket_descriptor,
-        new String[] { "Entities", "PositionUpdates", "EntityChanges", "AuthResponses", "Actions", "AuthCorrection", });
+        internal_static_GamePacketOut_descriptor,
+        new String[] { "Entities", "PositionUpdates", "EntityChanges", "AuthResponses", "Actions", "AuthCorrection", "CombatJson", });
+    internal_static_GamePacketIn_descriptor =
+      getDescriptor().getMessageTypes().get(10);
+    internal_static_GamePacketIn_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_GamePacketIn_descriptor,
+        new String[] { "PositionUpdate", "Actions", "CombatJson", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

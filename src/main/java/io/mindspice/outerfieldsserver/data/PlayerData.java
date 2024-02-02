@@ -7,7 +7,6 @@ import io.mindspice.jxch.rpc.util.bech32.AddressUtil;
 import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.mindlib.util.JsonUtils;
 import io.mindspice.outerfieldsserver.combat.enums.CardDomain;
-import io.mindspice.outerfieldsserver.combat.schema.PawnSet;
 import io.mindspice.outerfieldsserver.util.CardUtil;
 import io.mindspice.outerfieldsserver.util.Log;
 
@@ -27,6 +26,7 @@ public class PlayerData {
     private final Results historicalResults;
     private final Map<CardDomain, List<String>> ownedCards; // these only get replace
     private final Map<CardDomain, List<String>> validCards;
+
 
     public PlayerData(String displayName, String did, PlayerFunds playerFunds, String avatar,
             Map<Integer, String> pawnSets, Results dailyResults, Results historicalResults, List<String> ownedCards) {

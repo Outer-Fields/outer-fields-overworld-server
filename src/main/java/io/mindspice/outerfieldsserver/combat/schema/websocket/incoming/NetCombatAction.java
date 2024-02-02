@@ -5,7 +5,7 @@ import io.mindspice.outerfieldsserver.combat.enums.PawnIndex;
 import io.mindspice.outerfieldsserver.combat.enums.PlayerAction;
 
 
-public record NetGameAction(
+public record NetCombatAction(
         PlayerAction action,
         @JsonProperty("player_pawn") PawnIndex playerPawn,
         @JsonProperty("target_pawn") PawnIndex targetPawn

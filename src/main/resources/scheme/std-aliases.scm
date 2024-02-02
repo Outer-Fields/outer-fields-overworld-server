@@ -115,6 +115,9 @@
 (define-alias PredicatedConsumer io.mindspice.mindlib.functional.consumers.PredicatedConsumer)
 (define-alias BiPredicatedBiConsumer io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer)
 
+#| Validators |#
+(define-alias KawaMockValidator io.mindspice.kawautils.validation.KawaMockValidator)
+
 
 
 

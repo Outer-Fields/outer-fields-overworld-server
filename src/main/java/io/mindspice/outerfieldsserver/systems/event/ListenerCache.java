@@ -1,6 +1,7 @@
 package io.mindspice.outerfieldsserver.systems.event;
 
 import io.mindspice.outerfieldsserver.components.Component;
+import io.mindspice.outerfieldsserver.components.item.LootDrop;
 import io.mindspice.outerfieldsserver.core.Tick;
 import io.mindspice.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspice.mindlib.data.collections.sets.ByteSet;
@@ -26,10 +27,15 @@ public abstract class ListenerCache<T extends Component<T>> {
 
     private BiConsumer<EventType, Component<?>> onAddEventListener;
     private BiConsumer<EventType, Component<?>> onRemoveEventListener;
+    private Consumer<Component<?>> onAddTickConsumer;
 
-    public void linkSystemUpdates(BiConsumer<EventType, Component<?>> incConsumer, BiConsumer<EventType, Component<?>> decConsumer) {
+    public void linkSystemUpdates(
+            BiConsumer<EventType, Component<?>> incConsumer,
+            BiConsumer<EventType, Component<?>> decConsumer,
+            Consumer<Component<?>> onAddTickConsumer) {
         this.onAddEventListener = incConsumer;
         this.onRemoveEventListener = decConsumer;
+        this.onAddTickConsumer = onAddTickConsumer;
     }
 
     public ListenerCache(List<EventType> emittedEvents) {
@@ -39,8 +45,16 @@ public abstract class ListenerCache<T extends Component<T>> {
 
     private void linkToSystem(EventType eventType, Component<?> component) {
         if (onAddEventListener != null) {
-            ;
             onAddEventListener.accept(eventType, component);
+        }
+    }
+
+    public void unregisterAllListeners() {
+        if (listeners != null) {
+            listeners.keySet().forEach(e -> onRemoveEventListener.accept(e, (Component<?>) this));
+        }
+        if (inputEventHooks != null) {
+            inputEventHooks.keySet().forEach(e -> onRemoveEventListener.accept(e, (Component<?>) this));
         }
     }
 
@@ -64,6 +78,9 @@ public abstract class ListenerCache<T extends Component<T>> {
     public void setOnTickConsumer(BiConsumer<T, Tick> tickConsumer) {
         this.tickConsumer = tickConsumer;
         isOnTick = true;
+        if (this.onAddTickConsumer != null) {
+            onAddTickConsumer.accept((Component<?>) this);
+        }
     }
 
     public <E> void registerOutputHook(EventType eventType, Consumer<E> callback, boolean intercept) {
@@ -123,13 +140,13 @@ public abstract class ListenerCache<T extends Component<T>> {
         linkToSystem(eventType, (Component<?>) this);
     }
 
-    public <E> void unRegisterListener(EventType eventType, BiConsumer<T, Event<E>> handler) {
-        if (listeners == null) {
-            return;
-        }
-        listeners.remove(eventType);
-        listeningFor.decrement(eventType.ordinal());
-    }
+//    public <E> void unRegisterListener(EventType eventType, BiConsumer<T, Event<E>> handler) {
+//        if (listeners == null) {
+//            return;
+//        }
+//        listeners.remove(eventType);
+//        listeningFor.decrement(eventType.ordinal());
+//    }
 
 //    public void removeListenersOfType(EventType eventType) {
 //        listeners.remove(eventType);
@@ -221,7 +238,6 @@ public abstract class ListenerCache<T extends Component<T>> {
         System.out.println();
     }
 
-
     public boolean isOnTick() {
         return isOnTick;
     }
@@ -241,7 +257,6 @@ public abstract class ListenerCache<T extends Component<T>> {
     }
 
     public void disableListening() {
-        System.out.println("\n\n\nDisabled Listener: " + this);
         isListening = false;
     }
 
@@ -279,6 +294,10 @@ public abstract class ListenerCache<T extends Component<T>> {
 
     public void addEmittedEvents(List<EventType> eventTypes) {
         emittedEvents.addAll(eventTypes);
+    }
+
+    public void addEmittedEvent(EventType eventTypes) {
+        emittedEvents.add(eventTypes);
     }
 
     @Override

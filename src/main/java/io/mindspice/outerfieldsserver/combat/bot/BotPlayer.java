@@ -16,7 +16,7 @@ public class BotPlayer extends PlayerEntity {
     }
 
     @Override
-    public void send(Object obj) {
+    public void sendJson(Object obj) {
         // Not used for the bot player
     }
 

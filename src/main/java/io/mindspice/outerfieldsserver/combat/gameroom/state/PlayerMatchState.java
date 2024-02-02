@@ -7,7 +7,7 @@ import io.mindspice.outerfieldsserver.combat.gameroom.NetCombatManager;
 import io.mindspice.outerfieldsserver.combat.gameroom.effect.ActiveEffect;
 import io.mindspice.outerfieldsserver.combat.gameroom.pawn.Pawn;
 import io.mindspice.outerfieldsserver.entities.PlayerEntity;
-import io.mindspice.outerfieldsserver.combat.schema.PawnSet;
+import io.mindspice.outerfieldsserver.data.PawnSet;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import static io.mindspice.outerfieldsserver.combat.enums.StatType.HP;
 
 
-public class PlayerGameState {
+public class PlayerMatchState {
 
     // Thread visibility on this class is protected by volatiles, all the methods calling methods on pawns
     //  are protected internally by the pawn class reentrant lock
@@ -37,7 +37,7 @@ public class PlayerGameState {
 //        this.player = player;
 //    }
 
-    public PlayerGameState(PlayerEntity player, PawnSet ps) {
+    public PlayerMatchState(PlayerEntity player, PawnSet ps) {
         this.player = player;
         for (int i = 0; i < 3; ++i) {
             PawnIndex pi = null;
@@ -59,12 +59,12 @@ public class PlayerGameState {
         }
     }
 
-    public PlayerGameState(PlayerEntity player) {
+    public PlayerMatchState(PlayerEntity player) {
         this.player = player;
     }
 
     public void send(Object msgObj) {
-        player.send(msgObj);
+        player.sendJson(msgObj);
     }
 
 //    public boolean doPotion(PotionCard potion) {
@@ -310,7 +310,7 @@ public class PlayerGameState {
                 .reduce(0, Integer::sum);
     }
 
-    public PlayerGameState getPlayerState() {
+    public PlayerMatchState getPlayerState() {
         return this;
     }
 
@@ -352,7 +352,7 @@ public class PlayerGameState {
     public boolean equals(Object o) {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
-        PlayerGameState that = (PlayerGameState) o;
+        PlayerMatchState that = (PlayerMatchState) o;
         return Objects.equals(player.getPlayerId(), that.player.getPlayerId());
     }
 

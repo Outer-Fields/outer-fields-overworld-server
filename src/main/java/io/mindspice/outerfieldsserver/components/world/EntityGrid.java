@@ -2,6 +2,7 @@ package io.mindspice.outerfieldsserver.components.world;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.outerfieldsserver.components.Component;
 import io.mindspice.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspice.outerfieldsserver.core.singletons.EntityManager;
@@ -21,41 +22,43 @@ import java.util.List;
 
 
 public class EntityGrid extends Component<EntityGrid> {
-    public TIntSet activeEntities;
-    public IVectorQuadTree<Entity> entityGrid;
+    public final IVectorQuadTree<Entity> entityGrid;
 
-    public EntityGrid(Entity parentEntity, int initialSetSize, IRect2 gridArea, int maxPerQuad) {
-        super(parentEntity, ComponentType.ACTIVE_ENTITIES, List.of());
-        activeEntities = new TIntHashSet(100);
+    public EntityGrid(Entity parentEntity, IRect2 gridArea, int maxPerQuad) {
+        super(parentEntity, ComponentType.ENTITY_GRID, List.of());
         entityGrid = new IVectorQuadTree<>(gridArea, maxPerQuad);
 
-        registerListener(
-                EventType.NEW_ENTITY,
-                BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, EntityGrid::onNewEntityEvent)
-        );
-        registerListener(
-                EventType.ENTITY_POSITION_CHANGED,
-                BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, EntityGrid::onEntityPositionChanged)
-        );
-        registerListener(
-                EventType.AREA_ENTITIES_QUERY,
-                BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, EntityGrid::onAreaEntitiesQuery)
-        );
+        registerListener(EventType.NEW_POSITIONAL_ENTITY, BiPredicatedBiConsumer.of(
+                PredicateLib::isSameAreaEvent, EntityGrid::onNewEntityEvent
+        ));
+        registerListener(EventType.ENTITY_POSITION_CHANGED, BiPredicatedBiConsumer.of(
+                PredicateLib::isSameAreaEvent, EntityGrid::onEntityPositionChanged
+        ));
+
+        registerListener(EventType.ENTITY_DESTROY, BiPredicatedBiConsumer.of(
+                PredicateLib::isSameAreaEvent, EntityGrid::onDestroyEntity
+        ));
+
         registerListener(EventType.ENTITY_AREA_CHANGED, EntityGrid::onEntityAreaChanged);
         registerListener(EventType.ENTITY_GRID_QUERY, EntityGrid::onEntityGridQuery);
 
     }
 
-    public void onNewEntityEvent(Event<EventData.NewEntity> event) {
-        addActiveEntity(event.data().entity(), event.data().position());
+    public void onNewEntityEvent(Event<EventData.NewPositionalEntity> event) {
+        entityGrid.insert(event.data().entity().entityId(), event.data().position(), event.data().entity());
     }
 
     public void onEntityAreaChanged(Event<EventData.EntityAreaChanged> event) {
         if (event.data().oldArea() == areaId()) {
-            removeActiveEntity(event.issuerEntityId());
+            entityGrid.remove(event.issuerEntityId());
         }
         if (event.data().newArea() == areaId()) {
-            addActiveEntity(EntityManager.GET().entityById(event.issuerEntityId()), event.data().position());
+            Entity entity = EntityManager.GET().entityById(event.issuerEntityId());
+            if (entity == null) {
+                // TODO LOG THIS
+                return;
+            }
+            entityGrid.insert(entity.entityId(), event.data().position(), entity);
         }
     }
 
@@ -63,18 +66,16 @@ public class EntityGrid extends Component<EntityGrid> {
         entityGrid.update(event.issuerEntityId(), event.data().newPosition());
     }
 
+    public void onDestroyEntity(Event<Entity> event) {
+        entityGrid.remove(event.data().entityId());
+    }
+
+
     public void addActiveEntity(Entity entity, IVector2 position) {
-        if (activeEntities.contains(entity.entityId())) {
-            // TODO log this important error
-            // this will trigger on if a new player event is sent and then a new area event for the same player-area
-            return;
-        }
-        activeEntities.add(entity.entityId());
         entityGrid.insert(entity.entityId(), position, entity);
     }
 
-    public void removeActiveEntity(int id) {
-        activeEntities.remove(id);
+    public void removeEntity(int id) {
         entityGrid.remove(id);
     }
 
@@ -85,10 +86,6 @@ public class EntityGrid extends Component<EntityGrid> {
                 EventType.ENTITY_GRID_RESPONSE,
                 entityGrid.query(event.data()).stream().mapToInt(QuadItemId::id).toArray())
         );
-    }
-
-    public void onAreaEntitiesQuery(Event<AreaId> event) {
-        emitEvent(Event.responseEvent(this, event, EventType.SYSTEM_ENTITIES_RESP, activeEntities.toArray()));
     }
 
 

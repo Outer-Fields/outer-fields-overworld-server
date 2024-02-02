@@ -3,7 +3,7 @@ import io.mindspice.outerfieldsserver.combat.enums.EffectType;
 import io.mindspice.outerfieldsserver.combat.enums.PawnIndex;
 import io.mindspice.outerfieldsserver.combat.gameroom.effect.ActiveEffect;
 import io.mindspice.outerfieldsserver.combat.gameroom.pawn.Pawn;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -15,9 +15,9 @@ import static io.mindspice.outerfieldsserver.combat.enums.StatType.HP;
 public class BotEnemyState {
 
     //FIXME should extend idk why I did it this way......
-    private final PlayerGameState gameState;
+    private final PlayerMatchState gameState;
 
-    public BotEnemyState(PlayerGameState gameState) {
+    public BotEnemyState(PlayerMatchState gameState) {
         this.gameState = gameState;
     }
 
@@ -98,7 +98,7 @@ public class BotEnemyState {
         return gameState.getLivingPawns().size();
     }
 
-    public PlayerGameState getGameState() {
+    public PlayerMatchState getGameState() {
         return gameState;
     }
 }

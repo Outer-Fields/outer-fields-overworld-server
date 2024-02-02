@@ -13,7 +13,6 @@ import io.mindspice.outerfieldsserver.components.dataclasses.ContainedEntity;
 import io.mindspice.outerfieldsserver.components.npc.NPCMovement;
 import io.mindspice.outerfieldsserver.components.player.ViewRect;
 import io.mindspice.outerfieldsserver.core.singletons.EntityManager;
-import io.mindspice.outerfieldsserver.entities.*;
 import io.mindspice.outerfieldsserver.entities.NonPlayerEntity;
 import io.mindspice.outerfieldsserver.entities.PlayerEntity;
 import io.mindspice.outerfieldsserver.enums.ComponentType;
@@ -197,12 +196,8 @@ public class ThoughtFactory {
         // @formatter:on
         System.out.println(graph.getRoot().printGraph(1));
 
-        ViewRect npcView = ComponentType.VIEW_RECT.castOrNull(
-                entity.getComponent(ComponentType.VIEW_RECT).getFirst()
-        );
-        NPCMovement npcMovement = ComponentType.NPC_MOVEMENT.castOrNull(
-                entity.getComponent(ComponentType.NPC_MOVEMENT).getFirst()
-        );
+        ViewRect npcView = ComponentType.VIEW_RECT.castOrNull(entity.getComponent(ComponentType.VIEW_RECT));
+        NPCMovement npcMovement = ComponentType.NPC_MOVEMENT.castOrNull(entity.getComponent(ComponentType.NPC_MOVEMENT));
 
         if (npcView == null || npcMovement == null) {
             System.out.println("Null NPCMovement or ViewRect");
@@ -210,7 +205,7 @@ public class ThoughtFactory {
 
         AttackFocus attackFocus = new AttackFocus(
                 npcMovement,
-                entity.areaId().entity,
+                entity.areaId().areaEntity,
                 npcView,
                 List.of(FactionType.PLAYER),
                 IVector2.of(672, 960),
@@ -221,9 +216,7 @@ public class ThoughtFactory {
 
         thoughtModule.addDecisionGraph(graph, attackFocus);
 
-        NPCMovement NPCMovement = ComponentType.NPC_MOVEMENT.castOrNull(
-                entity.getComponent(ComponentType.NPC_MOVEMENT).getFirst()
-        );
+        NPCMovement NPCMovement = ComponentType.NPC_MOVEMENT.castOrNull(entity.getComponent(ComponentType.NPC_MOVEMENT));
 
         if (NPCMovement == null) {
             System.out.println("Null controller");
@@ -267,9 +260,7 @@ public class ThoughtFactory {
 
         thoughtModule.addDecisionGraph(graph, bfoc);
 
-        NPCMovement NPCMovement = ComponentType.NPC_MOVEMENT.castOrNull(
-                entity.getComponent(ComponentType.NPC_MOVEMENT).getFirst()
-        );
+        NPCMovement NPCMovement = ComponentType.NPC_MOVEMENT.castOrNull(entity.getComponent(ComponentType.NPC_MOVEMENT));
 
         if (NPCMovement == null) {
             System.out.println("Null controller");

@@ -16,10 +16,10 @@ import io.mindspice.outerfieldsserver.combat.gameroom.MatchInstance;
 import io.mindspice.outerfieldsserver.combat.gameroom.action.ActivePower;
 import io.mindspice.outerfieldsserver.combat.gameroom.effect.ActiveEffect;
 import io.mindspice.outerfieldsserver.combat.gameroom.pawn.Pawn;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 
 import io.mindspice.outerfieldsserver.core.Settings;
-import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetGameAction;
+import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetCombatAction;
 import io.mindspice.outerfieldsserver.data.PlayerData;
 import io.mindspice.outerfieldsserver.enums.AreaId;
 import io.mindspice.outerfieldsserver.enums.ClothingItem;
@@ -90,7 +90,7 @@ public class GameTests {
     }
 
     public static class TestPlayer extends PlayerEntity {
-        PlayerGameState pgs;
+        PlayerMatchState pgs;
 
         public TestPlayer(int id) {
             super(-1, id, "Nonnome", List.of(),
@@ -99,12 +99,12 @@ public class GameTests {
                     AreaId.TEST, IVector2.negOne(), null);
         }
 
-        public void setPlayerGameState(PlayerGameState psg) {
+        public void setPlayerGameState(PlayerMatchState psg) {
             this.pgs = psg;
         }
 
         @Override
-        public void send(Object obj) {
+        public void sendJson(Object obj) {
             System.out.println("Msg Out | Id:" + pgs.getId());
             System.out.println(writePretty(obj));
         }
@@ -115,7 +115,7 @@ public class GameTests {
         }
 
         @Override
-        public void onMessage(NetGameAction msg) {
+        public void oncombatMessage(NetCombatAction msg) {
             if (inCombat) {
                 System.out.println("Action In | Id:" + pgs.getId());
                 System.out.println(writePretty(msg));

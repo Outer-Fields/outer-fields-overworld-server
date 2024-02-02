@@ -20,7 +20,6 @@ import io.mindspice.outerfieldsserver.entities.Entity;
 import io.mindspice.outerfieldsserver.entities.NonPlayerEntity;
 import io.mindspice.outerfieldsserver.entities.PositionalEntity;
 import io.mindspice.outerfieldsserver.enums.*;
-import io.mindspice.outerfieldsserver.enums.*;
 import io.mindspice.outerfieldsserver.systems.event.EventData;
 import io.mindspice.outerfieldsserver.systems.event.Event;
 import io.mindspice.outerfieldsserver.systems.event.EventType;
@@ -142,9 +141,7 @@ public class NPCTests {
 
         thoughtModule.addDecisionGraph(graph, bf);
 
-        NPCMovement NPCMovement = ComponentType.NPC_MOVEMENT.castOrNull(
-                entity.getComponent(ComponentType.NPC_MOVEMENT).getFirst()
-        );
+        NPCMovement NPCMovement = ComponentType.NPC_MOVEMENT.castOrNull(entity.getComponent(ComponentType.NPC_MOVEMENT));
 
         if (NPCMovement == null) {
             System.out.println("Null controller");
@@ -154,7 +151,7 @@ public class NPCTests {
         }
 
         entity.addComponent(thoughtModule);
-        Event.emitAndRegisterEntity(SystemType.NPC, entity.areaId(), IVector2.of(0, 0), entity);
+        Event.emitAndRegisterPositionalEntity(SystemType.NPC, entity.areaId(), IVector2.of(0, 0), entity);
 
         return testCount;
 
@@ -197,9 +194,7 @@ public class NPCTests {
 
         thoughtModule.addDecisionGraph(graph, bf);
 
-        NPCMovement NPCMovement = ComponentType.NPC_MOVEMENT.castOrNull(
-                entity.getComponent(ComponentType.NPC_MOVEMENT).getFirst()
-        );
+        NPCMovement NPCMovement = ComponentType.NPC_MOVEMENT.castOrNull(entity.getComponent(ComponentType.NPC_MOVEMENT));
 
         if (NPCMovement == null) {
             System.out.println("Null controller");
@@ -209,7 +204,7 @@ public class NPCTests {
         }
 
         entity.addComponent(thoughtModule);
-        Event.emitAndRegisterEntity(SystemType.NPC, entity.areaId(), IVector2.of(0, 0), entity);
+        Event.emitAndRegisterPositionalEntity(SystemType.NPC, entity.areaId(), IVector2.of(0, 0), entity);
         return taskData;
 
     }
@@ -243,7 +238,7 @@ public class NPCTests {
 
         Thread.sleep(1000);
 
-        ThoughtModule<?> tm = ComponentType.THOUGHT_MODULE.castOrNull(npc.getComponent(ComponentType.THOUGHT_MODULE).getFirst());
+        ThoughtModule<?> tm = ComponentType.THOUGHT_MODULE.castOrNull(npc.getComponent(ComponentType.THOUGHT_MODULE));
         assert tm != null;
         assert tm.hasInputHooksFor().contains(EventType.PING);
         assert tm.hasInputHooksFor().contains(EventType.PONG);
@@ -253,7 +248,7 @@ public class NPCTests {
         assert npcSystem.isListeningFor(EventType.PING);
         assert npcSystem.isListeningFor(EventType.PONG);
 
-        var tc = new TestComponent(new PositionalEntity(11, EntityType.PLAYER, AreaId.TEST), ComponentType.SIMPLE_OBJECT, List.of());
+        var tc = new TestComponent(new PositionalEntity(11, EntityType.PLAYER, AreaId.TEST, IVector2.zero()), ComponentType.SIMPLE_OBJECT, List.of());
         EntityManager.GET().emitEvent(Event.builder(EventType.PING, tc).setData(new Object()).build());
         EntityManager.GET().emitEvent(Event.builder(EventType.PONG, tc).setData(new Object()).build());
 

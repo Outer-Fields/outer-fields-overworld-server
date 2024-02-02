@@ -32,12 +32,12 @@ public class AttackFocus {
     public IVector2 wanderInterval;
 
     public AttackFocus(NPCMovement movementController, AreaEntity area, ViewRect viewRect,
-            List<FactionType> dispisedFactions, IVector2 spawnPos, IVector2 wanderAreaSize,
+            List<FactionType> despisedFactions, IVector2 spawnPos, IVector2 wanderAreaSize,
             long checkTimeIntervalMs, int attackDistance, IVector2 wanderInterval) {
         this.movementController = movementController;
         this.area = area;
         this.viewRect = viewRect;
-        this.enemyFactions = dispisedFactions;
+        this.enemyFactions = despisedFactions;
         this.spawnPos = spawnPos;
         this.checkTimeInterval = checkTimeIntervalMs;
         this.attackDistance = attackDistance;

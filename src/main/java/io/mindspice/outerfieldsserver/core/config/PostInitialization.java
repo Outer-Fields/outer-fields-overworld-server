@@ -24,6 +24,6 @@ public class PostInitialization implements ApplicationListener<ApplicationReadyE
         var npc = EntityManager.GET().newNonPlayerEntity(-1, "Test_NPC", List.of(EntityState.TEST),
                 new ClothingItem[6], AreaId.TEST, IVector2.of(672, 960), IVector2.of(256, 256), false);
        npc.addComponent(ThoughtFactory.aggressiveEnemyThought(npc));
-        Event.emitAndRegisterEntity(SystemType.NPC, AreaId.TEST, IVector2.of(672, 960), npc);
+        Event.emitAndRegisterPositionalEntity(SystemType.NPC, AreaId.TEST, IVector2.of(672, 960), npc);
     }
 }

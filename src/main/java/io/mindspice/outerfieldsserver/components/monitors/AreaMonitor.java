@@ -7,7 +7,6 @@ import io.mindspice.outerfieldsserver.entities.Entity;
 import io.mindspice.outerfieldsserver.enums.ComponentType;
 import io.mindspice.outerfieldsserver.enums.EntityType;
 import io.mindspice.outerfieldsserver.systems.event.EventData;
-import io.mindspice.outerfieldsserver.systems.event.*;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
@@ -34,8 +33,8 @@ public class AreaMonitor extends Component<AreaMonitor> {
                 },
                 AreaMonitor::onEntityPositionChanged)
         );
-        registerListener(EventType.NEW_ENTITY, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, AreaMonitor::onNewEntity));
-        registerListener(EventType.ENTITY_DESTROYED, BiPredicatedBiConsumer.of(
+        registerListener(EventType.NEW_POSITIONAL_ENTITY, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, AreaMonitor::onNewEntity));
+        registerListener(EventType.ENTITY_DESTROY, BiPredicatedBiConsumer.of(
                 PredicateLib::isSameAreaEvent, (AreaMonitor am, Event<Integer> event) -> onExitView(event.issuerEntityId()))
         );
         registerListener(EventType.AREA_MONITOR_QUERY, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, AreaMonitor::onQuery));
@@ -72,7 +71,7 @@ public class AreaMonitor extends Component<AreaMonitor> {
         }
     }
 
-    public void onNewEntity(Event<EventData.NewEntity> event) {
+    public void onNewEntity(Event<EventData.NewPositionalEntity> event) {
         if (monitoredArea.contains(event.data().position())) {
             emitEvent(Event.areaEntered(
                     this, new EventData.AreaEntered(event.issuerEntityType() == EntityType.PLAYER, event.issuerEntityId())

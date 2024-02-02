@@ -8,8 +8,9 @@ import io.mindspice.outerfieldsserver.enums.SystemType;
 import io.mindspice.mindlib.util.JsonUtils;
 
 
-public class SystemEntity extends Entity{
+public class SystemEntity extends Entity {
     private final SystemType systemType;
+
     public SystemEntity(int id, SystemType systemType) {
         super(id, EntityType.SYSTEM, AreaId.NONE);
         this.systemType = systemType;
@@ -30,7 +31,7 @@ public class SystemEntity extends Entity{
                 .put("chunkIndex", chunkIndex)
                 .put("attachComponents", getAttachedComponentTypes())
                 .put("listeningFor", listeningForTypes())
-                .put("systemRegistry", systemRegistry != null ?  systemRegistry.systemType() : null)
+                .put("systemRegistry", systemRegistry != null ? systemRegistry.systemType() : null)
                 .buildNode();
         try {
             return JsonUtils.writePretty(node);

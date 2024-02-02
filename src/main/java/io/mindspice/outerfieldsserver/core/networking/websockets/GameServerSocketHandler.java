@@ -38,17 +38,12 @@ public class GameServerSocketHandler extends AbstractWebSocketHandler {
     public void handleBinaryMessage(@NonNull WebSocketSession session, @NonNull BinaryMessage message) throws IOException {
         try {
             ByteBuffer byteBuffer = message.getPayload();
-            byte messageTypeByte = byteBuffer.get();
-            NetMsgIn messageType = NetMsgIn.convert(messageTypeByte);
-
-            int pid = (int) session.getAttributes().get("pid");
+            int pid = (int) session.getAttributes().get("playerId");
             int eid = (int) session.getAttributes().get("eid");
-
-            NetMessageIn netMessageIn = new NetMessageIn(System.currentTimeMillis(), pid, eid, messageType, byteBuffer);
+            NetMessageIn netMessageIn = new NetMessageIn(System.currentTimeMillis(), pid, eid, byteBuffer);
             socketService.handOffMessageIn(netMessageIn);
         } catch (Exception e) {
             e.printStackTrace();
-
             //todo logging
             session.close();
         }
@@ -74,7 +69,7 @@ public class GameServerSocketHandler extends AbstractWebSocketHandler {
 
 //        var ps = EntityManager.GET().newPlayerState(count);
 //        playerTable.put(ps.entityId(), ps);
-//        session.getAttributes().put("pid", ps.entityId());
+//        session.getAttributes().put("playerId", ps.entityId());
 //        WorldState.GET().getAreaTable().get(AreaId.TEST).addActivePlayer(ps);
 //        PlayerSession pSession = new PlayerSession(session);
 //        pSession.setMessageOutConsumer(socketService.networkOutHandler(pSession));

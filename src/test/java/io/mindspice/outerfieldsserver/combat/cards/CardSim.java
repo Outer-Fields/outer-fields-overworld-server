@@ -1,12 +1,11 @@
 package io.mindspice.outerfieldsserver.combat.cards;
 
 
-import io.mindspice.outerfieldsserver.combat.cards.*;
 import io.mindspice.outerfieldsserver.combat.enums.*;
 import io.mindspice.outerfieldsserver.combat.gameroom.effect.Effect;
 import io.mindspice.outerfieldsserver.combat.gameroom.pawn.Pawn;
 import io.mindspice.outerfieldsserver.combat.gameroom.state.PawnInterimState;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 
 import io.mindspice.outerfieldsserver.entities.PlayerEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -213,9 +212,9 @@ public class CardSim {
 
 
 
-    private PlayerGameState[] getFreshStates() {
-        PlayerGameState playerState = new PlayerGameState(mock(PlayerEntity.class));
-        PlayerGameState enemyState = new PlayerGameState(mock(PlayerEntity.class));
+    private PlayerMatchState[] getFreshStates() {
+        PlayerMatchState playerState = new PlayerMatchState(mock(PlayerEntity.class));
+        PlayerMatchState enemyState = new PlayerMatchState(mock(PlayerEntity.class));
 
         Pawn p_magePawn = new Pawn(
                 PawnIndex.PAWN1,
@@ -275,7 +274,7 @@ public class CardSim {
                 new ArrayList<>(List.of(PowerCard.IRON_JAW)));
         enemyState.setPawns(List.of(e_magePawn, e_rangerPawn, e_warriorPawn));
 
-        return new PlayerGameState[]{playerState, enemyState};
+        return new PlayerMatchState[]{playerState, enemyState};
     }
 
     double[] getCardStats(WeaponCard card, Alignment pAlignOverride, Alignment tAlignOverride, boolean print) {

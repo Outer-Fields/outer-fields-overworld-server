@@ -12,7 +12,7 @@ import io.mindspice.outerfieldsserver.core.MatchMaking;
 import io.mindspice.outerfieldsserver.data.PlayerData;
 import io.mindspice.outerfieldsserver.core.HttpServiceClient;
 import io.mindspice.outerfieldsserver.core.Settings;
-import io.mindspice.outerfieldsserver.combat.schema.PawnSet;
+import io.mindspice.outerfieldsserver.data.PawnSet;
 import io.mindspice.outerfieldsserver.combat.schema.rest.MatchInfo;
 import io.mindspice.outerfieldsserver.combat.schema.rest.SaveSetReq;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.game.NetQueueJoinResponse;

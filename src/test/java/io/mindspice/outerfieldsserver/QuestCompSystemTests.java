@@ -5,7 +5,6 @@ import io.mindspice.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspice.outerfieldsserver.core.systems.QuestSystem;
 import io.mindspice.outerfieldsserver.entities.PlayerEntity;
 import io.mindspice.outerfieldsserver.enums.*;
-import io.mindspice.outerfieldsserver.enums.*;
 import io.mindspice.outerfieldsserver.systems.event.Event;
 import io.mindspice.outerfieldsserver.systems.event.EventType;
 import io.mindspice.mindlib.data.geometry.IVector2;
@@ -71,7 +70,7 @@ public class QuestCompSystemTests {
         );
 
         questEntity.addComponent(qm);
-        Event.emitAndRegisterEntity(SystemType.QUEST, AreaId.TEST, IVector2.negOne(), questEntity);
+        Event.emitAndRegisterPositionalEntity(SystemType.QUEST, AreaId.TEST, IVector2.negOne(), questEntity);
         EntityManager.GET().emitEvent(Event.newPlayerQuest(questEntity));
 
         return td;
@@ -120,7 +119,7 @@ public class QuestCompSystemTests {
         );
 
         questEntity.addComponent(qm);
-        Event.emitAndRegisterEntity(SystemType.QUEST, AreaId.TEST, IVector2.negOne(), questEntity);
+        Event.emitAndRegisterPositionalEntity(SystemType.QUEST, AreaId.TEST, IVector2.negOne(), questEntity);
         EntityManager.GET().emitEvent(Event.newPlayerQuest(questEntity));
 
         return td;

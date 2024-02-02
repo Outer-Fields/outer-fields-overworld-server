@@ -1,4 +1,4 @@
-package io.mindspice.outerfieldsserver.combat.schema;
+package io.mindspice.outerfieldsserver.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.mindspice.outerfieldsserver.combat.cards.*;

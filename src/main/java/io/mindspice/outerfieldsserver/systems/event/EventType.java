@@ -1,12 +1,10 @@
 package io.mindspice.outerfieldsserver.systems.event;
 
+import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetCombatAction;
 import io.mindspice.outerfieldsserver.core.Tick;
 import io.mindspice.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
 import io.mindspice.outerfieldsserver.core.networking.proto.EntityProto;
-import io.mindspice.outerfieldsserver.entities.Entity;
-import io.mindspice.outerfieldsserver.entities.LocationEntity;
-import io.mindspice.outerfieldsserver.entities.PlayerQuestEntity;
-import io.mindspice.outerfieldsserver.entities.WorldQuestEntity;
+import io.mindspice.outerfieldsserver.entities.*;
 import io.mindspice.outerfieldsserver.enums.AreaId;
 import io.mindspice.outerfieldsserver.enums.ClothingItem;
 import io.mindspice.outerfieldsserver.ai.task.Task;
@@ -17,6 +15,7 @@ import jakarta.annotation.Nullable;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -39,9 +38,11 @@ public enum EventType {
     //NETWORK OUT EVENTS
     NETWORK_OUT_ENTITY_UPDATE(byte[].class, x -> x instanceof byte[]),
     NETWORK_PLAYER_RECONNECT(WebSocketSession.class, x -> x instanceof WebSocketSession),
+    NETWORK_IN_PLAYER_ACTION(List.class, x -> x instanceof List),
+    NETWORK_IN_COMBAT_ACTION(NetCombatAction.class, x -> x instanceof NetCombatAction),
 
-    // ENTITY CHANGE EVENTS
-    NEW_ENTITY(EventData.NewEntity.class, x -> x instanceof EventData.NewEntity),
+    // ENTITY EVENT
+    NEW_POSITIONAL_ENTITY(EventData.NewPositionalEntity.class, x -> x instanceof EventData.NewPositionalEntity),
     ENTITY_POSITION_CHANGED(EventData.EntityPositionChanged.class, x -> x instanceof EventData.EntityPositionChanged),
     ENTITY_VIEW_RECT_ENTERED(Integer.class, x -> x instanceof Integer),
     Entity_VIEW_RECT_EXITED(Integer.class, x -> x instanceof Integer),
@@ -50,18 +51,42 @@ public enum EventType {
     ENTITY_AREA_CHANGED(EventData.EntityAreaChanged.class, x -> x instanceof EventData.EntityAreaChanged),
     ENTITY_STATE_CHANGED(List.class, x -> x instanceof List<?>),
     ENTITY_PROPERTY_CHANGE(Pair.class, x -> x instanceof Pair),
+    ENTITY_IS_ACTIVE_CHANGED(Pair.class, x -> x instanceof Pair<?, ?>), //Pair<Integer, Boolean>
+    ENTITY_IS_ACTIVE_QUERY(Integer.class, x -> x instanceof Integer),
+    ENTITY_IS_ACTIVE_RESP(Boolean.class, x -> x instanceof Boolean), //Pair<Integer, Boolean>
+    ENTITY_SET_ACTIVE(Boolean.class, x -> x instanceof Boolean),
+    ENTITY_VISIBILITY_QUERY(Integer.class, x -> x instanceof Integer),
+    ENTITY_VISIBILITY_RESP(EventData.EntityVisibility.class, x -> x instanceof EventData.EntityVisibility),
+    ENTITY_VISIBILITY_CHANGED(EventData.EntityVisibility.class, x -> x instanceof EventData.EntityVisibility),
+    ENTITY_VISIBILITY_UPDATE(EventData.VisibilityUpdate.class, x -> x instanceof EventData.VisibilityUpdate),
+    ENTITY_VISIBLE_TO_QUERY(Integer.class, x -> x instanceof Integer),
+    ENTITY_VISIBLE_TO_RESPONSE(Boolean.class, x -> x instanceof Boolean),
 
-    // ENTITY UPDATE EVENTS
     ENTITY_AREA_UPDATE(AreaId.class, x -> x instanceof AreaId),
     ENTITY_NAME_UPDATE(String.class, x -> x instanceof String),
     ENTITY_STATE_UPDATE(EventData.EntityStateUpdate.class, x -> x instanceof EventData.EntityStateUpdate),
     ENTITY_POSITION_UPDATE(IVector2.class, x -> x instanceof IVector2),
     ENTITY_PROPERTY_UPDATE(Pair.class, x -> x instanceof Pair),
-    ENTITY_DESTROYED(Integer.class, x -> x instanceof Integer),
+    ENTITY_DESTROY(Entity.class, x -> x instanceof Entity),
 
     // PLAYER SUBSYSTEM EVENTS
     PLAYER_VALID_MOVEMENT(IVector2.class, x -> x instanceof IVector2),
     PLAYER_INVALID_MOVEMENT(EventData.EntityPositionChanged.class, x -> x instanceof EventData.EntityPositionChanged),
+
+    PLAYER_FUNDS_ITEMS_QUERY(Integer.class, x -> x instanceof Integer),
+    PLAYER_FUNDS_ITEMS_RESP(EventData.FundsAndItems.class, x -> x instanceof EventData.FundsAndItems),
+    PLAYER_TOKENS_BANKED_TO_INV(Map.class, x -> x instanceof Map), // EnumMap<TokenType, Integer>
+    PLAYER_TOKENS_INV_TO_BANKED(Map.class, x -> x instanceof Map), // EnumMap<TokenType, ItemEntity>
+    PLAYER_ITEMS_BANKED_TO_INV(Map.class, x -> x instanceof Map), // EnumMap<long(key), ItemEntity>
+    PLAYER_ITEMS_INV_TO_BANKED(Map.class, x -> x instanceof Map), // EnumMap<long(key), ItemEntity>
+    PLAYER_ADD_BANKED_TOKENS(Map.class, x -> x instanceof Map), // EnumMap<lTokenType, ItemEntity>
+    PLAYER_ADD_INV_TOKENS(Map.class, x -> x instanceof Map), // EnumMap<TokenType, ItemEntity>
+    PLAYER_ADD_BANKED_ITEMS(Map.class, x -> x instanceof Map), // EnumMap<long(key), ItemEntity>
+    PLAYER_ADD_INV_ITEMS(Map.class, x -> x instanceof Map), // EnumMap<long(key), ItemEntity>
+    PLAYER_REMOVE_BANKED_TOKENS(Map.class, x -> x instanceof Map), // EnumMap<TokenType, ItemEntity>
+    PLAYER_REMOVE_INV_TOKENS(Map.class, x -> x instanceof Map), // EnumMap<TokenType, ItemEntity>
+    PLAYER_REMOVE_BANKED_ITEMS(Map.class, x -> x instanceof Map), // EnumMap<long(key), ItemEntity>
+    PLAYER_REMOVE_INV_ITEMS(Map.class, x -> x instanceof Map), // EnumMap<long(key), ItemEntity>
 
     // Serialization
     SERIALIZED_ENTITY_REQUEST(Integer.class, x -> x instanceof Integer),
@@ -74,6 +99,15 @@ public enum EventType {
     // CHARACTER
     CHARACTER_OUTFIT_CHANGED(ClothingItem.class, x -> x instanceof ClothingItem[]),
     CHARACTER_OUTFIT_UPDATE(byte[].class, x -> x instanceof byte[]),
+    CHARACTER_DEATH(EventData.CharacterDeath.class, x -> x instanceof EventData.CharacterDeath),
+    CHARACTER_NEW_SPAWN(IVector2.class, x -> x instanceof IVector2),
+    CHARACTER_RESPAWN(Object.class, Objects::nonNull), // TODO add respawn dataclass
+
+    // CONTAINER
+    CONTAINER_CONTAINED_ITEMS_QUERY(Integer.class, x -> x instanceof Integer),
+    CONTAINER_CONTAINED_ITEMS_RESP(EventData.TokensAndItems.class, x -> x instanceof EventData.TokensAndItems),
+    CONTAINER_REMOVE_ITEMS(EventData.TokensAndItems.class, x -> x instanceof EventData.TokensAndItems),
+    CONTAINER_ADD_ITEMS(EventData.TokensAndItems.class, x -> x instanceof EventData.TokensAndItems),
 
     // AREA
     AREA_MONITOR_QUERY(List.class, x -> x instanceof List), //List<Pair<IVector2,Integer>

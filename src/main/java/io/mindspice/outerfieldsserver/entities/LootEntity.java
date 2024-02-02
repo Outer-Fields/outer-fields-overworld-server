@@ -2,64 +2,85 @@ package io.mindspice.outerfieldsserver.entities;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import io.mindspice.mindlib.data.geometry.IVector2;
+import io.mindspice.mindlib.data.tuples.Triple;
+import io.mindspice.outerfieldsserver.data.LootDropItem;
 import io.mindspice.outerfieldsserver.enums.AreaId;
 import io.mindspice.outerfieldsserver.enums.EntityType;
-import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.mindlib.util.JsonUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 
-public class LootEntity extends PositionalEntity {
-    private final List<Pair<String, Double>> lootAndChance;
-    private volatile Pair<Integer, Integer> lootAmount;
-    private volatile Function<PlayerEntity, List<String>> lootCalcFunction;
+public class LootEntity extends Entity {
+    private final List<LootDropItem> lootChanceAndAmount;
+    private volatile BiFunction<LootEntity, PlayerEntity, List<ItemEntity<?>>> lootCalcFunction;
 
-    public LootEntity(int id, AreaId areaId, IVector2 position, List<Pair<String, Double>> lootAndChance,
-            Pair<Integer, Integer> lootAmount, Function<PlayerEntity, List<String>> lootCalcFunction) {
-        super(id, EntityType.LOOT, areaId, position);
-        this.lootAndChance = new CopyOnWriteArrayList<>(lootAndChance);
-        this.lootAmount = lootAmount;
+    // TODO add destroy on drop on drop
+    public LootEntity(int id, AreaId areaId, List<LootDropItem> lootChanceAndAmount,
+            BiFunction<LootEntity, PlayerEntity, List<ItemEntity<?>>> lootCalcFunction) {
+        super(id, EntityType.LOOT, areaId);
+        this.lootChanceAndAmount = new CopyOnWriteArrayList<>(lootChanceAndAmount);
         this.lootCalcFunction = lootCalcFunction;
     }
 
-    public List<String> calculateLootDrop(PlayerEntity entity) { return lootCalcFunction.apply(entity); }
+    public List<ItemEntity<?>> calculateLootDrop(PlayerEntity player) {
+        return lootCalcFunction.apply(this, player);
+    }
 
-    public List<Pair<String, Double>> lootAndChance() { return Collections.unmodifiableList(lootAndChance); }
+    public List<ItemEntity<?>> calculateLootDrop(PlayerEntity player,
+            BiFunction<LootEntity, PlayerEntity, List<ItemEntity<?>>> calcFunc) {
+        return calcFunc.apply(this, player);
+    }
 
-    public Pair<Integer, Integer> lootAmount() { return lootAmount; }
+    public void setLootCalcFunction(BiFunction<LootEntity, PlayerEntity, List<ItemEntity<?>>> lootCalcFunction) {
+        this.lootCalcFunction = lootCalcFunction;
+    }
 
-    public void addItem(String itemName, double chance) { lootAndChance.add(Pair.of(itemName, chance)); }
+    public List<LootDropItem> lootAndChance() {
+        return Collections.unmodifiableList(lootChanceAndAmount);
+    }
 
-    public void addItem(Pair<String, Double> itemAndChance) { lootAndChance.add(itemAndChance); }
+    public void addItem(ItemEntity<?> item, double chance, int amountLow, int amountHigh) {
+        lootChanceAndAmount.add(LootDropItem.of(item, chance, amountLow, amountHigh));
+    }
 
-    public void addItems(List<Pair<String, Double>> itemsAndChances) { lootAndChance.addAll(itemsAndChances); }
+    public void addItem(LootDropItem lootDropItem) {
+        this.lootChanceAndAmount.add(lootDropItem);
+    }
 
-    public void removeItem(String itemName) { lootAndChance.removeIf(i -> i.first().equals(itemName)); }
+    public void addItems(List<LootDropItem> lootDropItems) {
+        this.lootChanceAndAmount.addAll(lootDropItems);
+    }
 
-    public void removeItems(List<String> itemNames) { itemNames.forEach(i -> lootAndChance.removeIf(existing -> existing.first().equals(i))); }
+    public void removeItems(LootDropItem lootDropItem) {
+        lootAndChance().remove(lootDropItem);
+    }
 
-    public void setLootAmounts(int min, int max) { this.lootAmount = Pair.of(min, max); }
+    public void removeItem(String itemName) {
+        lootChanceAndAmount.removeIf(i -> Objects.equals(i.item().itemName(), itemName));
+    }
 
-    public void setLootCalcFunction(Function<PlayerEntity, List<String>> lootCalcFunction) { this.lootCalcFunction = lootCalcFunction; }
-
+    public void removeItem(ItemEntity<?> item) {
+        lootChanceAndAmount.removeIf(i -> i.item().equals(item));
+    }
 
     public String toString() {
         JsonNode node = new JsonUtils.ObjectBuilder()
                 .put("entityType", entityType)
                 .put("entityId", id)
                 .put("name", name)
-                .put("lootAndChance", lootAndChance )
-                .put("lootAmount", lootAmount)
+                .put("lootAndChance", lootChanceAndAmount)
                 .put("areaId", areaId)
                 .put("chunkIndex", chunkIndex)
                 .put("attachComponents", getAttachedComponentTypes())
                 .put("listeningFor", listeningForTypes())
-                .put("systemRegistry", systemRegistry != null ?  systemRegistry.systemType() : null)
+                .put("systemRegistry", systemRegistry != null ? systemRegistry.systemType() : null)
                 .buildNode();
         try {
             return JsonUtils.writePretty(node);

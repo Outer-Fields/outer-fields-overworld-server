@@ -5,14 +5,14 @@ import io.mindspice.outerfieldsserver.combat.cards.ActionCard;
 import io.mindspice.outerfieldsserver.combat.cards.WeaponCard;
 import io.mindspice.outerfieldsserver.combat.enums.InvalidMsg;
 import io.mindspice.outerfieldsserver.combat.enums.PawnIndex;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 
 
 public class ActionFactory {
-    private final PlayerGameState player;
-    private final PlayerGameState enemy;
+    private final PlayerMatchState player;
+    private final PlayerMatchState enemy;
 
-    public ActionFactory(PlayerGameState player, PlayerGameState enemy) {
+    public ActionFactory(PlayerMatchState player, PlayerMatchState enemy) {
         this.player = player;
         this.enemy = enemy;
     }

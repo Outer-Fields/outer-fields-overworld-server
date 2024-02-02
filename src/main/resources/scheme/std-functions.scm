@@ -29,6 +29,10 @@
   (EntityManager:systemListeners))
 
 
+
+(define (validate-consumer consumer ::KConsumer class )
+  (KawaValidator:validateConsumer consumer class))
+
 #| Entity |#
 
 (define (get-all-entities)

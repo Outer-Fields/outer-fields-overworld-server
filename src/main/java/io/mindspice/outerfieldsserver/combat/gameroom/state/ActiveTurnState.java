@@ -6,7 +6,7 @@ import io.mindspice.outerfieldsserver.combat.gameroom.action.ActionFactory;
 import io.mindspice.outerfieldsserver.combat.gameroom.action.ActionReturn;
 import io.mindspice.outerfieldsserver.combat.gameroom.effect.ActiveEffect;
 import io.mindspice.outerfieldsserver.combat.gameroom.pawn.Pawn;
-import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetGameAction;
+import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetCombatAction;
 import io.mindspice.outerfieldsserver.util.Log;
 
 import java.time.Instant;
@@ -17,14 +17,14 @@ import java.util.List;
 
 public class ActiveTurnState {
 
-    public final PlayerGameState activePlayer;
-    public final PlayerGameState enemyPlayer;
+    public final PlayerMatchState activePlayer;
+    public final PlayerMatchState enemyPlayer;
     private final ActionFactory actionFactory;
     private volatile long turnInitTime;
     private final List<PawnTurnState> pawnTurnStates = new ArrayList<>();
     private volatile long lastActionTime;
 
-    public ActiveTurnState(PlayerGameState activePlayer, PlayerGameState enemyPlayer, int round) {
+    public ActiveTurnState(PlayerMatchState activePlayer, PlayerMatchState enemyPlayer, int round) {
         this.activePlayer = activePlayer;
         this.enemyPlayer = enemyPlayer;
         actionFactory = new ActionFactory(activePlayer, enemyPlayer); //TODO this can be instanced once for each player at game start
@@ -94,7 +94,7 @@ public class ActiveTurnState {
      * The packet queue performs initial authoritative validation as to make sure the action packets are from the active player
      * Before an action is performed these methods first check if the pawn is active, then check if action is valid/allowed
      */
-    public void doAction(NetGameAction nga) {
+    public void doAction(NetCombatAction nga) {
 
         if (isTurnOver()) {
             Log.SERVER.debug(this.getClass(), "PlayerId: " + getActivePlayerId() + " | Action sent after turn end");
@@ -218,11 +218,11 @@ public class ActiveTurnState {
 
     /* FOR TESTING */
 
-    public PlayerGameState getActivePlayer() {
+    public PlayerMatchState getActivePlayer() {
         return activePlayer;
     }
 
-    public PlayerGameState getEnemyPlayer() {
+    public PlayerMatchState getEnemyPlayer() {
         return enemyPlayer;
     }
 

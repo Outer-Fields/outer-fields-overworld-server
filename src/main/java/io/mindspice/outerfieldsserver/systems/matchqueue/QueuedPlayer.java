@@ -1,6 +1,6 @@
 package io.mindspice.outerfieldsserver.systems.matchqueue;
 
-import io.mindspice.outerfieldsserver.combat.schema.PawnSet;
+import io.mindspice.outerfieldsserver.data.PawnSet;
 import io.mindspice.outerfieldsserver.entities.PlayerEntity;
 
 import java.time.Instant;

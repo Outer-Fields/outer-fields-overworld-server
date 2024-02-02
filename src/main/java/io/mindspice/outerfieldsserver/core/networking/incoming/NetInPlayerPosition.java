@@ -9,13 +9,4 @@ public record NetInPlayerPosition(
         int x,
         int y,
         long timestamp
-) {
-    public static NetInPlayerPosition fromBytes(int playerId, ByteBuffer bytes) {
-        bytes.order(ByteOrder.LITTLE_ENDIAN);
-        return new NetInPlayerPosition(
-                playerId,
-                (int) bytes.getLong(),
-                (int) bytes.getLong(),
-                System.currentTimeMillis());
-    }
-}
+) { }

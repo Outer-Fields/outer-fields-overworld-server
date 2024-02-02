@@ -7,11 +7,12 @@ public enum  AreaId {
     AREA_KEY(-3),
     NONE(-2),
     GLOBAL(-1),
-    TEST(0);
+    TEST(0),
+    INVENTORY(1);
 
     public final int value;
     public int entityId;
-    public AreaEntity entity;
+    public AreaEntity areaEntity;
 
     AreaId(int value) { this.value = value; }
 
@@ -19,7 +20,7 @@ public enum  AreaId {
         entityId = id;
     }
 
-    public void setEntity(AreaEntity entity) {
-        this.entity = entity;
+    public void setAreaEntity(AreaEntity areaEntity) {
+        this.areaEntity = areaEntity;
     }
 }

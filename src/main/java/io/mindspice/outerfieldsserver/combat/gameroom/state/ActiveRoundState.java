@@ -34,12 +34,12 @@ import java.time.Instant;
 
 public class ActiveRoundState {
     private final int round;
-    public final PlayerGameState player1;
-    public final PlayerGameState player2;
+    public final PlayerMatchState player1;
+    public final PlayerMatchState player2;
     private volatile ActiveTurnState activeTurn;
     private volatile boolean firstOver = false;
     private volatile boolean secondOver = false;
-    private volatile PlayerGameState winningPlayer;
+    private volatile PlayerMatchState winningPlayer;
 
 
     public enum RoundState {
@@ -49,7 +49,7 @@ public class ActiveRoundState {
         GAME_OVER
     }
 
-    public ActiveRoundState(PlayerGameState player1, PlayerGameState player2, int round) {
+    public ActiveRoundState(PlayerMatchState player1, PlayerMatchState player2, int round) {
         this.player1 = player1;
         this.player2 = player2;
         this.round = round;
@@ -152,13 +152,13 @@ public class ActiveRoundState {
 
     public int getRound() { return round; }
 
-    public PlayerGameState getPlayer1() { return player1; }
+    public PlayerMatchState getPlayer1() { return player1; }
 
-    public PlayerGameState getPlayer2() { return player2; }
+    public PlayerMatchState getPlayer2() { return player2; }
 
 
 
     public boolean isSecondOver() { return secondOver; }
 
-    public PlayerGameState getWinningPlayer() { return winningPlayer; }
+    public PlayerMatchState getWinningPlayer() { return winningPlayer; }
 }

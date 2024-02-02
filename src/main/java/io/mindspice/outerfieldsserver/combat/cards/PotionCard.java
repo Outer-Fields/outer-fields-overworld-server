@@ -4,7 +4,7 @@ import io.mindspice.outerfieldsserver.combat.enums.EffectType;
 import io.mindspice.outerfieldsserver.combat.enums.PawnIndex;
 import io.mindspice.outerfieldsserver.combat.enums.StatType;
 import io.mindspice.outerfieldsserver.combat.gameroom.action.ActionReturn;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ public enum PotionCard implements Potion {
 
     // Not in active use
     @Override
-    public ActionReturn consumePotion(PlayerGameState player, PawnIndex targetIndex) {
+    public ActionReturn consumePotion(PlayerMatchState player, PawnIndex targetIndex) {
 //        var actionReturn = null //new ActionReturn(null);
 //        actionReturn.playerPawnStates.add(new PawnInterimState(player.getPawn(targetIndex)));
 //        if (!player.doPotion(this)) {

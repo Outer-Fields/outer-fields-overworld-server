@@ -10,7 +10,7 @@ import io.mindspice.outerfieldsserver.combat.gameroom.action.logic.EffectCalc;
 import io.mindspice.outerfieldsserver.combat.gameroom.action.logic.EffectLogic;
 import io.mindspice.outerfieldsserver.combat.gameroom.effect.Effect;
 import io.mindspice.outerfieldsserver.combat.gameroom.state.PawnInterimState;
-import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerGameState;
+import io.mindspice.outerfieldsserver.combat.gameroom.state.PlayerMatchState;
 import io.mindspice.outerfieldsserver.util.CardUtil;
 
 import java.util.Arrays;
@@ -38,7 +38,7 @@ public enum AbilityCard implements Card {
             .skipValidation()
             .build()) {
         @Override
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getSingleActionReturn(player.getPawn(playerIdx), target.getPawn(targetIdx), getStats().getAnimation());
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
                 return ActionReturn.getInvalid(player.getPawn(playerIdx), InvalidMsg._INVALID_COST, getName());
@@ -77,7 +77,7 @@ public enum AbilityCard implements Card {
             .skipValidation()
             .build()) {
         @Override
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getSingleActionReturn(player.getPawn(playerIdx), target.getPawn(targetIdx), getStats().getAnimation());
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
                 return ActionReturn.getInvalid(player.getPawn(playerIdx), InvalidMsg._INVALID_COST, getName());
@@ -129,7 +129,7 @@ public enum AbilityCard implements Card {
             .skipValidation()
             .build()) {
         @Override
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getSingleActionReturn(player.getPawn(playerIdx), target.getPawn(targetIdx), getStats().getAnimation());
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
                 return ActionReturn.getInvalid(player.getPawn(playerIdx), InvalidMsg._INVALID_COST, getName());
@@ -182,7 +182,7 @@ public enum AbilityCard implements Card {
             .skipValidation()
             .build()) {
         @Override
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getSingleActionReturn(player.getPawn(playerIdx), target.getPawn(targetIdx), getStats().getAnimation());
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
                 return ActionReturn.getInvalid(player.getPawn(playerIdx), InvalidMsg._INVALID_COST, getName());
@@ -218,7 +218,7 @@ public enum AbilityCard implements Card {
             .skipValidation()
             .build()) {
         @Override
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getSingleActionReturn(player.getPawn(playerIdx), target.getPawn(targetIdx), getStats().getAnimation());
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
                 return ActionReturn.getInvalid(player.getPawn(playerIdx), InvalidMsg._INVALID_COST, getName());
@@ -271,7 +271,7 @@ public enum AbilityCard implements Card {
             .setAnimation(AnimType.INSIGHT, WeaponSprite.NONE)
             .build()) {
         @Override
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getSingleActionReturn(player.getPawn(playerIdx), target.getPawn(targetIdx), getStats().getAnimation());
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
                 return ActionReturn.getInvalid(player.getPawn(playerIdx), InvalidMsg._INVALID_COST, getName());
@@ -293,7 +293,7 @@ public enum AbilityCard implements Card {
                     " opponent's pawns, including their buffs and de-buffs")
             .setAnimation(AnimType.INSIGHT, WeaponSprite.NONE)
             .build()) {
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getSingleActionReturn(player.getPawn(playerIdx), target.getPawn(targetIdx), getStats().getAnimation());
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
                 return ActionReturn.getInvalid(player.getPawn(playerIdx), InvalidMsg._INVALID_COST, getName());
@@ -316,7 +316,7 @@ public enum AbilityCard implements Card {
             .setAnimation(AnimType.INSIGHT, WeaponSprite.NONE)
             .build()) {
         @Override
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getSingleActionReturn(player.getPawn(playerIdx), target.getPawn(targetIdx), getStats().getAnimation());
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
                 return ActionReturn.getInvalid(player.getPawn(playerIdx), InvalidMsg._INVALID_COST, getName());
@@ -336,7 +336,7 @@ public enum AbilityCard implements Card {
                     "pawns, getting a glimpse each ones current hand.")
             .setAnimation(AnimType.INSIGHT, WeaponSprite.NONE)
             .build()) {
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getMultiActionReturn(player, playerIdx, target, targetIdx, getStats().getAnimation());
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
                 return ActionReturn.getInvalid(player.getPawn(playerIdx), InvalidMsg._INVALID_COST, getName());
@@ -359,7 +359,7 @@ public enum AbilityCard implements Card {
             .setAnimation(AnimType.INSIGHT, WeaponSprite.NONE)
             .build()) {
         @Override
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getSingleActionReturn(player.getPawn(playerIdx), target.getPawn(targetIdx), getStats().getAnimation());
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
                 return ActionReturn.getInvalid(player.getPawn(playerIdx), InvalidMsg._INVALID_COST, getName());
@@ -381,7 +381,7 @@ public enum AbilityCard implements Card {
                     "the fate that lies before you upon revelation of the contents of your opponent's pawn's ability deck.")
             .build()) {
         @Override
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getSingleActionReturn(player.getPawn(playerIdx), target.getPawn(targetIdx), getStats().getAnimation());
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
                 return ActionReturn.getInvalid(player.getPawn(playerIdx), InvalidMsg._INVALID_COST, getName());
@@ -403,7 +403,7 @@ public enum AbilityCard implements Card {
             .skipValidation()
             .build()) {
         @Override
-        public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+        public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
             ActionReturn actionReturn = getMultiActionReturn(player, playerIdx, target, targetIdx, getStats().getAnimation());
             if (!getStats().getCostLogic().doCost(player.getPawn(playerIdx), getStats().getCost().asMap(), actionReturn)) {
                 return ActionReturn.getInvalid(player.getPawn(playerIdx), InvalidMsg._INVALID_COST, getName());
@@ -716,7 +716,7 @@ public enum AbilityCard implements Card {
         this.stats = stats;
     }
 
-    public ActionReturn playCard(PlayerGameState player, PlayerGameState target, PawnIndex playerIdx, PawnIndex targetIdx) {
+    public ActionReturn playCard(PlayerMatchState player, PlayerMatchState target, PawnIndex playerIdx, PawnIndex targetIdx) {
         // Call the default implementation with included stats
         return playCard(player, target, playerIdx, targetIdx, stats);
     }

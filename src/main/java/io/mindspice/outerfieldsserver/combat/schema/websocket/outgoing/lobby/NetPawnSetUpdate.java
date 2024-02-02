@@ -1,6 +1,6 @@
 package io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.lobby;
 
-import io.mindspice.outerfieldsserver.combat.schema.PawnSet;
+import io.mindspice.outerfieldsserver.data.PawnSet;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.outgoing.OutMsgType;
 
 import java.util.Map;

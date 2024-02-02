@@ -33,8 +33,8 @@ public class ViewRect extends Component<ViewRect> {
                 },
                 ViewRect::onEntityPositionChanged)
         );
-        registerListener(EventType.NEW_ENTITY, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, ViewRect::onNewEntity));
-        registerListener(EventType.ENTITY_DESTROYED, BiPredicatedBiConsumer.of(
+        registerListener(EventType.NEW_POSITIONAL_ENTITY, BiPredicatedBiConsumer.of(PredicateLib::isSameAreaEvent, ViewRect::onNewEntity));
+        registerListener(EventType.ENTITY_DESTROY, BiPredicatedBiConsumer.of(
                 PredicateLib::isSameAreaEvent, (ViewRect vr, Event<Integer> event) -> onExitView(event.issuerEntityId()))
         );
     }
@@ -60,7 +60,7 @@ public class ViewRect extends Component<ViewRect> {
         }
     }
 
-    public void onNewEntity(Event<EventData.NewEntity> event) {
+    public void onNewEntity(Event<EventData.NewPositionalEntity> event) {
         if (viewRect.contains(event.data().position())) {
             onEnterView(event.issuerEntityId(), event.data().position());
         }

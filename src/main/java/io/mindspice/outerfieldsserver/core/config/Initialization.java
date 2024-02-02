@@ -3,11 +3,13 @@ package io.mindspice.outerfieldsserver.core.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.mindspice.databaseservice.client.DBServiceClient;
 import io.mindspice.databaseservice.client.api.OkraGameAPI;
+import io.mindspice.kawautils.validation.KawaMockValidator;
 import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 import io.mindspice.mindlib.util.JsonUtils;
 import io.mindspice.outerfieldsserver.combat.bot.BotFactory;
 import io.mindspice.outerfieldsserver.components.primatives.SimpleListener;
+import io.mindspice.outerfieldsserver.core.ActiveCombat;
 import io.mindspice.outerfieldsserver.core.HttpServiceClient;
 import io.mindspice.outerfieldsserver.core.MatchMaking;
 import io.mindspice.outerfieldsserver.core.Settings;
@@ -27,6 +29,7 @@ import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import org.jctools.maps.NonBlockingHashMapLong;
 import org.reflections.Reflections;
+import org.reflections.scanners.MemberUsageScanner;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
@@ -40,6 +43,7 @@ import java.io.File;
 import java.io.IOException;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.function.BiConsumer;
@@ -57,6 +61,11 @@ public class Initialization {
         return new NonBlockingHashMapLong<>(100);
     }
 
+    @Bean
+    Map<UUID, ActiveCombat> combatTable() {
+        return new ConcurrentHashMap<>(50);
+    }
+
     public List<Pair<String, Class<?>>> getInnerClasses(Class<?> clazz) {// Replace with your class
         Class<?>[] innerClasses = clazz.getDeclaredClasses();
 
@@ -71,12 +80,23 @@ public class Initialization {
     }
 
     public List<Pair<String, Class<?>>> reflectAll() {
+
+
         Reflections reflections = new Reflections(new ConfigurationBuilder()
-                .setUrls(ClasspathHelper.forPackage("io.mindspice"))
+               // .setUrls(ClasspathHelper.forPackage("io.mindspice.kawautils") )
+                .setUrls(ClasspathHelper.forPackage("io.mindspice.outerfieldsserver") )
                 .setScanners(new SubTypesScanner(false)));
 
         Set<Class<?>> classes = reflections.getSubTypesOf(Object.class);
+        classes.removeIf(c ->c.getName().contains("kawa."));
+        classes.removeIf(c ->c.getName().contains("gnu"));
+        classes.removeIf(c ->c.getName().contains("objenesis"));
+        classes.removeIf(c ->c.getName().contains("bytebuddy"));
+        classes.removeIf(c ->c.getName().contains("mockito"));
+
+
         Set<Class<?>> inners = classes.stream()
+
                 .flatMap(c -> Arrays.stream(c.getDeclaredClasses()))
                 .collect(Collectors.toSet());
 
@@ -84,6 +104,8 @@ public class Initialization {
         Pattern anonPat = Pattern.compile(".*\\$\\d+$");
         classes.removeIf(c -> c.getName().contains("proto")
                 || c.getName().contains("Scheme")
+                || c.getName().contains("gnu.kawa")
+                || c.getName().contains("kawa.")
                 || c.getName().contains("EntityManager")
                 || anonPat.matcher(c.getName()).matches()
         );
@@ -107,6 +129,7 @@ public class Initialization {
     public KawaInstance scheme() throws Throwable {
         KawaInstance kawa = new KawaInstance();
         kawa.defineObject("EntityManager", entityManager);
+        kawa.defineObject("KawaValidator", KawaMockValidator.class);
         reflectAll().forEach(p -> kawa.defineObject(p.first(), p.second()));
         var load1 = kawa.loadSchemeFile(new File("src/main/resources/scheme/std-aliases.scm"));
         var load2 = kawa.loadSchemeFile(new File("src/main/resources/scheme/std-functions.scm"));
@@ -206,7 +229,6 @@ public class Initialization {
     public QuestSystem questSystem() {
         QuestSystem questSystem = entityManager.newQuestSystem();
         ShellEntity shellEntity = entityManager.getShellEntity();
-        shellEntity.registerWithSystem(questSystem); // FIXME register this else where later
         return questSystem;
     }
 
@@ -244,19 +266,19 @@ public class Initialization {
     CombatSystem CombatSystem(
             @Qualifier("combatExecutor") ScheduledExecutorService gameExec,
             @Qualifier("httpServiceClient") HttpServiceClient httpServiceClient,
-            @Qualifier("playerTable") NonBlockingHashMapLong<PlayerEntity> playerTable) {
-        CombatSystem server = entityManager.newCombatSystem(gameExec, httpServiceClient, playerTable);
+            @Qualifier("playerTable") NonBlockingHashMapLong<PlayerEntity> playerTable,
+            @Qualifier("combatTable") Map<UUID, ActiveCombat> combatTable) {
         //  server.init();
-        return server;
+        return entityManager.newCombatSystem(gameExec, httpServiceClient, playerTable, combatTable);
     }
 
     @Bean
     MatchMaking matchMaking(
             @Qualifier("combatExecutor") ScheduledExecutorService gameExec,
             @Qualifier("playerTable") NonBlockingHashMapLong<PlayerEntity> playerTable,
-            @Qualifier("httpServiceClient") HttpServiceClient httpServiceClient
-    ) {
-        MatchMaking matchMaking = new MatchMaking(combatExecutor(), playerTable, httpServiceClient);
+            @Qualifier("httpServiceClient") HttpServiceClient httpServiceClient,
+            @Qualifier("combatTable") Map<UUID, ActiveCombat> combatTable) {
+        MatchMaking matchMaking = new MatchMaking(combatExecutor(), playerTable, httpServiceClient, combatTable);
         matchMaking.init();
         return matchMaking;
     }

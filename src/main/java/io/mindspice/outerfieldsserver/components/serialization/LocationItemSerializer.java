@@ -11,6 +11,8 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 
@@ -18,17 +20,22 @@ public class LocationItemSerializer extends Component<LocationItemSerializer> {
     private final Supplier<IVector2> position;
     private final Supplier<int[]> states;
     private final long key;
+    private final BooleanSupplier isActiveSupplier;
+    private final Function<Integer, Boolean> isVisibleToSupplier;
     private EntityProto.LocationItemEntity lastSerialization;
     private long lastSerializationTime;
 
+
     public LocationItemSerializer(Entity parentEntity, long key, Supplier<IVector2> position,
-            Supplier<int[]> states) {
+            Supplier<int[]> states, BooleanSupplier isActiveSupplier, Function<Integer, Boolean> isVisibleToSupplier) {
         super(parentEntity, ComponentType.CHARACTER_SERIALIZER,
                 List.of(EventType.SERIALIZED_ENTITY_REQUEST, EventType.SERIALIZED_ENTITIES_REQUEST)
         );
         this.position = position;
         this.states = states;
         this.key = key;
+        this.isActiveSupplier = isActiveSupplier;
+        this.isVisibleToSupplier = isVisibleToSupplier;
 
         registerListener(EventType.SERIALIZED_ENTITY_REQUEST, BiPredicatedBiConsumer.of(
                 (LocationItemSerializer cs, Event<Integer> ev) -> ev.eventArea() == areaId() && ev.recipientEntityId() == entityId(),
@@ -37,6 +44,10 @@ public class LocationItemSerializer extends Component<LocationItemSerializer> {
     }
 
     public void onSerializedEntityRequest(Event<Integer> event) {
+        if (!isActiveSupplier.getAsBoolean() || !isVisibleToSupplier.apply(entityId())) {
+            return;
+        }
+
         if (lastSerialization == null || System.currentTimeMillis() - lastSerializationTime > 20) {
             var pos = position.get();
             var builder = EntityProto.LocationItemEntity.newBuilder()
