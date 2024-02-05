@@ -1,5 +1,6 @@
 package io.mindspice.outerfieldsserver.components.player;
 
+import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.outerfieldsserver.components.Component;
 import io.mindspice.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspice.outerfieldsserver.entities.Entity;
@@ -16,32 +17,41 @@ import java.util.List;
 
 
 public class CharacterOutfit extends Component<CharacterOutfit> {
-    public final ClothingItem[] outfit;
+    public final ClothingItem[] outfit = new ClothingItem[6];
 
-    public CharacterOutfit(Entity parentEntity, ClothingItem[] outfit) {
+    public CharacterOutfit(Entity parentEntity, List<ClothingItem> initOutfit) {
         super(parentEntity, ComponentType.OUTFIT, List.of(EventType.CHARACTER_OUTFIT_CHANGED));//
-        this.outfit = outfit != null ? outfit : new ClothingItem[]{
-                ClothingItem.EMPTY, ClothingItem.EMPTY, ClothingItem.EMPTY,
-                ClothingItem.EMPTY, ClothingItem.EMPTY, ClothingItem.EMPTY,
-        };
-        for (int i = 0; i < outfit.length; ++i) { if (outfit[i] == null) { outfit[i] = ClothingItem.EMPTY; } }
 
-        registerListener(EventType.CHARACTER_OUTFIT_UPDATE, BiPredicatedBiConsumer.of(PredicateLib::isRecEntitySame,
-                CharacterOutfit::onOutfitUpdate
+        initOutfit.forEach(item -> outfit[item.slot.value] = item);
 
+        registerListener(EventType.CHARACTER_OUTFIT_UPDATE, BiPredicatedBiConsumer.of(
+                PredicateLib::isRecEntitySame, CharacterOutfit::onOutfitUpdate
         ));
+        padNull();
     }
 
-    // TODO this is going to need to implement authority
-    public void onOutfitUpdate(Event<byte[]> outfitChanges) {
-//        for (int i = 0; i < outfitChanges.data().length; i += 2) {
-//            outfit[outfitChanges.data()[i]] = ClothingItem.fromValue(outfitChanges.data()[i + 1]);
-//        }
-//        emitEvent(Event.characterOutFitChanges(this, outfit));
+    public void padNull() {
+        for (int i = 0; i < outfit.length; i++) {
+            if (outfit[i] == null) {
+                outfit[i] = ClothingItem.EMPTY;
+            }
+        }
     }
 
-    public byte[] asByteArray() {
-        return new byte[]{1, 2, 3, 4, 5, 6};
+    public void onOutfitUpdate(Event<List<ClothingItem>> event) {
+        PlayerItemsAndFunds playerItems = ComponentType.PLAYER_ITEMS_AND_FUNDS.castOrNull(
+                parentEntity.getComponent(ComponentType.PLAYER_ITEMS_AND_FUNDS)
+        );
+        if (playerItems == null) {
+            // TODO log this and send response, this should never happen
+            return;
+        }
+        List<ClothingItem> validItems = event.data().stream()
+                .filter(cItem -> playerItems.inventoryItems.values()
+                        .stream().anyMatch(invItem -> invItem.item().equals(cItem))
+                ).toList();
+
+        validItems.forEach(item -> outfit[item.slot.value] = item);
     }
 
     public int[] currOutfit() {

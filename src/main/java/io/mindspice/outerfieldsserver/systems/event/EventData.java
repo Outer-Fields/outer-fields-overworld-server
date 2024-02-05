@@ -70,20 +70,7 @@ public class EventData {
     public record CharacterDeath(int deadEntityId, int killerEntityId) { }
 
 
-    public record FundsAndItems(
-            Map<TokenType, Integer> bankedTokens,
-            Map<TokenType, Integer> inventoryTokens,
-            Map<Long, ItemEntity<?>> bankedItems,
-            Map<Long, ItemEntity<?>> inventoryItems
-    ) { }
-
-
-    public record TokensAndItems(Map<TokenType, Integer> tokens, Map<Long, ItemEntity<?>> items) {
-        public TokensAndItems {
-            if (tokens == null) { tokens = Map.of(); }
-            if (items == null) { items = Map.of(); }
-        }
-    }
+    public record FundsAndItems(Map<String, ItemEntity<?>> bankedItems, Map<String, ItemEntity<?>> inventoryItems) { }
 
 
     public record EntityVisibility(boolean isActive, boolean isInvisibleToAll, IntList visibleTo, IntList inVisibleTo) { }
@@ -109,19 +96,21 @@ public class EventData {
             return new VisibilityUpdate(false, false, visibleIds, false, IntList.of(), false);
         }
 
-        public static  VisibilityUpdate removeVisibleTo(IntList visibleIds) {
+        public static VisibilityUpdate removeVisibleTo(IntList visibleIds) {
             return new VisibilityUpdate(false, false, visibleIds, true, IntList.of(), false);
         }
 
-        public static  VisibilityUpdate addInvisibleTo(IntList invisibleIds) {
+        public static VisibilityUpdate addInvisibleTo(IntList invisibleIds) {
             return new VisibilityUpdate(false, false, IntList.of(), false, invisibleIds, false);
         }
 
         public static VisibilityUpdate removeInvisibleTo(IntList invisibleIds) {
             return new VisibilityUpdate(false, false, IntList.of(), false, invisibleIds, true);
         }
-
     }
+
+    public record GroundItems(boolean isDrop, int containerId, IntList entities) {}
+
 
 
 }

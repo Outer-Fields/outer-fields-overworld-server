@@ -1,11 +1,10 @@
 package io.mindspice.outerfieldsserver.components.items;
 
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TLongHashSet;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 import io.mindspice.outerfieldsserver.components.Component;
 import io.mindspice.outerfieldsserver.components.logic.PredicateLib;
 import io.mindspice.outerfieldsserver.core.Tick;
+import io.mindspice.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspice.outerfieldsserver.entities.Entity;
 import io.mindspice.outerfieldsserver.entities.ItemEntity;
 import io.mindspice.outerfieldsserver.enums.ComponentType;
@@ -20,15 +19,12 @@ import java.util.function.Consumer;
 
 
 public class ContainedItems extends Component<ContainedItems> {
-    public Map<TokenType, Integer> containedTokens;
-    public Map<Long, ItemEntity<?>> containedItems;
+    public Map<String, ItemEntity<?>> containedItems;
     public Consumer<ContainedItems> respawnLogic;
     public int tickTime = 100;
 
-
-    public ContainedItems(Entity parentEntity, Map<TokenType, Integer> tokens, Map<Long, ItemEntity<?>> items) {
+    public ContainedItems(Entity parentEntity, Map<String, ItemEntity<?>> items) {
         super(parentEntity, ComponentType.CONTAINED_ITEMS, List.of());
-        this.containedTokens = new EnumMap<>(tokens);
         this.containedItems = new HashMap<>(items);
 
         registerListener(EventType.CONTAINER_CONTAINED_ITEMS_QUERY, BiPredicatedBiConsumer.of(
@@ -37,9 +33,9 @@ public class ContainedItems extends Component<ContainedItems> {
         registerListener(EventType.CONTAINER_ADD_ITEMS, BiPredicatedBiConsumer.of(
                 PredicateLib::isRecEntitySame, ContainedItems::onAddItems
         ));
-        registerListener(EventType.CONTAINER_REMOVE_ITEMS, BiPredicatedBiConsumer.of(
-                PredicateLib::isRecEntitySame, ContainedItems::onRemoveItems
-        ));
+//        registerListener(EventType.CONTAINER_REMOVE_ITEMS, BiPredicatedBiConsumer.of(
+//                PredicateLib::isRecEntitySame, ContainedItems::onRemoveItems
+//        ));
 
         setOnTickConsumer(ContainedItems::onTickLogic);
     }
@@ -50,48 +46,48 @@ public class ContainedItems extends Component<ContainedItems> {
         return this;
     }
 
-
-
     private void onTickLogic(Tick tick) {
-        if (--tickTime <= 0) {
-            if (respawnLogic != null) {
+        if (respawnLogic != null) {
+            if (--tickTime <= 0) {
                 respawnLogic.accept(this);
+                tickTime = 100;
             }
         }
     }
 
     public void onContainedItemsQuery(Event<Integer> event) {
-        var data = new EventData.TokensAndItems(
-                containedTokens == null ? Map.of() : Collections.unmodifiableMap(containedTokens),
-                containedItems == null ? Map.of() : Collections.unmodifiableMap(containedItems)
+        emitEvent(Event.responseEvent(
+                this, event, EventType.CONTAINER_CONTAINED_ITEMS_RESP, Collections.unmodifiableMap(containedItems))
         );
-        emitEvent(Event.responseEvent(this, event, EventType.CONTAINER_CONTAINED_ITEMS_RESP, data));
     }
 
-    public void onAddItems(Event<EventData.TokensAndItems> event) {
-        if (!event.data().tokens().isEmpty()) {
-            if (containedTokens == null) { containedTokens = new EnumMap<>(TokenType.class); }
-            event.data().tokens().forEach((key, val) ->
-                    containedTokens.merge(key, val, Integer::sum)
-            );
-        }
-        if (!event.data().items().isEmpty()) {
-            if (containedItems == null) { containedItems = new HashMap<>(); }
-            containedItems.putAll(event.data().items());
-        }
+    public void onAddItems(Event<Map<String, Integer>> event) {
+        event.data().forEach((key, val) -> {
+            ItemEntity<?> existingItem = containedItems.get(key);
+            if (existingItem == null) {
+                containedItems.put(key, EntityManager.GET().newItemEntity(key, val));
+            } else {
+                existingItem.setAmount(existingItem.amount() + val);
+            }
+        });
     }
 
-    public void onRemoveItems(Event<EventData.TokensAndItems> event) {
-        if (containedTokens != null && !event.data().tokens().isEmpty()) {
-            event.data().tokens().forEach((key, val) -> {
-                if (containedTokens.containsKey(key)) {
-                    containedTokens.merge(key, -val, (oldVal, newVal) -> Math.min(oldVal - newVal, 0));
-                }
-            });
-        }
-        if (containedItems != null && !event.data().items().isEmpty()) {
-            event.data().items().forEach((key, val) -> containedItems.remove(key));
-        }
+
+    public void onRemoveItems(Event<Map<String, Integer>> event) {
+        event.data().forEach((key, val) -> {
+            ItemEntity<?> existingItem = containedItems.get(key);
+            if (existingItem == null || existingItem.amount() < val) {
+                // TODO LOG THIS AUTH ERROR and emit to player
+                return;
+            }
+            int newVal = existingItem.amount() - val;
+            if (newVal <= 0) {
+                containedItems.remove(key);
+                emitEvent(Event.destroyEntity(existingItem));
+            } else {
+                existingItem.setAmount(existingItem.amount() - val);
+            }
+        });
     }
 
 

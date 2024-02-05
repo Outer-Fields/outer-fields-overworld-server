@@ -310,9 +310,10 @@ public class EventCompSystemTests {
 
         assertNull(queue.poll());
         testComp = null;
+        //EntityManager.GET().destroyEntity(entityId);
+        EntityManager.GET().emitEvent(Event.destroyEntity(entity));
         entity = null;
-        EntityManager.GET().destroyEntity(entityId);
-        Thread.sleep(10);
+        Thread.sleep(100);
 
         assertNull(EntityManager.GET().entityById(entityId));
         assertFalse(system1.hasListeningEntity(entityId));

@@ -19,4 +19,8 @@ public record TimedEvent(
         return new TimedEvent(Instant.now().getEpochSecond() + (60L * offsetMins), event);
     }
 
+    public static TimedEvent ofOffsetHours(int offsetHours, Event<?> event) {
+        return new TimedEvent(Instant.now().getEpochSecond() + (60 * 60L * offsetHours), event);
+    }
+
 }

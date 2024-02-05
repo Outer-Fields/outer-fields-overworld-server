@@ -1,30 +1,36 @@
 package io.mindspice.outerfieldsserver.components.player;
 
+import io.mindspice.mindlib.data.collections.lists.primative.IntList;
+import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
+import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 import io.mindspice.outerfieldsserver.components.Component;
 import io.mindspice.outerfieldsserver.components.items.ContainedItems;
 import io.mindspice.outerfieldsserver.components.logic.PredicateLib;
+import io.mindspice.outerfieldsserver.components.world.ActiveEntities;
+import io.mindspice.outerfieldsserver.components.world.EntityGrid;
+import io.mindspice.outerfieldsserver.core.WorldSettings;
 import io.mindspice.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspice.outerfieldsserver.entities.ContainerEntity;
 import io.mindspice.outerfieldsserver.entities.Entity;
 import io.mindspice.outerfieldsserver.entities.ItemEntity;
-import io.mindspice.outerfieldsserver.enums.ComponentType;
-import io.mindspice.outerfieldsserver.enums.ContainerType;
-import io.mindspice.outerfieldsserver.enums.TokenType;
+import io.mindspice.outerfieldsserver.enums.*;
 import io.mindspice.outerfieldsserver.systems.event.Event;
 import io.mindspice.outerfieldsserver.systems.event.EventData;
 import io.mindspice.outerfieldsserver.systems.event.EventType;
+import io.mindspice.outerfieldsserver.systems.event.TimedEvent;
+import io.mindspice.outerfieldsserver.util.Utility;
+import jdk.jshell.execution.Util;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 
 public class PlayerItemsAndFunds extends Component<PlayerItemsAndFunds> {
-    public Map<TokenType, Integer> inventoryTokens = new EnumMap<>(TokenType.class);
-    public Map<TokenType, Integer> bankedTokens = new EnumMap<>(TokenType.class);
-    public Map<Long, ItemEntity<?>> inventoryItems = new HashMap<>();
-    public Map<Long, ItemEntity<?>> bankedItems = new HashMap<>();
+    public Map<String, ItemEntity<?>> inventoryItems = new HashMap<>();
+    public Map<String, ItemEntity<?>> bankedItems = new HashMap<>();
     public final Supplier<IVector2> playerPositionSupplier;
 
     public PlayerItemsAndFunds(Entity parentEntity, Supplier<IVector2> positionSupplier) {
@@ -36,12 +42,6 @@ public class PlayerItemsAndFunds extends Component<PlayerItemsAndFunds> {
         ));
 
         // Deposit/Withdraw
-        registerListener(EventType.PLAYER_TOKENS_BANKED_TO_INV, BiPredicatedBiConsumer.of(
-                PredicateLib::isRecEntitySame, PlayerItemsAndFunds::onTokensBankedToInv
-        ));
-        registerListener(EventType.PLAYER_TOKENS_INV_TO_BANKED, BiPredicatedBiConsumer.of(
-                PredicateLib::isRecEntitySame, PlayerItemsAndFunds::onTokensInvToBanked
-        ));
         registerListener(EventType.PLAYER_ITEMS_BANKED_TO_INV, BiPredicatedBiConsumer.of(
                 PredicateLib::isRecEntitySame, PlayerItemsAndFunds::onItemsBankedToInv
         ));
@@ -50,12 +50,6 @@ public class PlayerItemsAndFunds extends Component<PlayerItemsAndFunds> {
         ));
 
         //Add
-        registerListener(EventType.PLAYER_ADD_BANKED_TOKENS, BiPredicatedBiConsumer.of(
-                PredicateLib::isRecEntitySame, PlayerItemsAndFunds::onAddBankedTokens
-        ));
-        registerListener(EventType.PLAYER_ADD_INV_TOKENS, BiPredicatedBiConsumer.of(
-                PredicateLib::isRecEntitySame, PlayerItemsAndFunds::onAddInvTokens
-        ));
         registerListener(EventType.PLAYER_ADD_BANKED_ITEMS, BiPredicatedBiConsumer.of(
                 PredicateLib::isRecEntitySame, PlayerItemsAndFunds::onAddBankedItems
         ));
@@ -64,12 +58,6 @@ public class PlayerItemsAndFunds extends Component<PlayerItemsAndFunds> {
         ));
 
         //Remove
-        registerListener(EventType.PLAYER_REMOVE_BANKED_TOKENS, BiPredicatedBiConsumer.of(
-                PredicateLib::isRecEntitySame, PlayerItemsAndFunds::onRemoveBankedTokens
-        ));
-        registerListener(EventType.PLAYER_REMOVE_INV_TOKENS, BiPredicatedBiConsumer.of(
-                PredicateLib::isRecEntitySame, PlayerItemsAndFunds::onRemoveInvTokens
-        ));
         registerListener(EventType.PLAYER_REMOVE_BANKED_ITEMS, BiPredicatedBiConsumer.of(
                 PredicateLib::isRecEntitySame, PlayerItemsAndFunds::onRemoveBankedItems
         ));
@@ -83,109 +71,303 @@ public class PlayerItemsAndFunds extends Component<PlayerItemsAndFunds> {
                 PlayerItemsAndFunds::onPlayerDeath
         ));
 
+        // World interactions
+
+        registerListener(EventType.PLAYER_PICKUP_ITEMS, BiPredicatedBiConsumer.of(
+                PredicateLib::isRecEntitySame, PlayerItemsAndFunds::onPickupItems
+        ));
+
+        registerListener(EventType.PLAYER_DROP_ITEMS, BiPredicatedBiConsumer.of(
+                PredicateLib::isRecEntitySame, PlayerItemsAndFunds::onDropItems
+        ));
+
+        registerListener(EventType.CONTAINER_ADD_ITEMS, BiPredicatedBiConsumer.of(
+                PredicateLib::isRecEntitySame, PlayerItemsAndFunds::onContainerPutItems
+        ));
+
     }
 
     public void onFundAndItemQuery(Event<Integer> event) {
         var data = new EventData.FundsAndItems(
-                Collections.unmodifiableMap(bankedTokens),
-                Collections.unmodifiableMap(inventoryTokens),
                 Collections.unmodifiableMap(bankedItems),
                 Collections.unmodifiableMap(inventoryItems)
         );
         emitEvent(Event.responseEvent(this, event, EventType.PLAYER_FUNDS_ITEMS_RESP, data));
     }
 
-    public void onTokensBankedToInv(Event<Map<TokenType, Integer>> event) {
-        boolean invalid = event.data().entrySet().stream().anyMatch(entry -> bankedTokens.get(entry.getKey()) < entry.getValue());
+    public void onItemsBankedToInv(Event<Map<Integer, Integer>> event) {
+
+        List<ItemEntity<?>> itemEntities = Utility.mapEntities(
+                EntityManager.GET().multipleEntitiesById(event.data().keySet()),
+                EntityType.ITEM
+        );
+        Map<String, Integer> mappedEntities = itemEntities.stream().collect(Collectors.groupingBy(
+                ItemEntity::key,
+                Collectors.summingInt(ItemEntity::amount)
+        ));
+
+
+        boolean invalid = mappedEntities.entrySet().stream().anyMatch(entry -> {
+            ItemEntity<?> item = bankedItems.get(entry.getKey());
+            return item == null || item.amount() < entry.getValue();
+        });
+
         if (invalid) {
-            //TODO log this
+            //TODO log this and send auth
             return;
         }
-        event.data().forEach((key, val) -> {
-            bankedTokens.merge(key, -val, (oldVal, newVal) -> oldVal - newVal);
-            inventoryTokens.merge(key, val, Integer::sum);
+        mappedEntities.forEach((key, amount) -> {
+            inventoryItems.compute(key, (k, existingItem) -> {
+                if (existingItem == null) {
+                    return EntityManager.GET().newItemEntity(key, amount);
+                } else {
+                    existingItem.setAmount(existingItem.amount() + amount);
+                    return existingItem;
+                }
+            });
         });
+
+        mappedEntities.forEach((key, amount) -> {
+            bankedItems.computeIfPresent(key, (k, existingItem) -> {
+                int newAmount = existingItem.amount() - amount;
+                if (newAmount <= 0) {
+                    emitEvent(Event.destroyEntity(existingItem));
+                    return null;
+                } else {
+                    existingItem.setAmount(newAmount);
+                    return existingItem;
+                }
+            });
+        });
+
     }
 
-    public void onTokensInvToBanked(Event<Map<TokenType, Integer>> event) {
-        boolean invalid = event.data().entrySet().stream().anyMatch(entry -> inventoryTokens.get(entry.getKey()) < entry.getValue());
-        if (invalid) {
-            //TODO log this
-            return;
-        }
-        event.data().forEach((key, val) -> {
-            inventoryTokens.merge(key, -val, (oldVal, newVal) -> oldVal - newVal);
-            bankedTokens.merge(key, val, Integer::sum);
-        });
-    }
+    public void onItemsInvToBanked(Event<Map<Integer, Integer>> event) {
 
-    public void onItemsBankedToInv(Event<Map<Long, ItemEntity<?>>> event) {
-        boolean invalid = event.data().entrySet().stream().anyMatch(entry -> !bankedItems.containsKey(entry.getKey()));
-        if (invalid) {
-            //TODO log this
-            return;
-        }
-        event.data().forEach((key, val) -> {
-            bankedItems.remove(key);
-            inventoryItems.put(key, val);
-        });
-    }
+        List<ItemEntity<?>> itemEntities = Utility.mapEntities(
+                EntityManager.GET().multipleEntitiesById(event.data().keySet()),
+                EntityType.ITEM
+        );
+        Map<String, Integer> mappedEntities = itemEntities.stream().collect(Collectors.groupingBy(
+                ItemEntity::key,
+                Collectors.summingInt(ItemEntity::amount)
+        ));
 
-    public void onItemsInvToBanked(Event<Map<Long, ItemEntity<?>>> event) {
-        boolean invalid = event.data().entrySet().stream().anyMatch(entry -> !inventoryItems.containsKey(entry.getKey()));
+        boolean invalid = mappedEntities.entrySet().stream().anyMatch(entry -> {
+            ItemEntity<?> item = inventoryItems.get(entry.getKey());
+            return item == null || item.amount() < entry.getValue();
+        });
+
         if (invalid) {
-            //TODO log this
+            //TODO log this and send auth
             return;
         }
-        event.data().forEach((key, val) -> {
-            inventoryItems.remove(key);
-            bankedItems.put(key, val);
+        mappedEntities.forEach((key, amount) -> {
+            bankedItems.compute(key, (k, existingItem) -> {
+                if (existingItem == null) {
+                    return EntityManager.GET().newItemEntity(key, amount);
+                } else {
+                    existingItem.setAmount(existingItem.amount() + amount);
+                    return existingItem;
+                }
+            });
         });
+
+        mappedEntities.forEach((key, amount) -> {
+            inventoryItems.computeIfPresent(key, (k, existingItem) -> {
+                int newAmount = existingItem.amount() - amount;
+                if (newAmount <= 0) {
+                    emitEvent(Event.destroyEntity(existingItem));
+                    return null;
+                } else {
+                    existingItem.setAmount(newAmount);
+                    return existingItem;
+                }
+            });
+        });
+
     }
 
     public void onPlayerDeath(Event<EventData.CharacterDeath> event) {
-        ContainerEntity container = EntityManager.GET().newContainerEntity(ContainerType.BAG, areaId(), playerPositionSupplier.get(),
-                        Map.copyOf(inventoryTokens), Map.copyOf(inventoryItems), true)
-                .withDestructionTime(60 * 60);
+        ContainerEntity container = EntityManager.GET().newContainerEntity(ContainerType.BAG, areaId(),
+                playerPositionSupplier.get(), Map.copyOf(inventoryItems), true);
 
-        inventoryTokens.clear();
+        EntityManager.GET().submitTimedEvent(TimedEvent.ofOffsetMinutes(
+                60 * 6, Event.destroyEntity(container)
+        ));
+
         inventoryItems.clear();
     }
 
-    public void onAddBankedTokens(Event<Map<TokenType, Integer>> event) {
-        event.data().forEach((key, val) -> bankedTokens.merge(key, val, Integer::sum));
+    public void onAddBankedItems(Event<Map<String, Integer>> event) {
+        event.data().forEach((key, amount) -> {
+            bankedItems.compute(key, (k, existingItem) -> {
+                if (existingItem == null) {
+                    return EntityManager.GET().newItemEntity(key, amount);
+                } else {
+                    existingItem.setAmount(existingItem.amount() + amount);
+                    return existingItem;
+                }
+            });
+        });
     }
 
-    public void onAddInvTokens(Event<Map<TokenType, Integer>> event) {
-        event.data().forEach((key, val) -> inventoryTokens.merge(key, val, Integer::sum));
+    public void onAddInvItems(Event<Map<String, Integer>> event) {
+        event.data().forEach((key, amount) -> {
+            inventoryItems.compute(key, (k, existingItem) -> {
+                if (existingItem == null) {
+                    return EntityManager.GET().newItemEntity(key, amount);
+                } else {
+                    existingItem.setAmount(existingItem.amount() + amount);
+                    return existingItem;
+                }
+            });
+        });
     }
 
-    public void onAddBankedItems(Event<Map<Long, ItemEntity<?>>> event) {
-        event.data().values().forEach(item -> item.setOwner(entityId()));
-        bankedItems.putAll(event.data());
+    public void onRemoveBankedItems(Event<Map<String, Integer>> event) {
+        event.data().forEach((key, amount) -> {
+            bankedItems.computeIfPresent(key, (k, existingItem) -> {
+                int newAmount = existingItem.amount() - amount;
+                if (newAmount <= 0) {
+                    emitEvent(Event.destroyEntity(existingItem));
+                    return null;
+                } else {
+                    existingItem.setAmount(newAmount);
+                    return existingItem;
+                }
+            });
+        });
     }
 
-    public void onAddInvItems(Event<Map<Long, ItemEntity<?>>> event) {
-        event.data().values().forEach(item -> item.setOwner(entityId()));
-        inventoryItems.putAll(event.data());
+    public void onRemoveInvItems(Event<Map<String, Integer>> event) {
+        event.data().forEach((key, amount) -> {
+            inventoryItems.computeIfPresent(key, (k, existingItem) -> {
+                int newAmount = existingItem.amount() - amount;
+                if (newAmount <= 0) {
+                    emitEvent(Event.destroyEntity(existingItem));
+                    return null;
+                } else {
+                    existingItem.setAmount(newAmount);
+                    return existingItem;
+                }
+            });
+        });
     }
 
-    public void onRemoveBankedTokens(Event<Map<TokenType, Integer>> event) {
-        event.data().forEach((key, val) -> bankedTokens.merge(key, -val, (oldVal, newVal) -> oldVal - newVal));
+    public void onDropItems(Event<Map<Integer, Integer>> event) {
+        Map<String, ItemEntity<?>> dropItems = new HashMap<>(event.data().size());
+        event.data().forEach((key, val) -> {
+            ItemEntity<?> item = EntityType.ITEM.castOrNull(EntityManager.GET().entityById(key));
+            if (item == null) {
+                // TODO log and auth response
+                return;
+            }
+            ItemEntity<?> invItem = inventoryItems.get(item.key());
+            if (invItem == null || invItem.entityId() != key) {
+                // TODO log and auth response
+                return;
+            }
+            if (invItem.amount() < val) {
+                // TODO and auth response
+                return;
+            }
+            dropItems.put(invItem.key(), EntityManager.GET().newItemEntity(invItem.key(), val));
+            int newAmount = invItem.amount() - val;
+            if (newAmount <= 0) {
+                inventoryItems.remove(invItem.key());
+            } else {
+                invItem.setAmount(invItem.amount() - val);
+            }
+        });
+        final IVector2 position = IVector2.of(playerPositionSupplier.get()); // Need to get and clone this for other thread
+
+        emitEvent(Event.directEntityCallback(areaId().entityId, ComponentType.ENTITY_GRID, (EntityGrid grid) -> {
+            IRect2 searchRect = IRect2.fromCenter(position, WorldSettings.GET().interactionRadius());
+            var existing = grid.entityGrid.query(searchRect)
+                    .stream()
+                    .filter(e -> e.item().entityType() == EntityType.CONTAINER)
+                    .findFirst().orElse(null);
+
+            if (existing != null) { // remap and add to existing if found
+                Map<String, Integer> updateItems = dropItems.entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().amount()));
+                emitEvent(Event.containerAddItems(this, areaId(), existing.item().entityId(), updateItems));
+            } else {// else create new and broadcast = true
+                ContainerEntity cont = EntityManager.GET().newContainerEntity(ContainerType.BAG, areaId(), position, dropItems, true);
+                EntityManager.GET().submitTimedEvent(TimedEvent.ofOffsetHours(6, Event.destroyEntity(cont)));
+            }
+        }));
     }
 
-    public void onRemoveInvTokens(Event<Map<TokenType, Integer>> event) {
-        event.data().forEach((key, val) -> inventoryTokens.merge(key, -val, (oldVal, newVal) -> oldVal - newVal));
+    public void onPickupItems(Event<Pair<Integer, Map<Integer, Integer>>> event) {
+        int containerId = event.data().first();
+        IVector2 position = playerPositionSupplier.get();
+        IRect2 areaRect = IRect2.fromCenter(position, WorldSettings.GET().interactionRadius());
+
+        ContainerEntity container = EntityType.CONTAINER.castOrNull(EntityManager.GET().entityById(containerId));
+        if (container == null) {
+            //TODO log and auth response
+            return;
+        }
+        if (!areaRect.contains(container.position())) {
+            // TODO log and auth
+            return;
+        }
+
+        List<ItemEntity<?>> itemEntities = Utility.mapEntities(
+                EntityManager.GET().multipleEntitiesById(event.data().second().keySet()),
+                EntityType.ITEM
+        );
+        Map<String, Integer> mappedEntities = itemEntities.stream().collect(Collectors.groupingBy(
+                ItemEntity::key,
+                Collectors.summingInt(ItemEntity::amount)
+        ));
+
+        emitEvent(Event.directEntityCallback(containerId, ComponentType.CONTAINED_ITEMS, (ContainedItems contItems) -> {
+            mappedEntities.forEach((key, value) -> {
+                ItemEntity<?> item = contItems.containedItems.get(key);
+                if (item == null || item.amount() < value) {
+                    mappedEntities.remove(key);
+                    // TODO log this
+                }
+            });
+            emitEvent(Event.playerAddInvItems(contItems, areaId(), entityId(), mappedEntities));
+            contItems.onRemoveItems(Event.containerRemoveItems(contItems, areaId(), contItems.entityId(), mappedEntities));
+        }));
     }
 
-    public void onRemoveBankedItems(Event<Map<Long, ItemEntity<?>>> event) {
-        event.data().values().forEach(item -> item.setOwner(-1));
-        event.data().forEach((key, val) -> bankedItems.remove(key));
-    }
+    public void onContainerPutItems(Event<Pair<Integer, Map<Integer, Integer>>> event) {
+        int containerId = event.data().first();
+        IVector2 position = playerPositionSupplier.get();
+        IRect2 areaRect = IRect2.fromCenter(position, WorldSettings.GET().interactionRadius());
 
-    public void onRemoveInvItems(Event<Map<Long, ItemEntity<?>>> event) {
-        event.data().values().forEach(item -> item.setOwner(-1));
-        event.data().forEach((key, val) -> inventoryItems.remove(key));
+        ContainerEntity container = EntityType.CONTAINER.castOrNull(EntityManager.GET().entityById(containerId));
+        if (container == null) {
+            //TODO log and auth response
+            return;
+        }
+        if (!areaRect.contains(container.position())) {
+            // TODO log and auth
+            return;
+        }
+        List<ItemEntity<?>> itemEntities = Utility.mapEntities(
+                EntityManager.GET().multipleEntitiesById(event.data().second().keySet()),
+                EntityType.ITEM
+        );
+        Map<String, Integer> mappedEntities = itemEntities.stream().collect(Collectors.groupingBy(
+                ItemEntity::key,
+                Collectors.summingInt(ItemEntity::amount)
+        ));
+
+        boolean valid = mappedEntities.entrySet().stream().allMatch(entry -> {
+            ItemEntity<?> item = inventoryItems.get(entry.getKey());
+            return (item != null && item.amount() >= entry.getValue());
+        });
+
+        onRemoveInvItems(Event.containerRemoveItems(this, areaId(), entityId(), mappedEntities));
+        emitEvent(Event.containerAddItems(this, areaId(), containerId, mappedEntities));
     }
 
 

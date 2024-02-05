@@ -3,12 +3,12 @@ package io.mindspice.outerfieldsserver.enums;
 import io.mindspice.outerfieldsserver.entities.AreaEntity;
 
 
-public enum  AreaId {
+public enum AreaId {
     AREA_KEY(-3),
-    NONE(-2),
-    GLOBAL(-1),
-    TEST(0),
-    INVENTORY(1);
+    GLOBAL(-2),
+    TEST(-1),
+    NONE(0),
+    BUILDING(1);
 
     public final int value;
     public int entityId;
@@ -23,4 +23,4 @@ public enum  AreaId {
     public void setAreaEntity(AreaEntity areaEntity) {
         this.areaEntity = areaEntity;
     }
-}
+    }

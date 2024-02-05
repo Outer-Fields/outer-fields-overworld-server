@@ -12,15 +12,17 @@ public enum EntityType {
     ANY(-1, Object.class, Objects::nonNull),
     PLAYER(0, Object.class, x -> x instanceof PlayerEntity),
     NON_PLAYER(1, Object.class, Objects::nonNull),
-    AREA(2, AreaEntity.class, x -> x instanceof AreaEntity),
-    LOCATION(3, LocationEntity.class, x -> x instanceof LocationEntity),
-    CHUNK(4, ChunkEntity.class, x -> x instanceof ChunkEntity),
-    SYSTEM(5, SystemEntity.class, x -> x instanceof SystemEntity),
-    QUEST_PLAYER(6, PlayerQuestEntity.class, x -> x instanceof PlayerQuestEntity),
-    QUEST_WORLD(7, WorldQuestEntity.class, x -> x instanceof WorldQuestEntity),
-    ITEM(8, ItemEntity.class, x -> x instanceof ItemEntity),
-    LOOT(9, LootEntity.class, x -> x instanceof LootEntity),
-    CONTAINER(10, ContainerEntity.class, x -> x instanceof ContainerEntity);
+    CHARACTER(2, CharacterEntity.class, x -> x instanceof CharacterEntity),
+    AREA(3, AreaEntity.class, x -> x instanceof AreaEntity),
+    LOCATION(4, LocationEntity.class, x -> x instanceof LocationEntity),
+    CHUNK(5, ChunkEntity.class, x -> x instanceof ChunkEntity),
+    SYSTEM(6, SystemEntity.class, x -> x instanceof SystemEntity),
+    QUEST_PLAYER(7, PlayerQuestEntity.class, x -> x instanceof PlayerQuestEntity),
+    QUEST_WORLD(8, WorldQuestEntity.class, x -> x instanceof WorldQuestEntity),
+    ITEM(9, ItemEntity.class, x -> x instanceof ItemEntity),
+    LOOT(10, LootEntity.class, x -> x instanceof LootEntity),
+    CONTAINER(11, ContainerEntity.class, x -> x instanceof ContainerEntity),
+    FARM_PLOT(12, FarmPlotEntity.class, x -> x instanceof FarmPlotEntity);
 
     public final int value;
     public final Class<?> dataClass;

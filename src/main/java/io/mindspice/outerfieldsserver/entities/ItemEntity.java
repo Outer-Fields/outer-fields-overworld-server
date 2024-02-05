@@ -12,15 +12,14 @@ import io.mindspice.outerfieldsserver.enums.TokenType;
 import java.util.Map;
 
 
-public class ItemEntity<T> extends PositionalEntity {
-    private ItemType itemType;
-    private final long key;
-    private volatile int ownerPlayerId = -1;
+public class ItemEntity<T> extends Entity {
+    private final ItemType itemType;
+    private final String key;
     private final T item;
-    private final int amount;
+    private int amount;
 
-    public ItemEntity(int id, AreaId areaId, IVector2 position, ItemType itemType, String itemName, long key, T item, int amount) {
-        super(id, EntityType.ITEM, areaId, position);
+    public ItemEntity(int id, String key,  ItemType itemType, String itemName, T item, int amount) {
+        super(id, EntityType.ITEM, AreaId.NONE);
         this.name = itemName;
         this.key = key;
         this.item = item;
@@ -31,29 +30,28 @@ public class ItemEntity<T> extends PositionalEntity {
         }
     }
 
-    public int ownerPlayerId() { return ownerPlayerId; }
-
-    public void setOwner(int ownerPlayerId) { this.ownerPlayerId = ownerPlayerId; }
-
-    public boolean isOwned() { return ownerPlayerId > 0; }
 
     public String itemName() { return name; }
 
     public T item() { return item; }
 
-    public long key() { return key; }
+    public String key() { return key; }
 
     public ItemType itemType() { return itemType; }
 
     public int amount() { return amount; }
+
+    public void setAmount(int newAmount) {
+        this.amount = newAmount;
+    }
 
     public Map.Entry<TokenType, Integer> getAsTokenEntry() {
         if (itemType != ItemType.TOKEN) { return null; }
         return (Map.entry((TokenType) item, amount));
     }
 
-    public Map.Entry<Long, ItemEntity<?>> getAsItemEntry(){
-        if (itemType == ItemType.TOKEN) {return null;}
+    public Map.Entry<String, ItemEntity<?>> getAsItemEntry() {
+        if (itemType == ItemType.TOKEN) { return null; }
         return (Map.entry(key, this));
     }
 
@@ -62,7 +60,6 @@ public class ItemEntity<T> extends PositionalEntity {
                 .put("entityType", entityType)
                 .put("entityId", id)
                 .put("name", name)
-                .put("ownerPlayerId", ownerPlayerId)
                 .put("areaId", areaId)
                 .put("chunkIndex", chunkIndex)
                 .put("attachComponents", getAttachedComponentTypes())

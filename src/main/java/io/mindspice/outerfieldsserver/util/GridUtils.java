@@ -1,5 +1,6 @@
 package io.mindspice.outerfieldsserver.util;
 
+import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.outerfieldsserver.area.ChunkJson;
 import io.mindspice.outerfieldsserver.data.wrappers.ChunkTileIndex;
 import io.mindspice.outerfieldsserver.area.TileData;
@@ -115,6 +116,10 @@ public class GridUtils {
 
     public static IVector2 chunkIndexToGlobal(IVector2 chunkIndex) {
         return IVector2.of(chunkIndex).multiply(WorldSettings.GET().chunkSize());
+    }
+
+    public static int areaTileCount(IRect2 area) {
+       return (area.size().x() / 32) * (area.size().y() / 32);
     }
 
 

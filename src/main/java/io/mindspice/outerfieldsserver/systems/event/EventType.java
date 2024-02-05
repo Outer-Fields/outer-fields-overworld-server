@@ -11,7 +11,9 @@ import io.mindspice.outerfieldsserver.ai.task.Task;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
+import io.mindspice.outerfieldsserver.enums.SeedType;
 import jakarta.annotation.Nullable;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
@@ -38,7 +40,7 @@ public enum EventType {
     //NETWORK OUT EVENTS
     NETWORK_OUT_ENTITY_UPDATE(byte[].class, x -> x instanceof byte[]),
     NETWORK_PLAYER_RECONNECT(WebSocketSession.class, x -> x instanceof WebSocketSession),
-    NETWORK_IN_PLAYER_ACTION(List.class, x -> x instanceof List),
+    NETWORK_IN_PLAYER_ACTION(Map.class, x -> x instanceof Map), // Map<NetPlayerAction, List<NetPlayerActionMsg>>
     NETWORK_IN_COMBAT_ACTION(NetCombatAction.class, x -> x instanceof NetCombatAction),
 
     // ENTITY EVENT
@@ -75,39 +77,38 @@ public enum EventType {
 
     PLAYER_FUNDS_ITEMS_QUERY(Integer.class, x -> x instanceof Integer),
     PLAYER_FUNDS_ITEMS_RESP(EventData.FundsAndItems.class, x -> x instanceof EventData.FundsAndItems),
-    PLAYER_TOKENS_BANKED_TO_INV(Map.class, x -> x instanceof Map), // EnumMap<TokenType, Integer>
-    PLAYER_TOKENS_INV_TO_BANKED(Map.class, x -> x instanceof Map), // EnumMap<TokenType, ItemEntity>
-    PLAYER_ITEMS_BANKED_TO_INV(Map.class, x -> x instanceof Map), // EnumMap<long(key), ItemEntity>
-    PLAYER_ITEMS_INV_TO_BANKED(Map.class, x -> x instanceof Map), // EnumMap<long(key), ItemEntity>
-    PLAYER_ADD_BANKED_TOKENS(Map.class, x -> x instanceof Map), // EnumMap<lTokenType, ItemEntity>
-    PLAYER_ADD_INV_TOKENS(Map.class, x -> x instanceof Map), // EnumMap<TokenType, ItemEntity>
-    PLAYER_ADD_BANKED_ITEMS(Map.class, x -> x instanceof Map), // EnumMap<long(key), ItemEntity>
-    PLAYER_ADD_INV_ITEMS(Map.class, x -> x instanceof Map), // EnumMap<long(key), ItemEntity>
-    PLAYER_REMOVE_BANKED_TOKENS(Map.class, x -> x instanceof Map), // EnumMap<TokenType, ItemEntity>
-    PLAYER_REMOVE_INV_TOKENS(Map.class, x -> x instanceof Map), // EnumMap<TokenType, ItemEntity>
-    PLAYER_REMOVE_BANKED_ITEMS(Map.class, x -> x instanceof Map), // EnumMap<long(key), ItemEntity>
-    PLAYER_REMOVE_INV_ITEMS(Map.class, x -> x instanceof Map), // EnumMap<long(key), ItemEntity>
+
+
+    PLAYER_ITEMS_BANKED_TO_INV(Map.class, x -> x instanceof Map), // Map<Integer(itemId), Integer>
+    PLAYER_ITEMS_INV_TO_BANKED(Map.class, x -> x instanceof Map), // Map<Integer(itemId), Integer>
+    PLAYER_ADD_BANKED_ITEMS(Map.class, x -> x instanceof Map), // Map<String(key), ItemEntity>
+    PLAYER_ADD_INV_ITEMS(Map.class, x -> x instanceof Map), // Map<String(key), ItemEntity>
+    PLAYER_REMOVE_BANKED_ITEMS(Map.class, x -> x instanceof Map), // Map<String(key), Integer>
+    PLAYER_REMOVE_INV_ITEMS(Map.class, x -> x instanceof Map), // Map<String(key), Integer>
+
+    // Player Actions
+    PLAYER_DROP_ITEMS(Map.class, x -> x instanceof Map), // Map<Integer(itemId), Integer(amount>
+    PLAYER_PICKUP_ITEMS(Pair.class, x -> x instanceof Pair), // Pair<Integer(containerId), Map<Integer(itemId), Integer(amount)>>
+    PLAYER_PUT_CONTAINER(Pair.class, x -> x instanceof Pair), //Pair<Integer(containerId), Map<Integer(itemId), Integer(amount)>>
 
     // Serialization
     SERIALIZED_ENTITY_REQUEST(Integer.class, x -> x instanceof Integer),
-    SERIALIZED_ENTITY_RESP(byte[].class, x -> x instanceof byte[]),
     SERIALIZED_ENTITIES_REQUEST(Predicate.class, x -> x instanceof Predicate<?>),
-    SERIALIZED_ENTITIES_RESP(Pair.class, x -> x instanceof Pair<?, ?>),
     SERIALIZED_CHARACTER_RESP(EntityProto.CharacterEntity.class, x -> x instanceof EntityProto.CharacterEntity),
     SERIALIZED_LOC_ITEM_RESP(EntityProto.LocationItemEntity.class, x -> x instanceof EntityProto.LocationItemEntity),
 
     // CHARACTER
-    CHARACTER_OUTFIT_CHANGED(ClothingItem.class, x -> x instanceof ClothingItem[]),
-    CHARACTER_OUTFIT_UPDATE(byte[].class, x -> x instanceof byte[]),
+    CHARACTER_OUTFIT_CHANGED(ClothingItem[].class, x -> x instanceof ClothingItem[]),
+    CHARACTER_OUTFIT_UPDATE(List.class, x -> x instanceof List), // List<ClothingItem>
     CHARACTER_DEATH(EventData.CharacterDeath.class, x -> x instanceof EventData.CharacterDeath),
     CHARACTER_NEW_SPAWN(IVector2.class, x -> x instanceof IVector2),
     CHARACTER_RESPAWN(Object.class, Objects::nonNull), // TODO add respawn dataclass
 
     // CONTAINER
     CONTAINER_CONTAINED_ITEMS_QUERY(Integer.class, x -> x instanceof Integer),
-    CONTAINER_CONTAINED_ITEMS_RESP(EventData.TokensAndItems.class, x -> x instanceof EventData.TokensAndItems),
-    CONTAINER_REMOVE_ITEMS(EventData.TokensAndItems.class, x -> x instanceof EventData.TokensAndItems),
-    CONTAINER_ADD_ITEMS(EventData.TokensAndItems.class, x -> x instanceof EventData.TokensAndItems),
+    CONTAINER_CONTAINED_ITEMS_RESP(Map.class, x -> x instanceof Map), // Map<String, ItemEntity<?>>
+    CONTAINER_REMOVE_ITEMS(Map.class, x -> x instanceof Map), // Map<String, Integer>
+    CONTAINER_ADD_ITEMS(Map.class, x -> x instanceof Map), // Map<String, Integer>
 
     // AREA
     AREA_MONITOR_QUERY(List.class, x -> x instanceof List), //List<Pair<IVector2,Integer>
@@ -128,6 +129,11 @@ public enum EventType {
     // LOCATION
     LOCATION_NEW(LocationEntity.class, x -> x instanceof LocationEntity),
     LOCATION_REMOVE(Integer.class, x -> x instanceof Integer),
+
+    // FARMING
+    FARM_PLANT_PLOT(SeedType.class, x -> x instanceof SeedType),
+    FARM_HARVEST_PLOT(Integer.class, x -> x instanceof Integer),
+    FARM_UPDATE_PLOT_OWNER(Integer.class, x -> x instanceof Integer),
 
     //SYSTEM
     SYSTEM_REGISTER_ENTITY(Entity.class, x -> x instanceof Entity),

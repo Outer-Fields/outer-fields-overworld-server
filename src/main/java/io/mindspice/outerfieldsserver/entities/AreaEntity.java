@@ -1,6 +1,7 @@
 package io.mindspice.outerfieldsserver.entities;
 
 import io.mindspice.outerfieldsserver.area.TileData;
+import io.mindspice.outerfieldsserver.components.world.ActiveEntities;
 import io.mindspice.outerfieldsserver.components.world.EntityGrid;
 import io.mindspice.outerfieldsserver.components.world.ChunkMap;
 import io.mindspice.outerfieldsserver.enums.AreaId;
@@ -14,19 +15,23 @@ import io.mindspice.mindlib.data.tuples.Pair;
 import java.util.*;
 
 
-public class AreaEntity extends MapEntity {
+public class AreaEntity extends Entity {
     private final IVector2 chunkSize;
     private final IConcurrentPQuadTree<IPolygon2> collisionGrid;
     private ChunkMap chunkMap;
     private final EntityGrid entityGrid;
+    private final IRect2 areaSize;
+    protected final ActiveEntities activeEntities;
 
     public AreaEntity(int id, AreaId arenaName, IRect2 areaSize, IVector2 chunkSize,
-            List<Pair<LocationEntity, IVector2>> initLocations) {
-        super(id, EntityType.AREA, arenaName, areaSize);
+            List<Pair<LocationEntity, IVector2>> initLocations, int initialSetSize) {
+        super(id, EntityType.AREA, arenaName);
         this.areaSize = areaSize;
         this.chunkSize = chunkSize;
         this.entityGrid = ComponentFactory.addEntityGrid(this, areaSize, 6);
         this.collisionGrid = ComponentFactory.addCollisionGrid(this, new IConcurrentPQuadTree<>(areaSize, 6)).collisionGrid;
+        activeEntities = ComponentFactory.addActiveEntities(this, initialSetSize);
+        initLocations.forEach(l -> activeEntities.activeEntities.add(l.first().entityId()));
         initLocations.forEach(l -> entityGrid.addActiveEntity(l.first(), l.second()));
 
     }

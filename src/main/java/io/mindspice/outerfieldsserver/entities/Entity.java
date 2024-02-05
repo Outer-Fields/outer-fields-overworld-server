@@ -28,7 +28,7 @@ public abstract class Entity {
     protected final EntityType entityType;
     protected final int id;
     protected volatile String name = "";
-    protected volatile AreaId areaId = null;
+    protected volatile AreaId areaId;
     protected volatile IVector2 chunkIndex = IVector2.of(-1, -1);
     private List<Component<?>> componentList;
     protected final AtomicBitSet attachedComponents = new AtomicBitSet(ComponentType.values().length);

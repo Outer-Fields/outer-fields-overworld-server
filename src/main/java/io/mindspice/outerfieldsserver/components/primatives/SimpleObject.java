@@ -1,4 +1,4 @@
-package io.mindspice.outerfieldsserver.components.world;
+package io.mindspice.outerfieldsserver.components.primatives;
 
 import io.mindspice.outerfieldsserver.components.Component;
 import io.mindspice.outerfieldsserver.entities.Entity;

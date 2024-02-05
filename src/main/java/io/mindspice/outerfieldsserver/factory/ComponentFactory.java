@@ -4,6 +4,7 @@ import io.mindspice.mindlib.functional.consumers.BiPredicatedBiConsumer;
 import io.mindspice.outerfieldsserver.components.item.LootDrop;
 import io.mindspice.outerfieldsserver.components.npc.CharSpawnController;
 import io.mindspice.outerfieldsserver.components.player.*;
+import io.mindspice.outerfieldsserver.components.primatives.SimpleObject;
 import io.mindspice.outerfieldsserver.components.serialization.Visibility;
 import io.mindspice.outerfieldsserver.components.world.*;
 import io.mindspice.outerfieldsserver.core.singletons.EntityManager;
@@ -26,7 +27,6 @@ import io.mindspice.mindlib.data.geometry.IPolygon2;
 import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.outerfieldsserver.systems.event.TimedEvent;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
@@ -118,7 +118,7 @@ public class ComponentFactory {
     public static class CompSystem {
 
         public static void attachPlayerEntityComponents(PlayerEntity entity, IVector2 currPosition, AreaId currArea,
-                List<EntityState> initStates, ClothingItem[] initOutFit, WebSocketSession webSocketSession) {
+                List<EntityState> initStates, List<ClothingItem> initOutFit, WebSocketSession webSocketSession) {
 
             GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castOrNull(entity.getComponent(ComponentType.GLOBAL_POSITION));
             if (globalPosition == null) { throw new IllegalStateException("Entity must have an existing GlobalPosition component"); }
@@ -164,7 +164,7 @@ public class ComponentFactory {
         }
 
         public static void attachBaseNPCComponents(NonPlayerEntity entity, IVector2 currPosition, List<EntityState> initStates,
-                ClothingItem[] initOutFit, IVector2 viewRectSize, IRect2 spawnArea, IVector2 respawnTimes) {
+                List<ClothingItem> initOutFit, IVector2 viewRectSize, IRect2 spawnArea, IVector2 respawnTimes) {
 
             GlobalPosition globalPosition = ComponentType.GLOBAL_POSITION.castOrNull(entity.getComponent(ComponentType.GLOBAL_POSITION));
             if (globalPosition == null) { throw new IllegalStateException("Entity must have an existing GlobalPosition component"); }
@@ -219,11 +219,8 @@ public class ComponentFactory {
                         return;
                     }
                     List<ItemEntity<?>> loot = lootDrop.getLootEntity().calculateLootDrop((player));
-                    Map<TokenType, Integer> tokens = loot.stream().map(ItemEntity::getAsTokenEntry)
-                            .filter(Objects::nonNull) // Instead of filtering twice, filter once and remove nulls for non-token items
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-                    Map<Long, ItemEntity<?>> items = loot.stream().map(ItemEntity::getAsItemEntry)
+                    Map<String, ItemEntity<?>> items = loot.stream().map(ItemEntity::getAsItemEntry)
                             .filter(Objects::nonNull) // same here filter out tokens instead of filtering twice
                             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -232,7 +229,7 @@ public class ComponentFactory {
                     Consumer<GlobalPosition> addPosConsumer = (GlobalPosition pos) -> {
                         // Instance new container that is "dropped" and added to the world
                         ContainerEntity container = EntityManager.GET().newContainerEntity(
-                                ContainerType.BAG, pos.areaId(), pos.currPosition(), tokens, items, false
+                                ContainerType.BAG, pos.areaId(), pos.currPosition(), items, false
                         );
 
                         Visibility contVis = (Visibility) container.getComponent(ComponentType.VISIBILITY);
@@ -243,7 +240,7 @@ public class ComponentFactory {
                         ));
 
                         EntityManager.GET().submitTimedEvent(TimedEvent.ofOffsetMinutes(
-                                60,
+                                5,
                                 Event.builder(EventType.ENTITY_VISIBILITY_UPDATE)
                                         .setEventArea(entity.areaId())
                                         .setRecipientEntityId(entity.entityId())

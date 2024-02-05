@@ -14,18 +14,18 @@ import java.util.function.Consumer;
 
 
 public class ContainerEntity extends PositionalEntity {
-    public final ContainerType containerType;
     private final ContainedItems containedItems;
+    private final ContainerType containerType;
+    private final IVector2 position;
 
-    public ContainerEntity(int id, ContainerType containerType, AreaId areaId, IVector2 position, Map<TokenType, Integer> tokenMap,
-            Map<Long, ItemEntity<?>> itemMap) {
+    public ContainerEntity(int id, ContainerType containerType, AreaId areaId, IVector2 position,
+            Map<String, ItemEntity<?>> itemMap) {
         super(id, EntityType.CONTAINER, areaId, position);
         this.containerType = containerType;
-        containedItems = new ContainedItems(this, tokenMap, itemMap);
+        this.position = position;
+        containedItems = new ContainedItems(this, itemMap);
         addComponent(containedItems);
     }
-
-
 
     public ContainerEntity withRespawnLogic(Consumer<ContainedItems> respawnLogic, boolean runOnAdd) {
         containedItems.withRespawnLogic(respawnLogic, runOnAdd);
@@ -35,4 +35,14 @@ public class ContainerEntity extends PositionalEntity {
     public ContainerType containerType() {
         return containerType;
     }
+
+    public IVector2 position() {
+        return position;
+    }
+
+    public long containedCompId(){
+        return containedItems.componentId();
+    }
+
+
 }

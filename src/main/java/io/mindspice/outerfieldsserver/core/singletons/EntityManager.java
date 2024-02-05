@@ -1,5 +1,6 @@
 package io.mindspice.outerfieldsserver.core.singletons;
 
+import io.mindspice.mindlib.data.tuples.Triple;
 import io.mindspice.mindlib.util.DebugUtils;
 import io.mindspice.outerfieldsserver.core.ActiveCombat;
 import io.mindspice.outerfieldsserver.core.HttpServiceClient;
@@ -16,6 +17,7 @@ import io.mindspice.mindlib.data.geometry.IRect2;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
 import io.mindspice.outerfieldsserver.systems.event.*;
+import jakarta.annotation.Nullable;
 import org.jctools.maps.NonBlockingHashMapLong;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -25,19 +27,22 @@ import java.util.concurrent.locks.StampedLock;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 
 public class EntityManager {
 
     private static final EntityManager INSTANCE = new EntityManager();
     private final ConcurrentIndexCache<Entity> entityCache = new ConcurrentIndexCache<>(1000, false);
-    private final Map<EntityType, IntList> entityMap = new EnumMap<>(EntityType.class);
-    public final StampedLock entityLock = new StampedLock();
+    private final Map<EntityType, List<Entity>> entityMap = new ConcurrentHashMap<>(EntityType.values().length);
 
     private final List<SystemListener> systemListeners = new CopyOnWriteArrayList<>();
     private final ScheduledExecutorService tickExec = Executors.newSingleThreadScheduledExecutor();
     private final PriorityBlockingQueue<TimedEvent> timedEventQueue = new PriorityBlockingQueue<>(20, Comparator.comparing(TimedEvent::time));
     private long lastTickMilli = System.currentTimeMillis();
+
+    // ItemTable
+    private final Map<String, Triple<ItemType, String, Supplier<?>>> itemSupplierMap = new ConcurrentHashMap<>();
 
     // For Shell
     private Consumer<String> eventMonitor;
@@ -47,7 +52,7 @@ public class EntityManager {
 
     private EntityManager() {
         for (EntityType type : EntityType.values()) {
-            entityMap.put(type, new IntList(50));
+            entityMap.put(type, new ArrayList<>(50));
         }
         long tickTime = 1_000_000_000 / WorldSettings.GET().tickRate();
         tickExec.scheduleAtFixedRate(this::newTick, tickTime, tickTime, TimeUnit.NANOSECONDS);
@@ -101,46 +106,40 @@ public class EntityManager {
         return INSTANCE;
     }
 
+    public List<Entity> multipleEntitiesById(IntList ids) {
+        return entityCache.getMultiple(ids);
+    }
+
+    public List<Entity> multipleEntitiesById(Collection<Integer> ids) {
+        IntList list = new IntList(ids.size());
+        ids.forEach(list::add);
+        return entityCache.getMultiple(list);
+    }
+
     public List<Entity> allEntities() {
-        long stamp = entityLock.tryOptimisticRead();
-        List<Entity> entities;
-        do {
-            entities = entityCache.getAsList().stream().filter(Objects::nonNull).toList();
-        } while (!entityLock.validate(stamp));
-        return entities;
+        return entityCache.getAsList().stream().filter(Objects::nonNull).toList();
     }
 
-    public <T> List<T> getEntitiesOfType(EntityType entityType, List<T> returnList) {
-        long stamp = -1;
-
-        do {
-            returnList.clear();
-            stamp = entityLock.tryOptimisticRead();
-            IntList ids = entityMap.get(entityType);
-            for (int i = 0; i < ids.size(); i++) {
-                T entity = entityType.castOrNull(entityCache.get(ids.get(i)));
-                if (entity == null) {
-                    System.out.println("null cast in entity manager");
-                    //TODO log this
-                } else {
-                    returnList.add(entity);
-                }
+    public <T> List<T> getEntitiesOfType(EntityType entityType, List<T> rtnList) {
+        entityMap.get(entityType).forEach(e -> {
+            T ent = entityType.castOrNull(e);
+            if (ent == null) {
+                // TODO log this
+            } else {
+                rtnList.add(ent);
             }
-        } while (!entityLock.validate(stamp));
-        return returnList;
+        });
+        return rtnList;
     }
 
-    public <T> T entityById(int entityId) {
-        long stamp = -1;
-        T entity = null;
-        do {
-            stamp = entityLock.tryOptimisticRead();
-            Entity tmpEnt = entityCache.get(entityId);
-            if (tmpEnt != null) {
-                entity = tmpEnt.entityType().castOrNull(tmpEnt);
-            }
-        } while (!entityLock.validate(stamp));
-        return entity;
+    public Entity entityById(int entityId) {
+        return entityCache.get(entityId);
+    }
+
+    public int entityIdToPlayerId(int id) {
+        PlayerEntity player = EntityType.PLAYER.castOrNull(entityCache.get(id));
+        if (player == null) { return -1; }
+        return player.playerId();
     }
 
     public AreaEntity areaById(AreaId areaId) {
@@ -167,17 +166,11 @@ public class EntityManager {
         systemListeners.add(system);
     }
 
-    public void destroyEntity(int entityId) {
+    private void destroyEntity(int entityId) {
         Entity entity = entityById(entityId);
         if (entity == null) { return; }
-        entityCache.remove(entity.entityId());
-
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(entity.entityType()).removeFirstValueOf(entityId);
-        } finally {
-            entityLock.unlockWrite(stamp);
-        }
+        entityMap.get(entity.entityType()).removeIf(e -> e.entityId() == entityId);
+        entityCache.remove(entityId);
     }
 
     public void emitEvent(Event<?> event) {
@@ -250,13 +243,11 @@ public class EntityManager {
         timedEventQueue.add(timedEvent);
     }
 
-    private void addToEntityMap(EntityType entityType, int EntityId) {
-        long stamp = entityLock.writeLock();
-        try {
-            entityMap.get(entityType).add(EntityId);
-        } finally {
-            entityLock.unlockWrite(stamp);
+    private void addToEntityMap(EntityType entityType, Entity entity) {
+        if (!entityType.validate(entity)) {
+            throw new IllegalStateException("Error adding new entity to map: Type mismatch");
         }
+        entityMap.get(entityType).add(entity);
     }
 
     public ChunkEntity newChunkEntity(AreaId areaId, IVector2 chunkIndex, ChunkJson chunkJson) {
@@ -264,7 +255,7 @@ public class EntityManager {
         ChunkEntity chunkEntity = new ChunkEntity(id, areaId, chunkIndex, chunkJson);
         entityCache.putAtReservedIndex(id, chunkEntity);
 
-        addToEntityMap(EntityType.CHUNK, id);
+        addToEntityMap(EntityType.CHUNK, chunkEntity);
         // Doesn't need to register is handled internally on world system
         return chunkEntity;
     }
@@ -275,7 +266,7 @@ public class EntityManager {
             shellEntity = new ShellEntity(id);
             entityCache.putAtReservedIndex(id, shellEntity);
 
-            addToEntityMap(EntityType.ANY, id);
+            addToEntityMap(EntityType.ANY, shellEntity);
             Event.emitAndRegisterPositionalEntity(SystemType.QUEST, AreaId.NONE, IVector2.negOne(), shellEntity);
 
         }
@@ -283,14 +274,14 @@ public class EntityManager {
     }
 
     public AreaEntity newAreaEntity(AreaId areaId, IRect2 areaSize, IVector2 chunkSize,
-            List<Pair<LocationEntity, IVector2>> staticLocations) {
+            List<Pair<LocationEntity, IVector2>> staticLocations, int initialSetSize) {
         int id = entityCache.getAndReserveNextIndex();
-        AreaEntity areaEntity = new AreaEntity(id, areaId, areaSize, chunkSize, staticLocations, List.of());
+        AreaEntity areaEntity = new AreaEntity(id, areaId, areaSize, chunkSize, staticLocations, initialSetSize);
         areaId.setEntityId(id);
         areaId.setAreaEntity(areaEntity);
         entityCache.putAtReservedIndex(id, areaEntity);
 
-        addToEntityMap(EntityType.AREA, id);
+        addToEntityMap(EntityType.AREA, areaEntity);
         // Doesnt need to register is handled internally on world system
         return areaEntity;
     }
@@ -302,7 +293,7 @@ public class EntityManager {
         PlayerEntity playerEntity = new PlayerEntity(id, playerId, playerName, initState, outfit, currArea, currPos, session);
         entityCache.putAtReservedIndex(id, playerEntity);
 
-        addToEntityMap(EntityType.PLAYER, id);
+        addToEntityMap(EntityType.PLAYER, playerEntity);
 
         if (broadcast) {
             Event.emitAndRegisterPositionalEntity(SystemType.PLAYER, currArea, currPos, playerEntity);
@@ -317,7 +308,7 @@ public class EntityManager {
         NonPlayerEntity npcEntity = new NonPlayerEntity(id, key, name, initStates, outfit, currArea, currPos, viewRectSize);
         entityCache.putAtReservedIndex(id, npcEntity);
 
-        addToEntityMap(EntityType.NON_PLAYER, id);
+        addToEntityMap(EntityType.NON_PLAYER, npcEntity);
 
         if (broadcast) {
             Event.emitAndRegisterPositionalEntity(SystemType.NPC, currArea, currPos, npcEntity);
@@ -331,7 +322,7 @@ public class EntityManager {
         PlayerQuestEntity questEntity = new PlayerQuestEntity(id, quest, participatingPlayerId);
         entityCache.putAtReservedIndex(id, questEntity);
 
-        addToEntityMap(EntityType.QUEST_PLAYER, id);
+        addToEntityMap(EntityType.QUEST_PLAYER, questEntity);
         if (broadcast) {
             Event.emitAndRegisterPositionalEntity(SystemType.NPC, AreaId.NONE, IVector2.of(-1, -1), questEntity);
         }
@@ -339,12 +330,12 @@ public class EntityManager {
     }
 
     public ContainerEntity newContainerEntity(ContainerType containerType, AreaId areaId, IVector2 position,
-            Map<TokenType, Integer> tokenMap, Map<Long, ItemEntity<?>> itemMap, boolean broadcast) {
+            Map<String, ItemEntity<?>> itemMap, boolean broadcast) {
         int id = entityCache.getAndReserveNextIndex();
-        ContainerEntity containerEntity = new ContainerEntity(id, containerType, areaId, position, tokenMap, itemMap);
+        ContainerEntity containerEntity = new ContainerEntity(id, containerType, areaId, position, itemMap);
         entityCache.putAtReservedIndex(id, containerEntity);
 
-        addToEntityMap(EntityType.CONTAINER, id);
+        addToEntityMap(EntityType.CONTAINER, containerEntity);
 
         if (broadcast) {
             Event.emitAndRegisterPositionalEntity(SystemType.WORLD, AreaId.NONE, position, containerEntity);
@@ -359,7 +350,7 @@ public class EntityManager {
         LootEntity lootEntity = new LootEntity(id, areaId, lootItems, lootCalcFunc);
         entityCache.putAtReservedIndex(id, lootEntity);
 
-        addToEntityMap(EntityType.LOOT, id);
+        addToEntityMap(EntityType.LOOT, lootEntity);
         return lootEntity;
     }
 
@@ -368,11 +359,39 @@ public class EntityManager {
         TestEntity testEnt = new TestEntity(id, EntityType.TEST, AreaId.TEST);
         entityCache.putAtReservedIndex(id, testEnt);
 
-        addToEntityMap(EntityType.TEST, id);
+        addToEntityMap(EntityType.TEST, testEnt);
 
         Event.emitAndRegisterPositionalEntity(systemTypeToEmit, AreaId.TEST, IVector2.of(-1, -1), testEnt);
 
         return testEnt;
+    }
+
+    @Nullable
+    public ItemEntity<?> newItemEntity(String itemKey, int amount) {
+        int id = entityCache.getAndReserveNextIndex();
+
+        Triple<ItemType, String, Supplier<?>> itemSupplier = itemSupplierMap.get(itemKey);
+        if (itemSupplier == null) {
+            // TODO log this, this is important;
+            return null; //eww
+        }
+
+        ItemEntity<?> itemEntity;
+
+        try {
+            itemEntity = new ItemEntity<>(
+                    id, itemKey, itemSupplier.first(), itemSupplier.second(),
+                    itemSupplier.first().castOrNull(itemSupplier.third().get()),
+                    amount
+            );
+        } catch (Exception e) {
+            return null;
+        }
+        entityCache.putAtReservedIndex(id, itemEntity);
+
+        addToEntityMap(EntityType.ITEM, itemEntity);
+        // items are untracked by systems
+        return itemEntity;
     }
 
     public TestSystem newTestSystem(SystemType systemType) {
@@ -380,7 +399,7 @@ public class EntityManager {
         TestSystem systemEntity = new TestSystem(id, systemType);
         entityCache.putAtReservedIndex(id, systemEntity);
 
-        addToEntityMap(EntityType.SYSTEM, id);
+        addToEntityMap(EntityType.SYSTEM, systemEntity);
         registerSystem(systemEntity);
         return systemEntity;
     }
@@ -391,7 +410,7 @@ public class EntityManager {
         CombatSystem systemEntity = new CombatSystem(id, combatExec, serviceClient, playerTable, combatTable);
         entityCache.putAtReservedIndex(id, systemEntity);
 
-        addToEntityMap(EntityType.SYSTEM, id);
+        addToEntityMap(EntityType.SYSTEM, systemEntity);
         registerSystem(systemEntity);
         return systemEntity;
     }
@@ -401,7 +420,7 @@ public class EntityManager {
         NPCSystem systemEntity = new NPCSystem(id);
         entityCache.putAtReservedIndex(id, systemEntity);
 
-        addToEntityMap(EntityType.SYSTEM, id);
+        addToEntityMap(EntityType.SYSTEM, systemEntity);
         registerSystem(systemEntity);
         return systemEntity;
     }
@@ -411,7 +430,7 @@ public class EntityManager {
         PlayerSystem systemEntity = new PlayerSystem(id);
         entityCache.putAtReservedIndex(id, systemEntity);
 
-        addToEntityMap(EntityType.SYSTEM, id);
+        addToEntityMap(EntityType.SYSTEM, systemEntity);
         registerSystem(systemEntity);
         return systemEntity;
     }
@@ -421,7 +440,7 @@ public class EntityManager {
         QuestSystem systemEntity = new QuestSystem(id);
         entityCache.putAtReservedIndex(id, systemEntity);
 
-        addToEntityMap(EntityType.SYSTEM, id);
+        addToEntityMap(EntityType.SYSTEM, systemEntity);
         registerSystem(systemEntity);
         return systemEntity;
     }
@@ -431,7 +450,7 @@ public class EntityManager {
         WorldSystem systemEntity = new WorldSystem(id, areaMap);
         entityCache.putAtReservedIndex(id, systemEntity);
 
-        addToEntityMap(EntityType.SYSTEM, id);
+        addToEntityMap(EntityType.SYSTEM, systemEntity);
         registerSystem(systemEntity);
         return systemEntity;
     }

@@ -14,20 +14,21 @@ import io.mindspice.outerfieldsserver.systems.event.EventType;
 import java.util.List;
 
 
-public class GlobalPosition extends Component<GlobalPosition>{
+public class GlobalPosition extends Component<GlobalPosition> {
 
     private volatile AreaId currArea;
-    private volatile IVector2 currChunkIndex;
-    private volatile IMutLine2 mVector;
+    private final IVector2 currChunkIndex;
+    private final IMutLine2 mVector;
+    private final IMutRect2 triggerRect;
 
-    protected GlobalPosition(Entity parentEntity, AreaId currArea, IVector2 currChunkIndex, IVector2 mVector) {
+    protected GlobalPosition(Entity parentEntity, AreaId currArea, IVector2 currChunkIndex, IVector2 mVector, IRect2 triggerRect) {
         super(parentEntity, ComponentType.GLOBAL_POSITION,
                 List.of(EventType.ENTITY_AREA_CHANGED, EventType.ENTITY_CHUNK_CHANGED, EventType.ENTITY_POSITION_CHANGED)
         );
         this.currArea = currArea;
-        this.currChunkIndex = IVector2.of(currChunkIndex);
+        this.currChunkIndex = IVector2.ofMutable(currChunkIndex);
         this.mVector = ILine2.ofMutable(mVector, mVector);
-        //  registerListener(ENTITY_POSITION_CHANGED, GlobalPosition::onSelfPositionUpdate);
+        this.triggerRect = IRect2.ofMutable(triggerRect);
         registerListener(EventType.ENTITY_AREA_UPDATE, GlobalPosition::onSelfAreaUpdate);
         registerListener(EventType.ENTITY_POSITION_UPDATE, GlobalPosition::onPositionUpdate);
     }
@@ -37,8 +38,9 @@ public class GlobalPosition extends Component<GlobalPosition>{
                 List.of(EventType.ENTITY_AREA_CHANGED, EventType.ENTITY_CHUNK_CHANGED, EventType.ENTITY_POSITION_CHANGED)
         );
         currArea = AreaId.NONE;
-        currChunkIndex = IVector2.of(0, 0);
+        currChunkIndex = IVector2.ofMutable(0, 0);
         mVector = ILine2.ofMutable(0, 0, 0, 0);
+        this.triggerRect = IRect2.ofMutable(0, 0, 96, 96);
     }
 
     public void updateArea(AreaId newArea) {
@@ -77,7 +79,7 @@ public class GlobalPosition extends Component<GlobalPosition>{
                     currChunkIndex,
                     newChunkIndex
             );
-            currChunkIndex = newChunkIndex;
+            currChunkIndex.setXY(chunkX, chunkY);
             emitEvent(Event.entityChunkUpdate(this, eventData));
         }
 
@@ -98,6 +100,10 @@ public class GlobalPosition extends Component<GlobalPosition>{
 
     public IVector2 lastPosition() {
         return mVector.start();
+    }
+
+    public IRect2 triggerRect() {
+        return triggerRect.reCenter(currPosition());
     }
 
     public ILine2 mVector() {

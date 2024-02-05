@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class CharacterEntity extends PositionalEntity{
+public class CharacterEntity extends PositionalEntity {
     protected List<FactionType> factions = new CopyOnWriteArrayList<>();
+    protected volatile long inBuildingKey;
 
     public CharacterEntity(int id, EntityType entityType, AreaId areaId, IVector2 position) {
         super(id, entityType, areaId, position);
@@ -25,4 +26,14 @@ public class CharacterEntity extends PositionalEntity{
     }
 
     public List<FactionType> factions() { return factions; }
+
+    public boolean isInBuilding() {
+        return inBuildingKey != -1;
+    }
+
+    public long inBuildingKey() {
+        return inBuildingKey;
+    }
+
+
 }

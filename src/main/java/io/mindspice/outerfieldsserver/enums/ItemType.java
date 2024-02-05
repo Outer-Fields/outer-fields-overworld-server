@@ -1,12 +1,15 @@
 package io.mindspice.outerfieldsserver.enums;
 
+import io.mindspice.outerfieldsserver.entities.ItemEntity;
 import jakarta.annotation.Nullable;
 
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 
 public enum ItemType {
-    TOKEN(TokenType.class, x -> x instanceof TokenType);
+    TOKEN(TokenType.class, x -> x instanceof TokenType),
+    CLOTHING(ClothingItem.class, x -> x instanceof ClothingItem);
 
     public final Class<?> itemClass;
     public final Predicate<Object> validator;
@@ -29,5 +32,6 @@ public enum ItemType {
         }
         return null;
     }
+
 
 }

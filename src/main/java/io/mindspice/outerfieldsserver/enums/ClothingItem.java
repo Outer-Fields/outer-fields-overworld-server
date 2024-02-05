@@ -16,6 +16,13 @@ public enum ClothingItem {
         return value;
     }
 
+    public static ClothingItem fromValue(int value) {
+        for (var item : ClothingItem.values()) {
+            if (item.value == value) { return item; }
+        }
+        return null;
+    }
+
     public enum Slot {
         ALL(-1),
         HEAD(0),

@@ -1,6 +1,7 @@
 package io.mindspice.outerfieldsserver.enums;
 
 import io.mindspice.outerfieldsserver.components.Component;
+import io.mindspice.outerfieldsserver.components.environment.FarmPlot;
 import io.mindspice.outerfieldsserver.components.items.ContainedItems;
 import io.mindspice.outerfieldsserver.components.player.PlayerItemsAndFunds;
 import io.mindspice.outerfieldsserver.components.item.LootDrop;
@@ -13,6 +14,7 @@ import io.mindspice.outerfieldsserver.components.player.*;
 import io.mindspice.outerfieldsserver.components.primatives.ComponentSystem;
 import io.mindspice.outerfieldsserver.components.primatives.SimpleEmitter;
 import io.mindspice.outerfieldsserver.components.primatives.SimpleListener;
+import io.mindspice.outerfieldsserver.components.primatives.SimpleObject;
 import io.mindspice.outerfieldsserver.components.quest.QuestModule;
 import io.mindspice.outerfieldsserver.components.serialization.CharacterSerializer;
 import io.mindspice.outerfieldsserver.components.serialization.Visibility;
@@ -54,13 +56,14 @@ public enum ComponentType {
     CHARACTER_SERIALIZER(CharacterSerializer.class, x -> x instanceof CharacterSerializer),
     NPC_MOVEMENT(NPCMovement.class, x -> x instanceof NPCMovement),
     QUEST_MODULE(QuestModule.class, x -> x instanceof QuestModule),
-    PLAYER_ACTIONS(PlayerActions.class, x -> x instanceof PlayerActions),
+    PLAYER_ACTIONS(NetPlayerAction.class, x -> x instanceof NetPlayerAction),
     SPAWN_CONTROLLER(CharSpawnController.class, x -> x instanceof CharSpawnController),
     LOOT_DROP(LootDrop.class, x -> x instanceof LootDrop),
     PLAYER_ITEMS_AND_FUNDS(PlayerItemsAndFunds.class, x -> x instanceof PlayerItemsAndFunds),
     CONTAINED_ITEMS(ContainedItems.class, x -> x instanceof ContainedItems),
     VISIBILITY(Visibility.class, x -> x instanceof Visibility),
-    ENTITY_GRID(EntityGrid.class, x -> x instanceof EntityGrid);
+    ENTITY_GRID(EntityGrid.class, x -> x instanceof EntityGrid),
+    FARM_PLOT(FarmPlot.class, x -> x instanceof FarmPlot);
 
     public final Class<?> componentClass;
     private final Predicate<Object> validator;

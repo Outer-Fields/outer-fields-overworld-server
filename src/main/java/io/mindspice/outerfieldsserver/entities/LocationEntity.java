@@ -11,49 +11,48 @@ import io.mindspice.mindlib.util.JsonUtils;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 
 public class LocationEntity extends PositionalEntity {
     private final long key;
     private final boolean enterable;
     private volatile boolean accessible;
-    private final List<Integer> authorizedEntities;
+    private final Set<Integer> authorizedEntities;
     private final AreaId enterableAreaId;
-    private final long enterableAreaKey;
+    private final long enterableBuildingKey;
+    private final IRect2 enterTriggerRect;
 
-    public LocationEntity(int id, AreaId areaId, IVector2 position, int key) {
+    public LocationEntity(int id, AreaId areaId, IVector2 position, IRect2 enterTriggerRect, int key) {
         super(id, EntityType.LOCATION, areaId, position);
         this.key = key;
         this.enterable = false;
         this.accessible = false;
         this.enterableAreaId = AreaId.NONE;
-        this.enterableAreaKey = -1;
+        this.enterableBuildingKey = -1;
         authorizedEntities = null;
+        this.enterTriggerRect = enterTriggerRect;
+
     }
 
-    public LocationEntity(int id, AreaId areaId, IVector2 position, int key, boolean accessible,
-            List<Integer> authorizedEntities, AreaId enterableAreaId, long enterableAreaKey) {
+    public LocationEntity(int id, AreaId areaId, IVector2 position, IRect2 enterTriggerRect, int key, boolean accessible,
+            List<Integer> authorizedEntities, AreaId enterableAreaId, long enterableBuildingKey) {
         super(id, EntityType.LOCATION, areaId, position);
         this.key = key;
         this.enterable = true;
         this.accessible = accessible;
-        this.authorizedEntities = new CopyOnWriteArrayList<>(authorizedEntities);
+        this.authorizedEntities = new CopyOnWriteArraySet<>(authorizedEntities);
 
-        if (enterableAreaKey > 0) {
+        if (enterableBuildingKey > 0) {
             this.enterableAreaId = AreaId.AREA_KEY;
-            this.enterableAreaKey = enterableAreaKey;
+            this.enterableBuildingKey = enterableBuildingKey;
         } else {
             this.enterableAreaId = enterableAreaId;
-            this.enterableAreaKey = -1;
+            this.enterableBuildingKey = -1;
         }
+        this.enterTriggerRect = enterTriggerRect;
 
-    }
-
-    public LocationEntity withAreaMonitor(IRect2 monitorArea) {
-        AreaMonitor areaMonitor = new AreaMonitor(this, monitorArea);
-        addComponent(areaMonitor);
-        return this;
     }
 
     public long key() { return key; }
@@ -62,14 +61,18 @@ public class LocationEntity extends PositionalEntity {
 
     public boolean accessible() { return accessible; }
 
-    public List<Integer> authorizedEntities() { return Collections.unmodifiableList(authorizedEntities); }
+    public Set<Integer> authorizedEntities() { return Collections.unmodifiableSet(authorizedEntities); }
 
     public AreaId enterableAreaId() { return enterableAreaId; }
 
-    public long enterableAreaKey() { return enterableAreaKey; }
+    public long enterableBuildingKey() { return enterableBuildingKey; }
 
-    public boolean isEnterableKey() {
-        return enterableAreaKey > 0;
+    public boolean isEnterableBuilding() {
+        return enterableBuildingKey > 0;
+    }
+
+    public boolean isEnterableArea() {
+        return enterableAreaId != AreaId.NONE;
     }
 
     public void addAuthorizedEntity(int id) {
@@ -85,11 +88,28 @@ public class LocationEntity extends PositionalEntity {
     }
 
     public void removeAuthorizedEntities(List<Integer> entities) {
-        authorizedEntities.removeAll(entities);
+        entities.forEach(authorizedEntities::remove);
     }
 
     public void setAccessible(boolean accessible) {
         this.accessible = accessible;
+    }
+
+    public IRect2 enterTriggerRect() {
+        return enterTriggerRect;
+    }
+
+    public boolean isInEnterTrigger(IVector2 position) {
+        return enterTriggerRect.contains(position);
+    }
+
+    public boolean canEntityEnter(int entityId, IVector2 entityPosition) {
+        if (authorizedEntities != null && !authorizedEntities.isEmpty()) {
+            if (!authorizedEntities.contains(entityId)) {
+                return false;
+            }
+        }
+        return enterTriggerRect.contains(entityPosition);
     }
 
     public String toString() {
@@ -101,7 +121,7 @@ public class LocationEntity extends PositionalEntity {
                 .put("accessible", accessible)
                 .put("authorizedEntities", authorizedEntities)
                 .put("enterableAreaId", enterableAreaId)
-                .put("enterableAreaKey", enterableAreaKey)
+                .put("enterableAreaKey", enterableBuildingKey)
                 .put("name", name)
                 .put("areaId", areaId)
                 .put("chunkIndex", chunkIndex)

@@ -11,6 +11,7 @@ public class WorldSettings {
     private IVector2 chunkSize = IVector2.of(1920, 1920);
     private IVector2 tilesPerChunk = IVector2.of(60, 60);
     private IVector2 worldSize = IVector2.of(512, 512);
+    private IVector2 interactionRadius = IVector2.of(64, 64);
     private int tileSize = 32;
     private int maxSpeed = 1000;
     private int tickRate = 20;
@@ -67,6 +68,10 @@ public class WorldSettings {
 
     public int tickRate() {
         return tickRate;
+    }
+
+    public IVector2 interactionRadius() {
+        return interactionRadius;
     }
 
     public int npcTickInterval() {

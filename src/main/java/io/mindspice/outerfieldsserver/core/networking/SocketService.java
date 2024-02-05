@@ -4,18 +4,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.mindspice.mindlib.util.JsonUtils;
 import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetCombatAction;
-import io.mindspice.outerfieldsserver.core.networking.incoming.NetInPlayerAction;
+import io.mindspice.outerfieldsserver.core.networking.incoming.NetPlayerActionMsg;
 import io.mindspice.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
 import io.mindspice.outerfieldsserver.core.networking.proto.EntityProto;
 import io.mindspice.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspice.outerfieldsserver.entities.PlayerEntity;
+import io.mindspice.outerfieldsserver.enums.NetPlayerAction;
 import io.mindspice.outerfieldsserver.networking.incoming.NetMessageIn;
 import io.mindspice.outerfieldsserver.systems.event.Event;
 import org.jctools.maps.NonBlockingHashMapLong;
 import org.jctools.queues.MpscArrayQueue;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.LockSupport;
@@ -66,11 +69,15 @@ public class SocketService {
             }
 
             if (!packetIn.getActionsList().isEmpty()) {
-                List<NetInPlayerAction> actions = new ArrayList<>(packetIn.getActionsCount());
+                Map<NetPlayerAction, List<NetPlayerActionMsg>> actionMap = new EnumMap<>(NetPlayerAction.class);
                 for (EntityProto.Action action : packetIn.getActionsList()) {
-                    actions.add(NetInPlayerAction.fromProto(action));
+                    NetPlayerActionMsg playerAction = NetPlayerActionMsg.fromProto(action);
+                    List<NetPlayerActionMsg> existingActions = actionMap.computeIfAbsent(
+                            playerAction.actionKey(), k -> new ArrayList<>(10)
+                    );
+                    existingActions.add(playerAction);
                 }
-                entityManger.emitEvent(Event.netInPlayerAction(msg.entityId(), actions));
+                entityManger.emitEvent(Event.netInPlayerAction(msg.entityId(), actionMap));
             }
 
             if (packetIn.hasCombatJson()) {
@@ -90,7 +97,6 @@ public class SocketService {
             // TODO log this
         }
     }
-
 
 
 }

@@ -7,7 +7,6 @@ import io.mindspice.outerfieldsserver.enums.*;
 import io.mindspice.outerfieldsserver.enums.AreaId;
 import io.mindspice.outerfieldsserver.enums.ClothingItem;
 import io.mindspice.outerfieldsserver.enums.EntityState;
-import io.mindspice.outerfieldsserver.networking.NetMsgIn;
 import io.mindspice.outerfieldsserver.networking.incoming.NetMessageIn;
 import io.mindspice.mindlib.data.geometry.IVector2;
 import org.jctools.maps.NonBlockingHashMapLong;

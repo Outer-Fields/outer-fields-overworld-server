@@ -5145,28 +5145,28 @@ public final class EntityProto {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>int32 id = 1;</code>
-     * @return The id.
+     * <code>int32 focusId = 1;</code>
+     * @return The focusId.
      */
-    int getId();
+    int getFocusId();
 
     /**
-     * <code>bool isPlayer = 2;</code>
-     * @return The isPlayer.
-     */
-    boolean getIsPlayer();
-
-    /**
-     * <code>int32 key = 3;</code>
+     * <code>int32 key = 2;</code>
      * @return The key.
      */
     int getKey();
 
     /**
-     * <code>int32 value = 4;</code>
-     * @return The value.
+     * <code>int32 value1 = 3;</code>
+     * @return The value1.
      */
-    int getValue();
+    int getValue1();
+
+    /**
+     * <code>int32 value2 = 4;</code>
+     * @return The value2.
+     */
+    int getValue2();
 
     /**
      * <code>int32 amount = 5;</code>
@@ -5209,32 +5209,21 @@ public final class EntityProto {
               Action.class, Builder.class);
     }
 
-    public static final int ID_FIELD_NUMBER = 1;
-    private int id_ = 0;
+    public static final int FOCUSID_FIELD_NUMBER = 1;
+    private int focusId_ = 0;
     /**
-     * <code>int32 id = 1;</code>
-     * @return The id.
+     * <code>int32 focusId = 1;</code>
+     * @return The focusId.
      */
     @Override
-    public int getId() {
-      return id_;
+    public int getFocusId() {
+      return focusId_;
     }
 
-    public static final int ISPLAYER_FIELD_NUMBER = 2;
-    private boolean isPlayer_ = false;
-    /**
-     * <code>bool isPlayer = 2;</code>
-     * @return The isPlayer.
-     */
-    @Override
-    public boolean getIsPlayer() {
-      return isPlayer_;
-    }
-
-    public static final int KEY_FIELD_NUMBER = 3;
+    public static final int KEY_FIELD_NUMBER = 2;
     private int key_ = 0;
     /**
-     * <code>int32 key = 3;</code>
+     * <code>int32 key = 2;</code>
      * @return The key.
      */
     @Override
@@ -5242,15 +5231,26 @@ public final class EntityProto {
       return key_;
     }
 
-    public static final int VALUE_FIELD_NUMBER = 4;
-    private int value_ = 0;
+    public static final int VALUE1_FIELD_NUMBER = 3;
+    private int value1_ = 0;
     /**
-     * <code>int32 value = 4;</code>
-     * @return The value.
+     * <code>int32 value1 = 3;</code>
+     * @return The value1.
      */
     @Override
-    public int getValue() {
-      return value_;
+    public int getValue1() {
+      return value1_;
+    }
+
+    public static final int VALUE2_FIELD_NUMBER = 4;
+    private int value2_ = 0;
+    /**
+     * <code>int32 value2 = 4;</code>
+     * @return The value2.
+     */
+    @Override
+    public int getValue2() {
+      return value2_;
     }
 
     public static final int AMOUNT_FIELD_NUMBER = 5;
@@ -5278,17 +5278,17 @@ public final class EntityProto {
     @Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (id_ != 0) {
-        output.writeInt32(1, id_);
-      }
-      if (isPlayer_ != false) {
-        output.writeBool(2, isPlayer_);
+      if (focusId_ != 0) {
+        output.writeInt32(1, focusId_);
       }
       if (key_ != 0) {
-        output.writeInt32(3, key_);
+        output.writeInt32(2, key_);
       }
-      if (value_ != 0) {
-        output.writeInt32(4, value_);
+      if (value1_ != 0) {
+        output.writeInt32(3, value1_);
+      }
+      if (value2_ != 0) {
+        output.writeInt32(4, value2_);
       }
       if (amount_ != 0) {
         output.writeInt32(5, amount_);
@@ -5302,21 +5302,21 @@ public final class EntityProto {
       if (size != -1) return size;
 
       size = 0;
-      if (id_ != 0) {
+      if (focusId_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, id_);
-      }
-      if (isPlayer_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(2, isPlayer_);
+          .computeInt32Size(1, focusId_);
       }
       if (key_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(3, key_);
+          .computeInt32Size(2, key_);
       }
-      if (value_ != 0) {
+      if (value1_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(4, value_);
+          .computeInt32Size(3, value1_);
+      }
+      if (value2_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, value2_);
       }
       if (amount_ != 0) {
         size += com.google.protobuf.CodedOutputStream
@@ -5337,14 +5337,14 @@ public final class EntityProto {
       }
       Action other = (Action) obj;
 
-      if (getId()
-          != other.getId()) return false;
-      if (getIsPlayer()
-          != other.getIsPlayer()) return false;
+      if (getFocusId()
+          != other.getFocusId()) return false;
       if (getKey()
           != other.getKey()) return false;
-      if (getValue()
-          != other.getValue()) return false;
+      if (getValue1()
+          != other.getValue1()) return false;
+      if (getValue2()
+          != other.getValue2()) return false;
       if (getAmount()
           != other.getAmount()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
@@ -5358,15 +5358,14 @@ public final class EntityProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ID_FIELD_NUMBER;
-      hash = (53 * hash) + getId();
-      hash = (37 * hash) + ISPLAYER_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getIsPlayer());
+      hash = (37 * hash) + FOCUSID_FIELD_NUMBER;
+      hash = (53 * hash) + getFocusId();
       hash = (37 * hash) + KEY_FIELD_NUMBER;
       hash = (53 * hash) + getKey();
-      hash = (37 * hash) + VALUE_FIELD_NUMBER;
-      hash = (53 * hash) + getValue();
+      hash = (37 * hash) + VALUE1_FIELD_NUMBER;
+      hash = (53 * hash) + getValue1();
+      hash = (37 * hash) + VALUE2_FIELD_NUMBER;
+      hash = (53 * hash) + getValue2();
       hash = (37 * hash) + AMOUNT_FIELD_NUMBER;
       hash = (53 * hash) + getAmount();
       hash = (29 * hash) + getUnknownFields().hashCode();
@@ -5500,10 +5499,10 @@ public final class EntityProto {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        id_ = 0;
-        isPlayer_ = false;
+        focusId_ = 0;
         key_ = 0;
-        value_ = 0;
+        value1_ = 0;
+        value2_ = 0;
         amount_ = 0;
         return this;
       }
@@ -5539,16 +5538,16 @@ public final class EntityProto {
       private void buildPartial0(Action result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.id_ = id_;
+          result.focusId_ = focusId_;
         }
         if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.isPlayer_ = isPlayer_;
-        }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
           result.key_ = key_;
         }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.value1_ = value1_;
+        }
         if (((from_bitField0_ & 0x00000008) != 0)) {
-          result.value_ = value_;
+          result.value2_ = value2_;
         }
         if (((from_bitField0_ & 0x00000010) != 0)) {
           result.amount_ = amount_;
@@ -5599,17 +5598,17 @@ public final class EntityProto {
 
       public Builder mergeFrom(Action other) {
         if (other == Action.getDefaultInstance()) return this;
-        if (other.getId() != 0) {
-          setId(other.getId());
-        }
-        if (other.getIsPlayer() != false) {
-          setIsPlayer(other.getIsPlayer());
+        if (other.getFocusId() != 0) {
+          setFocusId(other.getFocusId());
         }
         if (other.getKey() != 0) {
           setKey(other.getKey());
         }
-        if (other.getValue() != 0) {
-          setValue(other.getValue());
+        if (other.getValue1() != 0) {
+          setValue1(other.getValue1());
+        }
+        if (other.getValue2() != 0) {
+          setValue2(other.getValue2());
         }
         if (other.getAmount() != 0) {
           setAmount(other.getAmount());
@@ -5641,22 +5640,22 @@ public final class EntityProto {
                 done = true;
                 break;
               case 8: {
-                id_ = input.readInt32();
+                focusId_ = input.readInt32();
                 bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 16: {
-                isPlayer_ = input.readBool();
+                key_ = input.readInt32();
                 bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 24: {
-                key_ = input.readInt32();
+                value1_ = input.readInt32();
                 bitField0_ |= 0x00000004;
                 break;
               } // case 24
               case 32: {
-                value_ = input.readInt32();
+                value2_ = input.readInt32();
                 bitField0_ |= 0x00000008;
                 break;
               } // case 32
@@ -5682,73 +5681,41 @@ public final class EntityProto {
       }
       private int bitField0_;
 
-      private int id_ ;
+      private int focusId_ ;
       /**
-       * <code>int32 id = 1;</code>
-       * @return The id.
+       * <code>int32 focusId = 1;</code>
+       * @return The focusId.
        */
       @Override
-      public int getId() {
-        return id_;
+      public int getFocusId() {
+        return focusId_;
       }
       /**
-       * <code>int32 id = 1;</code>
-       * @param value The id to set.
+       * <code>int32 focusId = 1;</code>
+       * @param value The focusId to set.
        * @return This builder for chaining.
        */
-      public Builder setId(int value) {
+      public Builder setFocusId(int value) {
 
-        id_ = value;
+        focusId_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 id = 1;</code>
+       * <code>int32 focusId = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearId() {
+      public Builder clearFocusId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        id_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private boolean isPlayer_ ;
-      /**
-       * <code>bool isPlayer = 2;</code>
-       * @return The isPlayer.
-       */
-      @Override
-      public boolean getIsPlayer() {
-        return isPlayer_;
-      }
-      /**
-       * <code>bool isPlayer = 2;</code>
-       * @param value The isPlayer to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIsPlayer(boolean value) {
-
-        isPlayer_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>bool isPlayer = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearIsPlayer() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        isPlayer_ = false;
+        focusId_ = 0;
         onChanged();
         return this;
       }
 
       private int key_ ;
       /**
-       * <code>int32 key = 3;</code>
+       * <code>int32 key = 2;</code>
        * @return The key.
        */
       @Override
@@ -5756,56 +5723,88 @@ public final class EntityProto {
         return key_;
       }
       /**
-       * <code>int32 key = 3;</code>
+       * <code>int32 key = 2;</code>
        * @param value The key to set.
        * @return This builder for chaining.
        */
       public Builder setKey(int value) {
 
         key_ = value;
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 key = 3;</code>
+       * <code>int32 key = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearKey() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000002);
         key_ = 0;
         onChanged();
         return this;
       }
 
-      private int value_ ;
+      private int value1_ ;
       /**
-       * <code>int32 value = 4;</code>
-       * @return The value.
+       * <code>int32 value1 = 3;</code>
+       * @return The value1.
        */
       @Override
-      public int getValue() {
-        return value_;
+      public int getValue1() {
+        return value1_;
       }
       /**
-       * <code>int32 value = 4;</code>
-       * @param value The value to set.
+       * <code>int32 value1 = 3;</code>
+       * @param value The value1 to set.
        * @return This builder for chaining.
        */
-      public Builder setValue(int value) {
+      public Builder setValue1(int value) {
 
-        value_ = value;
+        value1_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 value1 = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearValue1() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        value1_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int value2_ ;
+      /**
+       * <code>int32 value2 = 4;</code>
+       * @return The value2.
+       */
+      @Override
+      public int getValue2() {
+        return value2_;
+      }
+      /**
+       * <code>int32 value2 = 4;</code>
+       * @param value The value2 to set.
+       * @return This builder for chaining.
+       */
+      public Builder setValue2(int value) {
+
+        value2_ = value;
         bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 value = 4;</code>
+       * <code>int32 value2 = 4;</code>
        * @return This builder for chaining.
        */
-      public Builder clearValue() {
+      public Builder clearValue2() {
         bitField0_ = (bitField0_ & ~0x00000008);
-        value_ = 0;
+        value2_ = 0;
         onChanged();
         return this;
       }
@@ -11342,23 +11341,23 @@ public final class EntityProto {
       "\n\004posY\030\002 \001(\005\"H\n\014EntityChange\022\n\n\002id\030\001 \001(\005" +
       "\022\014\n\004name\030\002 \001(\t\022\016\n\006outfit\030\003 \003(\005\022\016\n\006states" +
       "\030\004 \003(\005\"9\n\014AuthResponse\022\013\n\003key\030\001 \001(\005\022\r\n\005v" +
-      "alid\030\002 \001(\010\022\r\n\005value\030\003 \001(\003\"R\n\006Action\022\n\n\002i" +
-      "d\030\001 \001(\005\022\020\n\010isPlayer\030\002 \001(\010\022\013\n\003key\030\003 \001(\005\022\r" +
-      "\n\005value\030\004 \001(\005\022\016\n\006amount\030\005 \001(\005\"\032\n\nCombatJ" +
-      "son\022\014\n\004json\030\001 \001(\t\"o\n\nGameEntity\022%\n\tchara" +
-      "cter\030\001 \001(\0132\020.CharacterEntityH\000\022+\n\014locati" +
-      "onItem\030\002 \001(\0132\023.LocationItemEntityH\000B\r\n\013e" +
-      "ntity_type\"\210\002\n\rGamePacketOut\022\035\n\010entities" +
-      "\030\001 \003(\0132\013.GameEntity\022(\n\017positionUpdates\030\002" +
-      " \003(\0132\017.PositionUpdate\022$\n\rentityChanges\030\003" +
-      " \003(\0132\r.EntityChange\022$\n\rauthResponses\030\004 \003" +
-      "(\0132\r.AuthResponse\022\030\n\007actions\030\005 \003(\0132\007.Act" +
-      "ion\022\'\n\016authCorrection\030\006 \001(\0132\017.AuthCorrec" +
-      "tion\022\037\n\ncombatJson\030\007 \001(\0132\013.CombatJson\"r\n" +
-      "\014GamePacketIn\022\'\n\016positionUpdate\030\001 \001(\0132\017." +
-      "PositionUpdate\022\030\n\007actions\030\002 \003(\0132\007.Action" +
-      "\022\037\n\ncombatJson\030\003 \001(\0132\013.CombatJsonb\006proto" +
-      "3"
+      "alid\030\002 \001(\010\022\r\n\005value\030\003 \001(\003\"V\n\006Action\022\017\n\007f" +
+      "ocusId\030\001 \001(\005\022\013\n\003key\030\002 \001(\005\022\016\n\006value1\030\003 \001(" +
+      "\005\022\016\n\006value2\030\004 \001(\005\022\016\n\006amount\030\005 \001(\005\"\032\n\nCom" +
+      "batJson\022\014\n\004json\030\001 \001(\t\"o\n\nGameEntity\022%\n\tc" +
+      "haracter\030\001 \001(\0132\020.CharacterEntityH\000\022+\n\014lo" +
+      "cationItem\030\002 \001(\0132\023.LocationItemEntityH\000B" +
+      "\r\n\013entity_type\"\210\002\n\rGamePacketOut\022\035\n\010enti" +
+      "ties\030\001 \003(\0132\013.GameEntity\022(\n\017positionUpdat" +
+      "es\030\002 \003(\0132\017.PositionUpdate\022$\n\rentityChang" +
+      "es\030\003 \003(\0132\r.EntityChange\022$\n\rauthResponses" +
+      "\030\004 \003(\0132\r.AuthResponse\022\030\n\007actions\030\005 \003(\0132\007" +
+      ".Action\022\'\n\016authCorrection\030\006 \001(\0132\017.AuthCo" +
+      "rrection\022\037\n\ncombatJson\030\007 \001(\0132\013.CombatJso" +
+      "n\"r\n\014GamePacketIn\022\'\n\016positionUpdate\030\001 \001(" +
+      "\0132\017.PositionUpdate\022\030\n\007actions\030\002 \003(\0132\007.Ac" +
+      "tion\022\037\n\ncombatJson\030\003 \001(\0132\013.CombatJsonb\006p" +
+      "roto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -11405,7 +11404,7 @@ public final class EntityProto {
     internal_static_Action_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Action_descriptor,
-        new String[] { "Id", "IsPlayer", "Key", "Value", "Amount", });
+        new String[] { "FocusId", "Key", "Value1", "Value2", "Amount", });
     internal_static_CombatJson_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_CombatJson_fieldAccessorTable = new

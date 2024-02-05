@@ -2,7 +2,7 @@ package io.mindspice.outerfieldsserver.systems.event;
 
 import io.mindspice.outerfieldsserver.combat.schema.websocket.incoming.NetCombatAction;
 import io.mindspice.outerfieldsserver.components.Component;
-import io.mindspice.outerfieldsserver.core.networking.incoming.NetInPlayerAction;
+import io.mindspice.outerfieldsserver.core.networking.incoming.NetPlayerActionMsg;
 import io.mindspice.outerfieldsserver.core.networking.incoming.NetInPlayerPosition;
 import io.mindspice.outerfieldsserver.core.singletons.EntityManager;
 import io.mindspice.outerfieldsserver.entities.*;
@@ -13,6 +13,7 @@ import io.mindspice.mindlib.data.geometry.IVector2;
 import io.mindspice.mindlib.data.tuples.Pair;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
@@ -90,6 +91,21 @@ public record Event<T>(
                 component.entityType(),
                 recipientEntityId,
                 recipientComponentId,
+                recCompType,
+                data);
+    }
+
+    public Event(EventType eventType, AreaId eventArea, Component<?> component, int recipientEntityId,
+            ComponentType recCompType, T data) {
+        this(
+                eventType,
+                eventArea,
+                component.entityId(),
+                component.componentId(),
+                component.componentType(),
+                component.entityType(),
+                recipientEntityId,
+                -1,
                 recCompType,
                 data);
     }
@@ -201,6 +217,12 @@ public record Event<T>(
         return new Event<>(EventType.CALLBACK, areaId, component, recEntId, recCompId, recCompType, callBack);
     }
 
+    public static Event<Consumer<?>> directComponentCallback(AreaId areaId, ComponentType recCompType,
+            int recEntId, long recCompId, Consumer<?> callBack) {
+        return new Event<>(EventType.CALLBACK, areaId, -1, -1, ComponentType.ANY,
+                EntityType.ANY, recEntId, recCompId, recCompType, callBack);
+    }
+
     public static Event<Consumer<?>> directEntityCallback(Component<?> component, AreaId areaId, int recEntId,
             ComponentType compType, Consumer<?> Callback) {
         return new Event<>(EventType.CALLBACK, areaId, component, recEntId, -1, compType, Callback);
@@ -235,7 +257,8 @@ public record Event<T>(
                 EntityType.ANY, recipientId, -1, ComponentType.NET_PLAYER_POSITION, data);
     }
 
-    public static Event<List<NetInPlayerAction>> netInPlayerAction(int recipientId, List<NetInPlayerAction> data) {
+    public static Event<Map<NetPlayerAction, List<NetPlayerActionMsg>>> netInPlayerAction(int recipientId,
+            Map<NetPlayerAction, List<NetPlayerActionMsg>> data) {
         return new Event<>(
                 EventType.NETWORK_IN_PLAYER_ACTION, AreaId.GLOBAL, -1, -1, ComponentType.ANY,
                 EntityType.ANY, recipientId, -1, ComponentType.NET_PLAYER_POSITION, data);
@@ -441,9 +464,56 @@ public record Event<T>(
         return new Event<>(EventType.ENTITY_VISIBILITY_CHANGED, area, comp, recipEntityId, data);
     }
 
-    public static Event<Entity> destroyEntity(Entity entity){
+    public static Event<Entity> destroyEntity(Entity entity) {
         return new Event<>(EventType.ENTITY_DESTROY, entity.areaId(), -1, -1,
                 ComponentType.ANY, EntityType.ANY, entity.entityId(), -1, ComponentType.ANY, entity);
+    }
+
+    public static Event<Map<String, Integer>> playerAddInvItems(Component<?> comp, AreaId area, int recipId, Map<String, Integer> data) {
+        return new Event<>(EventType.PLAYER_ADD_INV_ITEMS, area, comp, recipId, ComponentType.PLAYER_ITEMS_AND_FUNDS, data);
+    }
+
+    public static Event<Map<Integer, Integer>> playerInvToBanked(Component<?> comp, AreaId area, int recipId, Map<Integer, Integer> data) {
+        return new Event<>(EventType.PLAYER_ITEMS_INV_TO_BANKED, area, comp, recipId, ComponentType.PLAYER_ITEMS_AND_FUNDS, data);
+    }
+
+    public static Event<Map<Integer, Integer>> playerBankedToInv(Component<?> comp, AreaId area, int recipId, Map<Integer, Integer> data) {
+        return new Event<>(EventType.PLAYER_ITEMS_BANKED_TO_INV, area, comp, recipId, ComponentType.PLAYER_ITEMS_AND_FUNDS, data);
+    }
+
+    public static Event<List<ClothingItem>> characterOutfitUpdate(Component<?> comp, AreaId area, int recipId, List<ClothingItem> data) {
+        return new Event<>(EventType.CHARACTER_OUTFIT_UPDATE, area, comp, recipId, ComponentType.OUTFIT, data);
+    }
+
+    public static Event<Map<String, Integer>> containerAddItems(Component<?> comp, AreaId area, int recipId, Map<String, Integer> data) {
+        return new Event<>(EventType.CONTAINER_ADD_ITEMS, area, comp, recipId, ComponentType.CONTAINED_ITEMS, data);
+    }
+
+    public static Event<Map<String, Integer>> containerRemoveItems(Component<?> comp, AreaId area, int recipId, Map<String, Integer> data) {
+        return new Event<>(EventType.CONTAINER_REMOVE_ITEMS, area, comp, recipId, ComponentType.CONTAINED_ITEMS, data);
+
+    }
+
+    public static Event<Map<Integer, Integer>> playerDropItems(Component<?> comp, AreaId area, int recipId, Map<Integer, Integer> data) {
+        return new Event<>(EventType.PLAYER_DROP_ITEMS, area, comp, recipId, ComponentType.PLAYER_ITEMS_AND_FUNDS, data);
+    }
+
+    public static Event<Pair<Integer, Map<Integer, Integer>>> playerPickupItems(Component<?> comp, AreaId area,
+            int recipId, Pair<Integer, Map<Integer, Integer>> data) {
+        return new Event<>(EventType.PLAYER_PICKUP_ITEMS, area, comp, recipId, ComponentType.PLAYER_ITEMS_AND_FUNDS, data);
+    }
+
+    public static Event<Pair<Integer, Map<Integer, Integer>>> playerPutContainer(Component<?> comp, AreaId area,
+            int recipId, Pair<Integer, Map<Integer, Integer>> data) {
+        return new Event<>(EventType.PLAYER_PUT_CONTAINER, area, comp, recipId, ComponentType.PLAYER_ITEMS_AND_FUNDS, data);
+    }
+
+    public static Event<Integer> farmHarvestPlot(Component<?> comp, AreaId area, int recipId) {
+        return new Event<>(EventType.FARM_HARVEST_PLOT, area, comp, recipId, ComponentType.FARM_PLOT, recipId);
+    }
+
+    public static Event<SeedType> farmPlantPlot(Component<?> comp, AreaId area, int recipId, SeedType seedType) {
+        return new Event<>(EventType.FARM_PLANT_PLOT, area, comp, recipId, ComponentType.FARM_PLOT, seedType);
     }
 
     // BUILDER

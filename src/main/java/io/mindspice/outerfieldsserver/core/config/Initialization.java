@@ -205,7 +205,8 @@ public class Initialization {
                 AreaId.TEST,
                 IRect2.of(0, 0, 1920, 1920),
                 IVector2.of(1920, 1920),
-                List.of()
+                List.of(),
+                10
         );
 
         Map<IVector2, TileData> chunkData = ChunkEntity.loadFromJson(chunkJson);
